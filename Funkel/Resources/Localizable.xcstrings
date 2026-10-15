@@ -1,0 +1,20 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "app.name" : {
+      "comment" : "App name shown on the start screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Funkel" } }
+      }
+    },
+    "content.missing" : {
+      "comment" : "Shown if no learning content could be loaded (should never happen in a release build).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hier fehlen noch Inhalte." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,111 @@
+# Funkel
+
+An offline iOS learning app for children aged 4–14: vocabulary, maths and
+general knowledge, in German for now. No accounts, no network, no ads, no
+tracking. Design and roadmap are in [PLAN.md](PLAN.md).
+
+## Open and run
+
+Requirements: **Xcode 16 or later** (the project uses synchronized folders), iOS 17+ simulator or device.
+
+1. Open `Funkel.xcodeproj`.
+2. Select the **Funkel** scheme and an iPhone or iPad simulator.
+3. ⌘R to run, ⌘U to run the tests.
+
+For a device, set your Team under *Signing & Capabilities* and change the
+bundle ID (`com.example.funkel`) to one you own.
+
+From the command line:
+
+```bash
+xcodebuild -project Funkel.xcodeproj -scheme Funkel -destination 'platform=iOS Simulator,name=iPhone 16' build test
+```
+
+To check content without Xcode (any OS with Python 3):
+
+```bash
+python3 scripts/validate_content.py
+```
+
+## Project structure
+
+```
+Funkel/            app sources — new files here are picked up automatically
+  App/             entry point, root view, dependency container
+  Models/          SwiftData models (profiles, progress, round history)
+  Domain/          difficulty scaling, question types, subjects, streaks
+  Learning/        content loader + question providers
+  Features/        screens (View + ViewModel per feature)
+  DesignSystem/    colours, fonts, components, Pip the mascot
+  Resources/       asset catalog, Localizable.xcstrings (UI text)
+Content/<lang>/    learning content as JSON (folder reference, copied as-is)
+FunkelTests/       unit tests
+scripts/           content validator
+```
+
+Difficulty tuning is all in `Funkel/Domain/Difficulty/DifficultyTuning.swift`,
+and the rules are written out in PLAN.md §5.
+
+## Adding questions
+
+Edit the JSON in `Content/de/`, then run `python3 scripts/validate_content.py`.
+Every item has a `minAge` (4–14) and can have a `maxAge`.
+
+**General knowledge** (`generalknowledge.json`):
+
+```json
+{ "id": "gk-de-0015", "category": "animals", "minAge": 6, "maxAge": 10,
+  "format": "multipleChoice", "prompt": "Wie viele Beine hat eine Spinne?",
+  "emoji": "🕷️", "options": ["8", "6", "4", "10"], "correct": "8",
+  "explanation": "Spinnen haben acht Beine – Insekten haben sechs." }
+```
+
+IDs must be unique. Give at least 4 options for anything older children see.
+The app picks how many to show based on age.
+
+**Vocabulary** (`vocabulary.json`):
+
+```json
+{ "word": "Igel", "article": "der", "emoji": "🦔",
+  "definition": "Ein kleines Tier mit Stacheln.",
+  "synonyms": [], "antonyms": [], "category": "Tiere", "minAge": 4 }
+```
+
+Words for under-7s should have an emoji, since they're used for picture
+matching. Add `synonyms`/`antonyms` and the word becomes eligible for those
+question types.
+
+**Maths** is generated, so it never runs out. `maths.json` only holds names,
+countable items and word-problem templates (`{name}`, `{a}`, `{b}`, `{items}`).
+
+## Adding a language
+
+No code changes are needed:
+
+1. Copy `Content/de/` to `Content/fr/` (or `en/`).
+2. In `manifest.json`, set `code`, `name` (e.g. `Français`) and `speechLocale` (e.g. `fr-FR`).
+3. Translate `strings.json`: these are the question phrasing templates in the *learning* language.
+4. Replace the content files with French content.
+5. To offer **grammar**, add a subject to the manifest and write `grammar.json` as a question bank:
+
+   ```json
+   { "id": "grammar", "provider": "questionBank", "file": "grammar.json",
+     "title": "Grammaire", "icon": "text.book.closed.fill", "color": "#8A4FE0" }
+   ```
+
+   Grammar questions use the same generic formats: `multipleChoice` (with an
+   optional `sentence` containing `___` for gap-fill, e.g. articles and verb
+   forms) and `buildSequence` (tap words in order to build a sentence).
+6. Run the validator.
+
+The language then appears in the grown-up area's learning-language picker.
+
+**UI language** (menus, buttons) is a separate axis: open
+`Funkel/Resources/Localizable.xcstrings` in Xcode, add the language, and
+translate the strings. The UI follows the device language. Learning content
+follows each child's profile setting.
+
+## Privacy
+
+Everything stays on the device. A profile stores only a first name, an age, and
+learning progress. The app makes no network requests.

@@ -1,0 +1,28 @@
+{
+  "words": [
+    { "word": "Hund", "article": "der", "emoji": "🐕", "definition": "Ein Haustier, das bellt.", "category": "Tiere", "minAge": 4 },
+    { "word": "Katze", "article": "die", "emoji": "🐈", "definition": "Ein Haustier, das miaut.", "category": "Tiere", "minAge": 4 },
+    { "word": "Maus", "article": "die", "emoji": "🐭", "definition": "Ein kleines Tier, das gerne Käse frisst.", "category": "Tiere", "minAge": 4 },
+    { "word": "Kuh", "article": "die", "emoji": "🐄", "definition": "Ein Tier auf dem Bauernhof, das Milch gibt.", "category": "Tiere", "minAge": 4 },
+    { "word": "Apfel", "article": "der", "emoji": "🍎", "definition": "Ein rundes Obst, das an Bäumen wächst.", "category": "Essen", "minAge": 4 },
+    { "word": "Banane", "article": "die", "emoji": "🍌", "definition": "Ein gelbes, krummes Obst.", "category": "Essen", "minAge": 4 },
+    { "word": "Haus", "article": "das", "emoji": "🏠", "definition": "Ein Gebäude, in dem Menschen wohnen.", "category": "Alltag", "minAge": 4 },
+    { "word": "Sonne", "article": "die", "emoji": "☀️", "definition": "Sie scheint am Himmel und macht es hell und warm.", "category": "Natur", "minAge": 4 },
+    { "word": "Baum", "article": "der", "emoji": "🌳", "definition": "Eine große Pflanze mit Stamm, Ästen und Blättern.", "category": "Natur", "minAge": 4 },
+    { "word": "Auto", "article": "das", "emoji": "🚗", "definition": "Ein Fahrzeug mit vier Rädern.", "category": "Fahrzeuge", "minAge": 4 },
+    { "word": "groß", "emoji": "🐘", "definition": "Etwas, das viel Platz braucht.", "synonyms": ["riesig"], "antonyms": ["klein"], "category": "Eigenschaften", "minAge": 6 },
+    { "word": "klein", "emoji": "🐜", "definition": "Etwas, das wenig Platz braucht.", "synonyms": ["winzig"], "antonyms": ["groß"], "category": "Eigenschaften", "minAge": 6 },
+    { "word": "schnell", "emoji": "🐆", "definition": "Wer in kurzer Zeit weit kommt.", "synonyms": ["flink"], "antonyms": ["langsam"], "category": "Eigenschaften", "minAge": 6 },
+    { "word": "langsam", "emoji": "🐌", "definition": "Wer viel Zeit für einen kurzen Weg braucht.", "synonyms": ["gemächlich"], "antonyms": ["schnell"], "category": "Eigenschaften", "minAge": 7 },
+    { "word": "fröhlich", "emoji": "😄", "definition": "Wenn man gute Laune hat.", "synonyms": ["lustig", "heiter"], "antonyms": ["traurig"], "category": "Gefühle", "minAge": 7 },
+    { "word": "traurig", "emoji": "😢", "definition": "Wenn einem zum Weinen zumute ist.", "synonyms": ["betrübt"], "antonyms": ["fröhlich"], "category": "Gefühle", "minAge": 7 },
+    { "word": "mutig", "emoji": "🦁", "definition": "Wer sich traut, auch wenn er Angst hat.", "synonyms": ["tapfer"], "antonyms": ["ängstlich"], "category": "Eigenschaften", "minAge": 8 },
+    { "word": "Gebirge", "article": "das", "emoji": "🏔️", "definition": "Viele hohe Berge nebeneinander.", "category": "Natur", "minAge": 8 },
+    { "word": "Schmetterling", "article": "der", "emoji": "🦋", "definition": "Ein Insekt mit großen, bunten Flügeln.", "category": "Tiere", "minAge": 7 },
+    { "word": "neugierig", "emoji": "🧐", "definition": "Wer immer Neues erfahren möchte.", "synonyms": ["wissbegierig"], "antonyms": ["desinteressiert"], "category": "Eigenschaften", "minAge": 9 },
+    { "word": "gewaltig", "emoji": "🌋", "definition": "Sehr groß und stark.", "synonyms": ["enorm", "riesig"], "antonyms": ["winzig"], "category": "Eigenschaften", "minAge": 10 },
+    { "word": "Ausdauer", "article": "die", "emoji": "🏃", "definition": "Die Kraft, etwas lange durchzuhalten.", "synonyms": ["Durchhaltevermögen"], "category": "Eigenschaften", "minAge": 11 },
+    { "word": "vorsichtig", "emoji": "🦺", "definition": "Wer aufpasst, damit nichts passiert.", "synonyms": ["achtsam", "behutsam"], "antonyms": ["leichtsinnig"], "category": "Eigenschaften", "minAge": 9 },
+    { "word": "gelassen", "emoji": "😌", "definition": "Ruhig bleiben, auch wenn etwas schiefgeht.", "synonyms": ["ruhig", "entspannt"], "antonyms": ["aufgeregt"], "category": "Gefühle", "minAge": 12 }
+  ]
+}

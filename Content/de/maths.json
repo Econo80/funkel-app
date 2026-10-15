@@ -1,0 +1,26 @@
+{
+  "names": ["Lena", "Emil", "Mia", "Noah", "Lina", "Ben", "Ella", "Paul", "Ida", "Finn", "Yara", "Milan"],
+  "items": [
+    { "singular": "Apfel", "plural": "Äpfel", "emoji": "🍎" },
+    { "singular": "Ball", "plural": "Bälle", "emoji": "⚽️" },
+    { "singular": "Stern", "plural": "Sterne", "emoji": "⭐️" },
+    { "singular": "Blume", "plural": "Blumen", "emoji": "🌼" },
+    { "singular": "Fisch", "plural": "Fische", "emoji": "🐟" },
+    { "singular": "Keks", "plural": "Kekse", "emoji": "🍪" },
+    { "singular": "Ente", "plural": "Enten", "emoji": "🦆" },
+    { "singular": "Erdbeere", "plural": "Erdbeeren", "emoji": "🍓" },
+    { "singular": "Muschel", "plural": "Muscheln", "emoji": "🐚" },
+    { "singular": "Ballon", "plural": "Ballons", "emoji": "🎈" }
+  ],
+  "wordProblems": [
+    { "operation": "addition", "minAge": 7, "template": "{name} hat {a} {items}. Dann kommen noch {b} {items} dazu. Wie viele {items} sind es jetzt?" },
+    { "operation": "addition", "minAge": 7, "template": "Im Korb liegen {a} {items} und auf dem Tisch {b} {items}. Wie viele {items} sind es zusammen?" },
+    { "operation": "addition", "minAge": 9, "template": "Am Montag sammelt {name} {a} {items}, am Dienstag {b}. Wie viele {items} sind es insgesamt?" },
+    { "operation": "subtraction", "minAge": 7, "template": "{name} hat {a} {items} und verschenkt {b} davon. Wie viele {items} bleiben übrig?" },
+    { "operation": "subtraction", "minAge": 8, "template": "Auf der Wiese sind {a} {items}. {b} davon verschwinden. Wie viele {items} sind noch da?" },
+    { "operation": "multiplication", "minAge": 8, "template": "In einer Kiste sind {a} Reihen mit je {b} {items}. Wie viele {items} sind in der Kiste?" },
+    { "operation": "multiplication", "minAge": 9, "template": "{name} kauft {a} Tüten mit je {b} {items}. Wie viele {items} sind das?" },
+    { "operation": "division", "minAge": 9, "template": "{name} verteilt {a} {items} gerecht auf {b} Kinder. Wie viele {items} bekommt jedes Kind?" },
+    { "operation": "division", "minAge": 10, "template": "{a} {items} werden in Gruppen zu je {b} sortiert. Wie viele Gruppen gibt es?" }
+  ]
+}

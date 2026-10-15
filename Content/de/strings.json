@@ -1,0 +1,21 @@
+{
+  "maths.symbol.plus": "+",
+  "maths.symbol.minus": "−",
+  "maths.symbol.times": "·",
+  "maths.symbol.divide": ":",
+  "maths.counting": "Wie viele {items} siehst du?",
+  "maths.numberRecognition": "Wo sind genau {n}?",
+  "maths.equation": "Wie viel ist {equation}?",
+  "maths.missingNumber": "Welche Zahl fehlt?",
+  "maths.wordProblem": "Rechne aus:",
+
+  "vocab.pictureToWord": "Welches Wort passt zum Bild?",
+  "vocab.wordToPicture": "Welches Bild passt zu „{word}“?",
+  "vocab.meaning": "Was bedeutet „{word}“?",
+  "vocab.spelling": "Schreibe das Wort!",
+  "vocab.spelling.spoken": "Schreibe das Wort {word}.",
+  "vocab.opposite": "Was ist das Gegenteil von „{word}“?",
+  "vocab.synonym": "Welches Wort bedeutet fast das Gleiche wie „{word}“?",
+
+  "sequence.build": "Tippe die Teile in der richtigen Reihenfolge an."
+}

@@ -1,0 +1,31 @@
+{
+  "code": "de",
+  "name": "Deutsch",
+  "speechLocale": "de-DE",
+  "subjects": [
+    {
+      "id": "maths",
+      "provider": "maths",
+      "file": "maths.json",
+      "title": "Mathe",
+      "icon": "plus.forwardslash.minus",
+      "color": "#E8702A"
+    },
+    {
+      "id": "vocabulary",
+      "provider": "wordList",
+      "file": "vocabulary.json",
+      "title": "Wörter",
+      "icon": "textformat.abc",
+      "color": "#2F86D6"
+    },
+    {
+      "id": "generalKnowledge",
+      "provider": "questionBank",
+      "file": "generalknowledge.json",
+      "title": "Wissen",
+      "icon": "globe.europe.africa.fill",
+      "color": "#23A363"
+    }
+  ]
+}

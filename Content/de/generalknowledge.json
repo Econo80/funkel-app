@@ -1,0 +1,18 @@
+{
+  "questions": [
+    { "id": "gk-de-0001", "category": "animals", "minAge": 4, "maxAge": 7, "format": "multipleChoice", "prompt": "Welches Tier sagt „Muh“?", "emoji": "🐄", "options": ["Kuh", "Katze", "Ente", "Hund"], "correct": "Kuh" },
+    { "id": "gk-de-0002", "category": "animals", "minAge": 4, "maxAge": 7, "format": "multipleChoice", "prompt": "Welches Tier kann fliegen?", "options": ["Vogel", "Fisch", "Schnecke", "Pferd"], "correct": "Vogel" },
+    { "id": "gk-de-0003", "category": "nature", "minAge": 4, "maxAge": 8, "format": "multipleChoice", "prompt": "Welche Farbe hat Gras?", "emoji": "🌱", "options": ["Grün", "Blau", "Rot", "Lila"], "correct": "Grün" },
+    { "id": "gk-de-0004", "category": "body", "minAge": 4, "maxAge": 8, "format": "multipleChoice", "prompt": "Womit hörst du?", "options": ["Mit den Ohren", "Mit der Nase", "Mit den Füßen", "Mit den Haaren"], "correct": "Mit den Ohren" },
+    { "id": "gk-de-0005", "category": "everyday", "minAge": 5, "maxAge": 9, "format": "multipleChoice", "prompt": "Wie viele Tage hat eine Woche?", "options": ["7", "5", "10", "12"], "correct": "7" },
+    { "id": "gk-de-0006", "category": "nature", "minAge": 6, "maxAge": 10, "format": "multipleChoice", "prompt": "In welcher Jahreszeit fallen die Blätter von den Bäumen?", "emoji": "🍂", "options": ["Herbst", "Frühling", "Sommer", "Winter"], "correct": "Herbst" },
+    { "id": "gk-de-0007", "category": "animals", "minAge": 7, "maxAge": 12, "format": "multipleChoice", "prompt": "Was ist ein Wal?", "emoji": "🐋", "options": ["Ein Säugetier", "Ein Fisch", "Ein Vogel", "Ein Reptil"], "correct": "Ein Säugetier", "explanation": "Wale atmen Luft und säugen ihre Jungen – sie sind Säugetiere." },
+    { "id": "gk-de-0008", "category": "geography", "minAge": 7, "maxAge": 12, "format": "multipleChoice", "prompt": "Wie heißt die Hauptstadt von Deutschland?", "options": ["Berlin", "München", "Hamburg", "Köln"], "correct": "Berlin" },
+    { "id": "gk-de-0009", "category": "science", "minAge": 8, "maxAge": 13, "format": "multipleChoice", "prompt": "Bei wie viel Grad Celsius gefriert Wasser?", "emoji": "🧊", "options": ["0 °C", "10 °C", "50 °C", "100 °C"], "correct": "0 °C" },
+    { "id": "gk-de-0010", "category": "body", "minAge": 8, "maxAge": 13, "format": "multipleChoice", "prompt": "Welches Organ pumpt das Blut durch den Körper?", "options": ["Das Herz", "Die Lunge", "Der Magen", "Die Leber"], "correct": "Das Herz" },
+    { "id": "gk-de-0011", "category": "geography", "minAge": 9, "format": "multipleChoice", "prompt": "Welcher ist der größte Ozean der Erde?", "emoji": "🌊", "options": ["Pazifik", "Atlantik", "Indischer Ozean", "Nordpolarmeer"], "correct": "Pazifik" },
+    { "id": "gk-de-0012", "category": "science", "minAge": 10, "format": "multipleChoice", "prompt": "Welcher Planet ist der Sonne am nächsten?", "emoji": "🪐", "options": ["Merkur", "Venus", "Erde", "Mars"], "correct": "Merkur" },
+    { "id": "gk-de-0013", "category": "science", "minAge": 11, "format": "multipleChoice", "prompt": "Welches Gas nehmen Pflanzen aus der Luft auf, um zu wachsen?", "emoji": "🌿", "options": ["Kohlendioxid", "Sauerstoff", "Stickstoff", "Helium"], "correct": "Kohlendioxid", "explanation": "Bei der Fotosynthese nehmen Pflanzen Kohlendioxid auf und geben Sauerstoff ab." },
+    { "id": "gk-de-0014", "category": "geography", "minAge": 12, "format": "multipleChoice", "prompt": "Welcher Fluss fließt durch Wien, Budapest und Belgrad?", "options": ["Donau", "Rhein", "Elbe", "Moldau"], "correct": "Donau" }
+  ]
+}
