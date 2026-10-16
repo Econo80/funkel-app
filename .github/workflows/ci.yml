@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push cancels the running build, to save macOS minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  content:
+    name: Validate content
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/validate_content.py
+
+  build-and-test:
+    name: Build & test (iOS Simulator)
+    needs: content
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Pick newest iPhone simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          devices = json.load(sys.stdin)["devices"]
+          def version(key):
+              return [int(n) for n in re.findall(r"\d+", key.split("iOS")[-1])]
+          ios = sorted((k for k in devices if ".iOS-" in k), key=version, reverse=True)
+          for runtime in ios:
+              phones = [d for d in devices[runtime] if d["name"].startswith("iPhone")]
+              if phones:
+                  print(phones[0]["udid"]); print(runtime, phones[0]["name"], file=sys.stderr); break
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      # Tests run inside the host app, so a passing test run also proves the app launches.
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Funkel.xcodeproj \
+            -scheme Funkel \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee xcodebuild.log
+
+      - name: Summarise errors
+        if: failure()
+        run: |
+          echo "### Build errors" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -E "error:|failed|Failing tests|XCTAssert" xcodebuild.log | sort -u | head -80 >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xcodebuild-log
+          path: xcodebuild.log
+          retention-days: 7
