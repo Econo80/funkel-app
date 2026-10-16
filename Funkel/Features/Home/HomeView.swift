@@ -54,6 +54,7 @@ struct HomeView: View {
             HStack(alignment: .top) {
                 Pip(color: Palette.avatarColor(profile.avatarColor), mood: .happy)
                     .frame(width: 84, height: 84)
+                    .idleBob()
                 Spacer()
                 CircleIconButton(systemImage: "gearshape.fill", label: "grownups.button") {
                     showsGrownUps = true
@@ -70,15 +71,24 @@ struct HomeView: View {
                 .font(.funkelBody)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 12) {
-                StatChip(systemImage: "flame.fill", value: streak, color: .orange)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text("home.streak \(streak)"))
-                StatChip(systemImage: "star.fill", value: profile.totalStars, color: Palette.sun)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text("home.stars \(profile.totalStars)"))
+            // Side by side, or stacked when large text doesn't fit.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) { statChips }
+                VStack(alignment: .leading, spacing: 10) { statChips }
             }
         }
+    }
+}
+
+private extension HomeView {
+    @ViewBuilder
+    var statChips: some View {
+        StatChip(systemImage: "flame.fill", value: streak, color: .orange)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("home.streak \(streak)"))
+        StatChip(systemImage: "star.fill", value: profile.totalStars, color: Palette.sun)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("home.stars \(profile.totalStars)"))
     }
 }
 
@@ -88,11 +98,17 @@ private struct SubjectCard: View {
     let isAvailable: Bool
     let action: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var color: Color { Color(hex: subject.colorHex) }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 18) {
+            // Large text: icon above the title, so the title gets the full width.
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                : AnyLayout(HStackLayout(spacing: 18))
+            layout {
                 Image(systemName: subject.icon)
                     .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(color)
@@ -116,7 +132,7 @@ private struct SubjectCard: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if isAvailable, let progress, progress.questionsAnswered > 0 {
+                if isAvailable, let progress, progress.questionsAnswered > 0, !dynamicTypeSize.isAccessibilitySize {
                     ProgressRing(progress: progress.accuracy)
                         .frame(width: 40, height: 40)
                         .accessibilityHidden(true)

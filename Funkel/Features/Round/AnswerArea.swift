@@ -26,23 +26,55 @@ private struct ChoiceGrid: View {
     let viewModel: RoundViewModel
     let color: Color
 
-    /// Long answers (definitions) get one column, words two (or a full-width
-    /// stack when there are three), short answers fill the row.
-    private var columns: [GridItem] {
-        let longest = options.filter { $0.emoji == nil }.map(\.text.count).max() ?? 0
-        let count: Int
+    static let spacing: CGFloat = 14
+    static let buttonPadding: CGFloat = 12
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .largeTitle) private var textSize: CGFloat = 34
+    @ScaledMetric(relativeTo: .title2) private var longTextSize: CGFloat = 24
+    @State private var gridWidth: CGFloat = 0
+
+    private var texts: [String] { options.filter { $0.emoji == nil }.map(\.text) }
+    private var isPictureGrid: Bool { options.allSatisfy { $0.emoji != nil } }
+    /// Long answers (definitions, phrases) use the calmer, smaller style.
+    private var usesLongStyle: Bool { texts.contains { $0.count > 12 } }
+
+    /// Long answers get one column, words two (or a full-width stack when there
+    /// are three), short answers fill the row. Huge text sizes always stack.
+    private var columnCount: Int {
+        if dynamicTypeSize.isAccessibilitySize { return isPictureGrid ? 2 : 1 }
+        let longest = texts.map(\.count).max() ?? 0
         switch longest {
-        case 23...: count = 1
-        case 7...: count = options.count == 3 ? 1 : 2
-        default: count = options.count == 3 ? 3 : 2
+        case 23...: return 1
+        case 7...: return options.count == 3 ? 1 : 2
+        default: return options.count == 3 ? 3 : 2
         }
-        return Array(repeating: GridItem(.flexible(), spacing: 14), count: count)
+    }
+
+    /// One size for the whole grid, measured so the longest word fits a column.
+    private var fontSize: CGFloat {
+        let columns = CGFloat(columnCount)
+        let columnWidth = (gridWidth - Self.spacing * (columns - 1)) / columns - Self.buttonPadding * 2 - 4
+        let maxSize = usesLongStyle ? longTextSize : textSize
+        return TextFitting.fittingSize(
+            for: texts,
+            width: columnWidth,
+            maxSize: maxSize,
+            minSize: min(15, maxSize),
+            weight: usesLongStyle ? .semibold : .bold
+        )
     }
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 14) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Self.spacing), count: columnCount), spacing: Self.spacing) {
             ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
-                ChoiceButton(option: option, state: state(for: index), color: color, usesCompactText: usesCompactText) {
+                ChoiceButton(
+                    option: option,
+                    state: state(for: index),
+                    color: color,
+                    fontSize: fontSize,
+                    usesLongStyle: usesLongStyle
+                ) {
                     viewModel.choose(optionIndex: index)
                 }
                 #if DEBUG
@@ -51,11 +83,13 @@ private struct ChoiceGrid: View {
                 #endif
             }
         }
-    }
-
-    /// One text size for the whole grid, so options never look mismatched.
-    private var usesCompactText: Bool {
-        options.contains { $0.emoji == nil && $0.text.count > 12 }
+        .background {
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear { gridWidth = proxy.size.width }
+                    .onChange(of: proxy.size.width) { _, width in gridWidth = width }
+            }
+        }
     }
 
     private func state(for index: Int) -> ChoiceButton.AnswerState {
@@ -72,13 +106,13 @@ private struct ChoiceButton: View {
     let option: AnswerOption
     let state: AnswerState
     let color: Color
-    var usesCompactText = false
+    let fontSize: CGFloat
+    let usesLongStyle: Bool
     let action: () -> Void
 
-    @ScaledMetric(relativeTo: .largeTitle) private var textSize: CGFloat = 34
-    @ScaledMetric(relativeTo: .title2) private var longTextSize: CGFloat = 22
     @ScaledMetric(relativeTo: .largeTitle) private var emojiSize: CGFloat = 30
     @ScaledMetric(relativeTo: .largeTitle) private var pictureSize: CGFloat = 60
+    @ScaledMetric(relativeTo: .largeTitle) private var minHeight: CGFloat = 92
 
     private var background: Color {
         switch state {
@@ -100,8 +134,8 @@ private struct ChoiceButton: View {
         Button(action: action) {
             content
                 .foregroundStyle(foreground)
-                .padding(12)
-                .frame(maxWidth: .infinity, minHeight: 92)
+                .padding(ChoiceGrid.buttonPadding)
+                .frame(maxWidth: .infinity, minHeight: minHeight)
                 .background(background, in: .rect(cornerRadius: Metrics.buttonCorner))
                 .overlay {
                     RoundedRectangle(cornerRadius: Metrics.buttonCorner)
@@ -115,7 +149,7 @@ private struct ChoiceButton: View {
         }
         .buttonStyle(PressableStyle())
         .disabled(state != .idle)
-        .accessibilityLabel(Text(option.text))
+        .accessibilityLabel(Text(verbatim: option.text))
         .accessibilityAddTraits(state == .correct || state == .revealed ? .isSelected : [])
     }
 
@@ -123,22 +157,17 @@ private struct ChoiceButton: View {
     private var content: some View {
         if let emoji = option.emoji {
             // One emoji = a picture answer; several = a group to count.
-            Text(emoji)
+            Text(verbatim: emoji)
                 .font(.system(size: emoji.count == 1 ? pictureSize : emojiSize))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
-        } else if usesCompactText {
-            Text(option.text)
-                .font(.system(size: longTextSize, weight: .semibold, design: .rounded))
-                .multilineTextAlignment(.center)
-                .lineLimit(4)
-                .minimumScaleFactor(0.7)
         } else {
-            Text(option.text)
-                .font(.system(size: textSize, weight: .bold, design: .rounded))
+            Text(verbatim: option.text)
+                .font(.system(size: fontSize, weight: usesLongStyle ? .semibold : .bold, design: .rounded))
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.5)
+                .lineLimit(usesLongStyle ? 5 : 3)
+                // Safety net only; fontSize is already measured to fit.
+                .minimumScaleFactor(0.9)
         }
     }
 
@@ -150,6 +179,7 @@ private struct ChoiceButton: View {
                 .foregroundStyle(state == .correct ? .white : Palette.ink)
                 .padding(8)
                 .transition(.scale)
+                .accessibilityHidden(true)
         }
     }
 }

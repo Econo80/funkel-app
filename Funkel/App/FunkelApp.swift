@@ -14,6 +14,8 @@ struct FunkelApp: App {
         WindowGroup {
             RootView()
                 .environment(environment)
+                // Layouts are checked up to this size; beyond it they'd clip.
+                .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         }
         .modelContainer(container)
     }

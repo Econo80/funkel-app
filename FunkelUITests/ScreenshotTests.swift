@@ -90,6 +90,23 @@ final class ScreenshotTests: XCTestCase {
         snap("11-vocab-spelling-age-10", spellingApp, settle: 0.8)
     }
 
+    /// The same app at a large accessibility text size (AX3, the app's cap).
+    @MainActor
+    func testCaptureLargeText() throws {
+        let app = launch(extra: ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"])
+
+        snap("20-large-text-picker", app, waitFor: app.buttons["profile-Lena"])
+        app.buttons["profile-Lena"].tap()
+        snap("21-large-text-home", app, waitFor: app.buttons["subject-maths"])
+        open("subject-maths", app)
+        snap("22-large-text-maths-age-5", app, waitFor: app.buttons["answer-correct"].firstMatch, settle: 1.5)
+        app.buttons["round-close"].tap()
+
+        switchTo("Emil", app)
+        open("subject-generalKnowledge", app)
+        snap("23-large-text-knowledge-age-10", app, waitFor: app.buttons["round-close"], settle: 1.5)
+    }
+
     // MARK: Helpers
 
     @MainActor

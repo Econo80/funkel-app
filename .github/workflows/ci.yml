@@ -27,7 +27,7 @@ jobs:
     name: Build, test & screenshots (iOS Simulator)
     needs: content
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v5
 
@@ -73,6 +73,43 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | tee xcodebuild.log
 
+      # iPad layout pass: reuses the simulator build, runs only the screen walk.
+      - name: Pick newest iPad simulator
+        id: ipad
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          devices = json.load(sys.stdin)["devices"]
+          def version(key):
+              return [int(n) for n in re.findall(r"\d+", key.split("iOS")[-1])]
+          ios = sorted((k for k in devices if ".iOS-" in k), key=version, reverse=True)
+          for runtime in ios:
+              pads = [d for d in devices[runtime] if d["name"].startswith("iPad")]
+              pads.sort(key=lambda d: (not d["name"].startswith("iPad Pro 13"), not d["name"].startswith("iPad Pro"), d["name"]))
+              if pads:
+                  print(pads[0]["udid"]); print(runtime, pads[0]["name"], file=sys.stderr); break
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: iPad screenshots
+        env:
+          TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/screenshots/ipad
+        run: |
+          set -o pipefail
+          xcrun simctl boot "${{ steps.ipad.outputs.udid }}" || true
+          xcrun simctl bootstatus "${{ steps.ipad.outputs.udid }}" -b
+          xcrun simctl status_bar "${{ steps.ipad.outputs.udid }}" override \
+            --time "9:41" --dataNetwork wifi --wifiBars 3 \
+            --batteryState charged --batteryLevel 100 || true
+          xcodebuild test \
+            -project Funkel.xcodeproj \
+            -scheme Funkel \
+            -destination "id=${{ steps.ipad.outputs.udid }}" \
+            -only-testing:FunkelUITests/ScreenshotTests/testCaptureMainScreens \
+            -resultBundlePath TestResults-iPad.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee -a xcodebuild.log
+
       - name: Summarise errors
         if: failure()
         run: |
@@ -92,6 +129,6 @@ jobs:
         if: always()
         with:
           name: screenshots
-          path: screenshots/*.png
+          path: screenshots/
           if-no-files-found: warn
           retention-days: 30

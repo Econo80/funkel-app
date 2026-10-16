@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// One question per screen, big answer targets, gentle feedback.
 struct RoundView: View {
@@ -8,11 +9,23 @@ struct RoundView: View {
     let onClose: () -> Void
 
     @Environment(AppEnvironment.self) private var environment
-    @State private var correctPhrase: LocalizedStringKey = "feedback.correct.1"
+    @State private var correctPhrase = ""
+    @State private var celebration = 0
 
-    private static let correctPhrases: [LocalizedStringKey] = [
-        "feedback.correct.1", "feedback.correct.2", "feedback.correct.3", "feedback.correct.4", "feedback.correct.5",
-    ]
+    /// Praise in the UI language. A String (not a key) so it can also be
+    /// announced to VoiceOver.
+    private static var correctPhrases: [String] {
+        [
+            String(localized: "feedback.correct.1"), String(localized: "feedback.correct.2"),
+            String(localized: "feedback.correct.3"), String(localized: "feedback.correct.4"),
+            String(localized: "feedback.correct.5"),
+        ]
+    }
+
+    /// Learning-language phrasing, for reading the right answer aloud.
+    private var phrasing: Phrasing? {
+        try? environment.content.phrasing(language: viewModel.subject.languageCode)
+    }
 
     private var color: Color { Color(hex: viewModel.subject.colorHex) }
 
@@ -50,12 +63,18 @@ struct RoundView: View {
                 correctAnswer: viewModel.current?.format.correctAnswerText ?? "",
                 explanation: viewModel.current?.explanation,
                 profileColor: Palette.avatarColor(profile.avatarColor),
+                celebration: celebration,
                 onNext: { viewModel.next() }
             )
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.phase)
         }
+        .overlay {
+            ConfettiBurst(trigger: celebration)
+                .ignoresSafeArea()
+        }
         .onChange(of: viewModel.index, initial: true) {
-            if profile.readAloudEnabled { readAloud() }
+            // VoiceOver users hear the question from VoiceOver itself.
+            if profile.readAloudEnabled && !UIAccessibility.isVoiceOverRunning { readAloud() }
         }
         .onChange(of: viewModel.phase) { _, phase in
             handle(phase)
@@ -92,20 +111,39 @@ struct RoundView: View {
     }
 
     private func handle(_ phase: RoundViewModel.Phase) {
-        guard case let .feedback(isCorrect) = phase else { return }
+        guard case let .feedback(isCorrect) = phase, let question = viewModel.current else { return }
+        let answer = question.format.correctAnswerText
+
         if isCorrect {
-            correctPhrase = Self.correctPhrases.randomElement() ?? "feedback.correct.1"
+            correctPhrase = Self.correctPhrases.randomElement() ?? ""
+            celebration += 1
+            if profile.soundEnabled { environment.sound.play(.correct) }
             if profile.hapticsEnabled { Haptics.correct() }
+            announce(correctPhrase)
+
+            // Give VoiceOver time to speak before moving on.
+            let delay = UIAccessibility.isVoiceOverRunning ? 2.5 : 1.3
             let index = viewModel.index
             Task {
-                try? await Task.sleep(for: .seconds(1.3))
+                try? await Task.sleep(for: .seconds(delay))
                 if viewModel.index == index, viewModel.phase == .feedback(isCorrect: true) {
                     viewModel.next()
                 }
             }
-        } else if profile.hapticsEnabled {
-            Haptics.gentle()
+        } else {
+            if profile.soundEnabled { environment.sound.play(.gentle) }
+            if profile.hapticsEnabled { Haptics.gentle() }
+            announce(String(localized: "feedback.wrong.answer \(answer)"))
+            // Pre-readers hear the right answer in the learning language.
+            if profile.readAloudEnabled && !UIAccessibility.isVoiceOverRunning, let phrasing {
+                environment.speech.speak(phrasing.text("speech.answer", ["answer": answer]), locale: speechLocale)
+            }
         }
+    }
+
+    private func announce(_ text: String) {
+        guard UIAccessibility.isVoiceOverRunning, !text.isEmpty else { return }
+        UIAccessibility.post(notification: .announcement, argument: text)
     }
 }
 
@@ -167,10 +205,11 @@ private struct GentleTimerBar: View {
 
 private struct FeedbackBar: View {
     let phase: RoundViewModel.Phase
-    let correctPhrase: LocalizedStringKey
+    let correctPhrase: String
     let correctAnswer: String
     let explanation: String?
     let profileColor: Color
+    let celebration: Int
     let onNext: () -> Void
 
     var body: some View {
@@ -180,8 +219,9 @@ private struct FeedbackBar: View {
                 HStack(spacing: 16) {
                     Pip(color: profileColor, mood: .cheering)
                         .frame(width: 64, height: 64)
+                        .cheerfulHop(trigger: celebration)
                         .transition(.scale.combined(with: .opacity))
-                    Text(correctPhrase)
+                    Text(verbatim: correctPhrase)
                         .font(.funkelHeadline)
                         .foregroundStyle(.white)
                     Spacer()

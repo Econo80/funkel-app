@@ -26,7 +26,27 @@ struct QuestionCard: View {
         .frame(maxWidth: .infinity)
         .funkelCard()
         .accessibilityElement(children: .combine)
+        .modifier(SpokenLabel(text: spokenLabel))
         .accessibilityAddTraits(.isHeader)
+    }
+
+    /// VoiceOver reads the same words as read-aloud ("3 plus 4", not "3 · 4").
+    /// Counting questions keep the combined label so the objects are read out.
+    private var spokenLabel: String? {
+        if case .countable? = question.visual { return nil }
+        return question.spokenText
+    }
+}
+
+private struct SpokenLabel: ViewModifier {
+    let text: String?
+
+    func body(content: Content) -> some View {
+        if let text {
+            content.accessibilityLabel(Text(verbatim: text))
+        } else {
+            content
+        }
     }
 }
 

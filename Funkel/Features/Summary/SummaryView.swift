@@ -5,12 +5,15 @@ struct SummaryView: View {
     let summary: RoundSummary
     let color: Color
     let profileColor: Color
+    var playsSound = true
     let onAgain: () -> Void
     let onDone: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppEnvironment.self) private var environment
     @State private var shownStars = 0
     @State private var bounce = false
+    @State private var celebration = 0
 
     private var message: LocalizedStringKey {
         switch summary.score {
@@ -27,6 +30,7 @@ struct SummaryView: View {
                 Pip(color: profileColor, mood: .cheering)
                     .frame(width: 160, height: 160)
                     .scaleEffect(bounce ? 1 : 0.6)
+                    .cheerfulHop(trigger: celebration)
                     .padding(.top, 40)
 
                 Text("summary.title")
@@ -81,8 +85,14 @@ struct SummaryView: View {
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
         }
+        .overlay {
+            ConfettiBurst(trigger: celebration, count: summary.score >= 0.8 ? 70 : 40)
+                .ignoresSafeArea()
+        }
         .task {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) { bounce = true }
+            if playsSound { environment.sound.play(.finish) }
+            celebration += 1
             if reduceMotion {
                 shownStars = summary.starsEarned
                 return

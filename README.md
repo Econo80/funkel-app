@@ -116,6 +116,14 @@ The language then appears in the grown-up area's learning-language picker.
 translate the strings. The UI follows the device language. Learning content
 follows each child's profile setting.
 
+## Accessibility
+
+- Every screen uses Dynamic Type (capped at AX3, where layouts are checked by CI screenshots).
+- VoiceOver labels on all controls; questions are read with spoken words, and feedback is announced.
+- Reduce Motion turns off confetti and mascot animations.
+- Read-aloud uses the on-device voice for the profile's learning language (`speechLocale` in the manifest).
+- Feedback colours never rely on red: right is green, the reveal is a warm yellow, and both show a checkmark.
+
 ## Privacy
 
 Everything stays on the device. A profile stores only a first name, an age, and

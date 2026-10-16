@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 6 verified in CI._
+_Last updated: 2026-10-16 — Milestone 7 (polish & accessibility)._
 
 ---
 
@@ -19,7 +19,7 @@ _Last updated: 2026-10-16 — Milestone 6 verified in CI._
 | 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ✅ CI, 38/38 tests + screenshots |
 | 5 | General Knowledge (question bank) | done | ✅ CI, 45/45 tests + screenshots |
 | 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | done | ✅ CI, 53/53 tests + screenshots |
-| 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | next | |
+| 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | done | ⏳ pending CI |
 
 "Build verified" means the GitHub Actions workflow (`.github/workflows/ci.yml`) built the app and passed the unit tests on a macOS runner with an iOS Simulator. The tests run inside the app, so a pass also means it launches. Development happens on Windows, so CI is the only compiler; every slice is pushed and must be green before the next one starts.
 The JSON
@@ -275,7 +275,7 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 5. ✅ Vocabulary — `VocabularyQuestionGenerator` + letter-tile spelling view. *Verify build.*
 6. ✅ General Knowledge — `QuestionBankProvider`. *Verify build.*
 7. ✅ Grown-up gate + settings + profile management. *Verify build.*
-8. Polish — Pip animations, confetti, sounds (synthesised via AVAudioEngine; no audio assets needed), haptics, read-aloud, VoiceOver/Dynamic Type audit, iPad layout pass.
+8. ✅ Polish — Pip animations, confetti, sounds (synthesised via AVAudioEngine; no audio assets needed), haptics, read-aloud, VoiceOver/Dynamic Type audit, iPad layout pass.
 
 ---
 
@@ -300,4 +300,13 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-16** — Profile settings are edited as a value copy (`ProfileSettings`) and written back on save. "All subjects on" is stored as an empty list, so subjects a language adds later (e.g. Grammar) appear automatically; at least one subject always stays on. Changing the learning language turns all of its subjects on.
 - **2026-10-16** — "Fortschritt zurücksetzen" clears stars, streaks, per-subject progress, history and adaptivity, but keeps name, age and settings. "Profil löschen" removes everything (cascade). Both ask for confirmation.
 - **2026-10-16** — The sound toggle is stored now; sound effects arrive in milestone 7.
-- **2026-10-16** — Polish backlog: iOS shrinks long answers per button (minimumScaleFactor), so text sizes can still differ slightly within a grid. Measure the longest option and scale them all together.
+- **2026-10-16** — Sounds are synthesised at launch (`SoundService`): a rising chime for correct, a soft low two-note "hmm" for wrong (quieter and lower by test), and a fanfare at the end of a round. The `.ambient` audio session respects the silent switch and mixes with other audio.
+- **2026-10-16** — Celebrations: Canvas confetti on every correct answer and at the summary (more for 80 %+), plus a hop from Pip. Pip bobs gently on the home screen. Everything animated is skipped under Reduce Motion.
+- **2026-10-16** — Answer grids pick **one** font size, measured with UIKit so the longest *word* fits a column (`TextFitting`). Lines wrap between words, never inside them.
+- **2026-10-16** — Accessibility:
+  - VoiceOver reads the question card with the same words as read-aloud ("3 plus 4").
+  - Feedback is announced, and auto-advance waits longer while VoiceOver is on.
+  - Auto read-aloud steps aside while VoiceOver is running.
+  - After a wrong answer, read-aloud speaks the right answer in the learning language (`speech.answer` in `strings.json`, required for every language).
+  - Dynamic Type is capped at AX3. From the accessibility sizes up, answers stack in one column, subject cards stack their icon, and the stat chips wrap.
+- **2026-10-16** — CI screenshots now include a large-text run (AX3) and an iPad run (`screenshots/ipad/`).

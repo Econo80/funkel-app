@@ -20,6 +20,9 @@ MATHS_OPERATIONS = {"addition", "subtraction", "multiplication", "division"}
 HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
 
+# Needed by every language, whatever subjects it offers.
+COMMON_PHRASES = ["speech.answer"]
+
 REQUIRED_PHRASES = {
     "maths": [
         "maths.symbol.plus", "maths.symbol.minus", "maths.symbol.times", "maths.symbol.divide",
@@ -187,6 +190,9 @@ def validate_language(folder, report):
         report.error(manifest_path, f"code {manifest.get('code')!r} must match folder name {folder.name!r}")
 
     phrasing = load(folder / "strings.json", report) or {}
+    for key in COMMON_PHRASES:
+        if key not in phrasing:
+            report.error(folder / "strings.json", f"missing phrase '{key}'")
     ids = set()
     for i, s in enumerate(manifest.get("subjects", [])):
         where = f"{manifest_path} subjects[{i}] ({s.get('id', '?')})"

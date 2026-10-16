@@ -27,6 +27,7 @@ struct RoundContainerView: View {
                     summary: summary,
                     color: Color(hex: subject.colorHex),
                     profileColor: Palette.avatarColor(profile.avatarColor),
+                    playsSound: profile.soundEnabled,
                     onAgain: start,
                     onDone: close
                 )
