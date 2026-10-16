@@ -161,11 +161,15 @@ final class ScreenshotTests: XCTestCase {
     /// coordinate, which never fails.
     @MainActor
     private func answerCorrectlyUntil(_ target: XCUIElement, _ app: XCUIApplication) {
-        let origin = app.coordinate(withNormalizedOffset: .zero)
         for _ in 0..<60 where !target.exists {
+            // Frames are in screen coordinates; on iPad the app may be a window
+            // that doesn't start at (0, 0), so offset from the app's own frame.
+            let window = app.frame
             if let answer = try? app.buttons["answer-correct"].firstMatch.snapshot(),
-               answer.isEnabled, app.frame.contains(answer.frame) {
-                origin.withOffset(CGVector(dx: answer.frame.midX, dy: answer.frame.midY)).tap()
+               answer.isEnabled, window.contains(answer.frame) {
+                app.coordinate(withNormalizedOffset: .zero)
+                    .withOffset(CGVector(dx: answer.frame.midX - window.minX, dy: answer.frame.midY - window.minY))
+                    .tap()
             }
             pause(0.5)
         }
