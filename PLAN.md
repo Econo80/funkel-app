@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 4 (Vocabulary) and CI screenshots._
+_Last updated: 2026-10-16 — Milestone 4 verified in CI, with screenshots._
 
 ---
 
@@ -16,7 +16,7 @@ _Last updated: 2026-10-16 — Milestone 4 (Vocabulary) and CI screenshots._
 | 1 | Data model, age scaling, content loader, `de` manifest | done | ✅ CI, 19/19 tests |
 | 2 | Home screen + profile picker | done | ✅ CI, 31/31 tests |
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ✅ CI, 31/31 tests |
-| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ⏳ pending CI |
+| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ✅ CI, 38/38 tests + screenshots |
 | 5 | General Knowledge (question bank) | next | |
 | 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | | |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |

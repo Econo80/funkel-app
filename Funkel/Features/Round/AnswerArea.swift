@@ -26,13 +26,14 @@ private struct ChoiceGrid: View {
     let viewModel: RoundViewModel
     let color: Color
 
-    /// Long answers (definitions) get one column, words two, short answers fill the row.
+    /// Long answers (definitions) get one column, words two (or a full-width
+    /// stack when there are three), short answers fill the row.
     private var columns: [GridItem] {
         let longest = options.filter { $0.emoji == nil }.map(\.text.count).max() ?? 0
         let count: Int
         switch longest {
         case 23...: count = 1
-        case 9...: count = 2
+        case 7...: count = options.count == 3 ? 1 : 2
         default: count = options.count == 3 ? 3 : 2
         }
         return Array(repeating: GridItem(.flexible(), spacing: 14), count: count)
