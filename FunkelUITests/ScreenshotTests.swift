@@ -161,15 +161,27 @@ final class ScreenshotTests: XCTestCase {
     /// coordinate, which never fails.
     @MainActor
     private func answerCorrectlyUntil(_ target: XCUIElement, _ app: XCUIApplication) {
+        let next = app.buttons["round-next"]
         for _ in 0..<60 where !target.exists {
+            // If a tap ever lands on a wrong answer, move on instead of stalling.
+            if next.exists {
+                next.tap()
+                pause(0.8)
+                continue
+            }
             // Frames are in screen coordinates; on iPad the app may be a window
             // that doesn't start at (0, 0), so offset from the app's own frame.
             let window = app.frame
-            if let answer = try? app.buttons["answer-correct"].firstMatch.snapshot(),
-               answer.isEnabled, window.contains(answer.frame) {
-                app.coordinate(withNormalizedOffset: .zero)
-                    .withOffset(CGVector(dx: answer.frame.midX - window.minX, dy: answer.frame.midY - window.minY))
-                    .tap()
+            if let first = try? app.buttons["answer-correct"].firstMatch.snapshot(),
+               first.isEnabled, window.contains(first.frame) {
+                // Only tap once the question has finished sliding in.
+                pause(0.3)
+                if let settled = try? app.buttons["answer-correct"].firstMatch.snapshot(),
+                   settled.isEnabled, settled.frame == first.frame {
+                    app.coordinate(withNormalizedOffset: .zero)
+                        .withOffset(CGVector(dx: settled.frame.midX - window.minX, dy: settled.frame.midY - window.minY))
+                        .tap()
+                }
             }
             pause(0.5)
         }
