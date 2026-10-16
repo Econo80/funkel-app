@@ -26,8 +26,7 @@ enum QuestionProviderFactory {
     /// are shown as "coming soon".
     static func isAvailable(_ kind: ProviderKind) -> Bool {
         switch kind {
-        case .maths, .wordList: true
-        case .questionBank: false
+        case .maths, .wordList, .questionBank: true
         }
     }
 
@@ -46,7 +45,11 @@ enum QuestionProviderFactory {
                 phrasing: try content.phrasing(language: subject.languageCode)
             )
         case .questionBank:
-            return nil
+            return QuestionBankProvider(
+                subjectID: subject.id,
+                items: try content.questionBank(for: subject).questions,
+                phrasing: try content.phrasing(language: subject.languageCode)
+            )
         }
     }
 }

@@ -49,10 +49,20 @@ final class ScreenshotTests: XCTestCase {
         snap("07-vocab-age-5", app, waitFor: app.buttons["answer-correct"].firstMatch, settle: 1.2)
         app.buttons["round-close"].tap()
 
+        // Lena (5): general knowledge
+        open("subject-generalKnowledge", app)
+        snap("08-knowledge-age-5", app, waitFor: app.buttons["round-close"], settle: 1.2)
+        app.buttons["round-close"].tap()
+
         // Emil (10): number pad
         switchTo("Emil", app)
         open("subject-maths", app)
-        snap("08-maths-age-10", app, waitFor: app.buttons["key-check"], settle: 1.0)
+        snap("09-maths-age-10", app, waitFor: app.buttons["key-check"], settle: 1.0)
+        app.buttons["round-close"].tap()
+
+        // Emil (10): general knowledge
+        open("subject-generalKnowledge", app)
+        snap("10-knowledge-age-10", app, waitFor: app.buttons["round-close"], settle: 1.2)
         app.buttons["round-close"].tap()
 
         // Emil (10): spelling with letter tiles (forced via a Debug-only launch argument)
@@ -65,7 +75,7 @@ final class ScreenshotTests: XCTestCase {
         pause(1.0)
         firstTile.tap()
         spellingApp.buttons["tile-1"].tap()
-        snap("09-vocab-spelling-age-10", spellingApp, settle: 0.8)
+        snap("11-vocab-spelling-age-10", spellingApp, settle: 0.8)
     }
 
     // MARK: Helpers

@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 4 verified in CI, with screenshots._
+_Last updated: 2026-10-16 — Milestone 5 (General Knowledge)._
 
 ---
 
@@ -17,8 +17,8 @@ _Last updated: 2026-10-16 — Milestone 4 verified in CI, with screenshots._
 | 2 | Home screen + profile picker | done | ✅ CI, 31/31 tests |
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ✅ CI, 31/31 tests |
 | 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ✅ CI, 38/38 tests + screenshots |
-| 5 | General Knowledge (question bank) | next | |
-| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | | |
+| 5 | General Knowledge (question bank) | done | ⏳ pending CI |
+| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | next | |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |
 
 "Build verified" means the GitHub Actions workflow (`.github/workflows/ci.yml`) built the app and passed the unit tests on a macOS runner with an iOS Simulator. The tests run inside the app, so a pass also means it launches. Development happens on Windows, so CI is the only compiler; every slice is pushed and must be green before the next one starts.
@@ -273,7 +273,7 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 3. ✅ Home + profile picker
 4. ✅ **Maths end-to-end** — generator, `RoundViewModel`, round/feedback/summary views, progress + streak persistence. *Verify build.*
 5. ✅ Vocabulary — `VocabularyQuestionGenerator` + letter-tile spelling view. *Verify build.*
-6. General Knowledge — `QuestionBankProvider`. *Verify build.*
+6. ✅ General Knowledge — `QuestionBankProvider`. *Verify build.*
 7. Grown-up gate + settings + profile management. *Verify build.*
 8. Polish — Pip animations, confetti, sounds (synthesised via AVAudioEngine; no audio assets needed), haptics, read-aloud, VoiceOver/Dynamic Type audit, iPad layout pass.
 
@@ -294,3 +294,6 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-16** — CI now also runs `FunkelUITests/ScreenshotTests`, which walks the main screens with sample profiles (Debug-only `-uiTesting` launch mode, in-memory store) and uploads PNGs as the `screenshots` artifact (kept 30 days).
 - **2026-10-16** — The earliest vocabulary words carry a `maxAge` (4 → 8, 5 → 9, 6 → 11), so older children aren't offered "der Hund". **Content gap:** ages 12–14 have only 5–14 words in their current band. Needs more advanced words before release.
 - **2026-10-16** — Nouns are shown with their article ("der Hund") in picture questions, so children learn the article with the word.
+- **2026-10-16** — General Knowledge: 125 German questions in six categories (animals, nature, body, geography, science, everyday), ages 4–14, including tap-in-order questions (life cycles, weekdays, planets), so the `buildSequence` path that Grammar will use is already exercised. A round mixes categories: each pick halves the weight of its category for the rest of the round. A bank too small for the round length gives a shorter round, never repeats.
+- **2026-10-16** — Sequence distractor tiles only appear from age 8, so younger children just order the given tiles.
+- **2026-10-16** — **Content gap:** 4-year-olds have 22 general-knowledge questions, about two rounds' worth before repeats are down-weighted. Worth growing alongside the 12–14 vocabulary.
