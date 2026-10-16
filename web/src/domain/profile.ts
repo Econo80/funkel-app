@@ -2,6 +2,7 @@
 // StreakCalculator.swift, ProgressRecorder.swift and ProfileSettings.swift.
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdjustment } from "./difficulty";
+import { DEFAULT_GAME_SETTINGS, emptyGarden, type Garden } from "./games";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -39,13 +40,25 @@ export interface ProfileSettings {
   readAloudEnabled: boolean;
   hapticsEnabled: boolean;
   gentleTimerEnabled: boolean;
+  /** Play corner (grown-up controls). */
+  gamesEnabled: boolean;
+  gameCost: number;
+  /** 0 = no daily limit. */
+  gamesPerDay: number;
 }
 
 export interface Profile extends ProfileSettings {
   id: string;
   createdAt: string;
   difficultyAdjustment: number;
+  /** Lifetime stars: an achievement, never goes down (except a grown-up reset). */
   totalStars: number;
+  /** Spendable stars for the play corner. */
+  walletStars: number;
+  /** Day of the last game ticket, and how many tickets were used that day. */
+  gameDay?: string;
+  gamesToday: number;
+  garden: Garden;
   currentStreak: number;
   longestStreak: number;
   /** Local calendar day, "YYYY-MM-DD". */
@@ -69,7 +82,34 @@ export function defaultSettings(): ProfileSettings {
     readAloudEnabled: true,
     hapticsEnabled: true,
     gentleTimerEnabled: false,
+    ...DEFAULT_GAME_SETTINGS,
   };
+}
+
+/**
+ * Fills fields added after a profile was saved (older versions of the app),
+ * so stored profiles keep working. Stars earned before the play corner
+ * existed go into the wallet, so they can be spent right away.
+ */
+export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Profile {
+  const base = defaultSettings();
+  return {
+    ...base,
+    createdAt: new Date(0).toISOString(),
+    difficultyAdjustment: 0,
+    totalStars: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    progress: {},
+    rounds: [],
+    ...p,
+    walletStars: p.walletStars ?? p.totalStars ?? 0,
+    gamesToday: p.gamesToday ?? 0,
+    garden: p.garden ?? emptyGarden(),
+    gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
+    gameCost: p.gameCost ?? base.gameCost,
+    gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
+  } as Profile;
 }
 
 export function newId(): string {
@@ -84,6 +124,9 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
       createdAt: now.toISOString(),
       difficultyAdjustment: 0,
       totalStars: 0,
+      walletStars: 0,
+      gamesToday: 0,
+      garden: emptyGarden(),
       currentStreak: 0,
       longestStreak: 0,
       progress: {},
@@ -144,6 +187,9 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     readAloudEnabled: s.readAloudEnabled,
     hapticsEnabled: s.hapticsEnabled,
     gentleTimerEnabled: s.gentleTimerEnabled && allowsGentleTimer(age),
+    gamesEnabled: s.gamesEnabled,
+    gameCost: clamp(Math.round(s.gameCost), 1, 100),
+    gamesPerDay: clamp(Math.round(s.gamesPerDay), 0, 20),
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
   };
 }
@@ -217,6 +263,7 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
   const profile: Profile = {
     ...p,
     totalStars: p.totalStars + stars,
+    walletStars: p.walletStars + stars,
     currentStreak: streak.current,
     longestStreak: streak.longest,
     lastPlayedDay: streak.lastPlayedDay,
@@ -252,9 +299,13 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
   };
 }
 
-/** Clears stars, streaks, progress, history and adaptivity; keeps name and settings. */
+/** Clears stars (incl. wallet and garden), streaks, progress, history and adaptivity; keeps name and settings. */
 export function resetProgress(p: Profile): Profile {
-  return { ...p, totalStars: 0, currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [] };
+  return {
+    ...p,
+    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(),
+    currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [],
+  };
 }
 
 export { effectiveAge };

@@ -49,6 +49,22 @@ Tap **Profil anlegen**, solve the grown-up maths question, enter the child's
 first name and age, and tap **Speichern**. Add more children through the
 gear button (⚙️) on the start screen.
 
+## The play corner (Spielecke)
+
+Children earn one star per correct answer. In the **Spielecke** (the colourful
+card on the home screen) they can spend stars:
+
+- **Games** (2 minutes each): **Memory** (find pairs), **Ballon-Pop** (pop
+  balloons; from age 7 only even numbers, from 9 only the multiplications that
+  make a target number, e.g. 24) and **Sternenfänger** (move Pip to catch stars and dodge clouds).
+- **Pips Garten:** buy seeds, trees and decorations. Plants grow over the
+  next days and weeks. No timer.
+
+The lifetime star count never goes down; only the "stars to spend" are used.
+Grown-ups can change the price per game, the number of games per day, or turn
+the play corner off: ⚙️ → solve the question → the child's profile → **Spielecke**.
+Defaults: 10 ⭐ per game, 3 games a day.
+
 ## Good to know
 
 - **Each device keeps its own profiles and stars.** Nothing is sent anywhere,

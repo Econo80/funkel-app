@@ -7,6 +7,7 @@ import { deleteProfile, saveProfile, setMeta } from "../services/storage";
 import { GrownUpGate, GrownUps, ProfileEditor } from "./GrownUps";
 import { Home } from "./Home";
 import { ProfilePicker } from "./ProfilePicker";
+import { PlayCorner } from "./play/PlayCorner";
 import { RoundScreen } from "./Round";
 
 type Overlay = { kind: "grownUps" } | { kind: "newProfile" } | undefined;
@@ -17,6 +18,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
   const [profiles, setProfiles] = useState(initialProfiles);
   const [activeId, setActiveId] = useState(initialActiveId);
   const [subject, setSubject] = useState<SubjectDescriptor>();
+  const [playing, setPlaying] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>();
 
   const active = profiles.find((p) => p.id === activeId);
@@ -24,6 +26,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
 
   const selectProfile = (id: string | undefined) => {
     setActiveId(id);
+    setPlaying(false);
     void setMeta("activeProfileId", id ?? null);
   };
 
@@ -58,11 +61,14 @@ export function App({ library, initialProfiles, initialActiveId }: {
             onSave={upsert}
             onClose={() => setSubject(undefined)}
           />
+        ) : playing && active.gamesEnabled ? (
+          <PlayCorner profile={active} onSave={upsert} onBack={() => setPlaying(false)} />
         ) : (
           <Home
             profile={active}
             language={language}
             onStart={setSubject}
+            onPlay={() => setPlaying(true)}
             onSwitchProfile={() => selectProfile(undefined)}
             onGrownUps={() => setOverlay({ kind: "grownUps" })}
           />

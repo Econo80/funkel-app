@@ -2,6 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import { Tuning } from "../domain/difficulty";
+import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES } from "../domain/games";
 import { isGateAnswerCorrect, randomGate } from "../domain/gate";
 import {
   ROUND_LENGTH_CHOICES,
@@ -199,11 +200,34 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
         </div>
         {allowsGentleTimer(s.age) && <p class="footnote">{t("editor.timer.footer")}</p>}
 
+        <h3 class="section-title">{t("editor.games")}</h3>
+        <div class="list">
+          <Toggle checked={s.gamesEnabled} onChange={(v) => set({ gamesEnabled: v })}>{t("editor.games.enabled")}</Toggle>
+        </div>
+        {s.gamesEnabled && (
+          <>
+            <p class="footnote">{t("editor.games.cost")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.games.cost")}>
+              {GAME_COST_CHOICES.map((n) => (
+                <button key={n} role="radio" aria-checked={s.gameCost === n} class={s.gameCost === n ? "selected" : ""} onClick={() => set({ gameCost: n })}>{n} ⭐</button>
+              ))}
+            </div>
+            <p class="footnote">{t("editor.games.perDay")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.games.perDay")}>
+              {GAMES_PER_DAY_CHOICES.map((n) => (
+                <button key={n} role="radio" aria-checked={s.gamesPerDay === n} class={s.gamesPerDay === n ? "selected" : ""} onClick={() => set({ gamesPerDay: n })}>{n === 0 ? "∞" : n}</button>
+              ))}
+            </div>
+          </>
+        )}
+        <p class="footnote">{t("editor.games.footer")}</p>
+
         {profile && (
           <>
             <h3 class="section-title">{t("editor.progress")}</h3>
             <div class="list">
               <div class="row-between list-line"><span>⭐ {t("editor.stars")}</span><span class="muted">{t("home.stars %lld", profile.totalStars)}</span></div>
+              <div class="row-between list-line"><span>🎮 {t("editor.wallet")}</span><span class="muted">{profile.walletStars} ⭐</span></div>
               <div class="row-between list-line"><span>✓ {t("editor.rounds")}</span><span class="muted">{t("home.subject.rounds %lld", profile.rounds.length)}</span></div>
               <button class="list-row danger" onClick={async () => { if (confirm(t("editor.reset.confirm"))) await onSave(resetProgress(profile)); }}>{t("editor.reset")}</button>
               {onDelete && <button class="list-row danger" onClick={async () => { if (confirm(t("editor.delete.confirm %@", profile.name))) await onDelete(); }}>{t("editor.delete")}</button>}

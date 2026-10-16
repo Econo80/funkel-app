@@ -9,14 +9,16 @@ specifiers the way SwiftUI builds LocalizedStringKey ("home.greeting \\(name)"
     python3 scripts/check_strings.py
 """
 import json
+import os
 import pathlib
 import re
 import sys
 
-# Not resolve(): on Windows it can expand to a path past the 260-character limit.
-ROOT = pathlib.Path(__file__).absolute().parent.parent
+# Relative to the working directory: absolute paths can exceed Windows'
+# 260-character limit in deeply nested folders.
+ROOT = pathlib.Path(os.path.relpath(pathlib.Path(__file__).absolute().parent.parent))
 CATALOG = ROOT / "Funkel/Resources/Localizable.xcstrings"
-PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups"
+PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden"
 LITERAL = re.compile(r'"((?:' + PREFIXES + r')\.[^"]*)"')
 INTERPOLATION = re.compile(r"\\\(([^)]*\)?)\)")
 # Interpolated values that are strings; everything else is assumed to be an Int.
@@ -30,7 +32,11 @@ def specifier(expr: str) -> str:
 def main() -> int:
     catalog = set(json.loads(CATALOG.read_text(encoding="utf-8"))["strings"])
     used = {}
-    for path in (ROOT / "Funkel").rglob("*.swift"):
+    # Both apps share the catalog: Swift (iOS) and TypeScript (web). The web
+    # app passes catalog keys verbatim, e.g. t("home.greeting %@", name).
+    sources = list((ROOT / "Funkel").rglob("*.swift"))
+    sources += [p for p in (ROOT / "web" / "src").rglob("*.ts*")] if (ROOT / "web" / "src").exists() else []
+    for path in sources:
         for match in LITERAL.finditer(path.read_text(encoding="utf-8")):
             key = INTERPOLATION.sub(lambda m: specifier(m.group(1)), match.group(1))
             if key.endswith("."):
@@ -38,7 +44,7 @@ def main() -> int:
             used.setdefault(key, path.relative_to(ROOT))
 
     # Keys built at runtime, e.g. LocalizedStringKey("color." + key).
-    dynamic = {k for k in catalog if k.startswith("color.")}
+    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item."))}
 
     missing = sorted(set(used) - catalog)
     unused = sorted(catalog - set(used) - dynamic)

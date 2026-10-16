@@ -1,5 +1,5 @@
 // Saves profiles on this device only (IndexedDB). Nothing leaves the device.
-import type { Profile } from "../domain/profile";
+import { normalizeProfile, type Profile } from "../domain/profile";
 
 const DB_NAME = "funkel";
 const DB_VERSION = 1;
@@ -32,8 +32,8 @@ async function run<T>(store: string, mode: IDBTransactionMode, action: (s: IDBOb
 }
 
 export async function loadProfiles(): Promise<Profile[]> {
-  const profiles = await run<Profile[]>(PROFILES, "readonly", (s) => s.getAll());
-  return profiles.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const stored = await run<Profile[]>(PROFILES, "readonly", (s) => s.getAll());
+  return stored.map(normalizeProfile).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export async function saveProfile(profile: Profile): Promise<void> {

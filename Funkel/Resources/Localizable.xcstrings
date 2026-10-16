@@ -169,6 +169,66 @@
         }
       }
     },
+    "editor.games": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielecke"
+          }
+        }
+      }
+    },
+    "editor.games.cost": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preis pro Spiel"
+          }
+        }
+      }
+    },
+    "editor.games.enabled": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielecke einschalten"
+          }
+        }
+      }
+    },
+    "editor.games.footer": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Spiel dauert etwa 2 Minuten. Ausgegeben werden nur gesammelte Sterne; die Gesamtzahl bleibt als Erfolg erhalten."
+          }
+        }
+      }
+    },
+    "editor.games.perDay": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiele pro Tag"
+          }
+        }
+      }
+    },
     "editor.haptics": {
       "comment": "Toggle: haptic feedback.",
       "extractionState": "manual",
@@ -445,6 +505,18 @@
         }
       }
     },
+    "editor.wallet": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sterne zum Ausgeben"
+          }
+        }
+      }
+    },
     "feedback.correct.1": {
       "comment": "Correct-answer praise.",
       "extractionState": "manual",
@@ -525,6 +597,366 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fast!"
+          }
+        }
+      }
+    },
+    "game.balloons": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ballon-Pop"
+          }
+        }
+      }
+    },
+    "game.balloons.all": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lass alle Ballons platzen!"
+          }
+        }
+      }
+    },
+    "game.balloons.even": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die Ballons mit geraden Zahlen!"
+          }
+        }
+      }
+    },
+    "game.balloons.product %lld": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die Ballons, die %lld ergeben!"
+          }
+        }
+      }
+    },
+    "game.end": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiel beenden"
+          }
+        }
+      }
+    },
+    "game.goodbye": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toll gespielt! Zeit für eine neue Lernrunde?"
+          }
+        }
+      }
+    },
+    "game.memory": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory"
+          }
+        }
+      }
+    },
+    "game.memory.hint": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finde die Paare!"
+          }
+        }
+      }
+    },
+    "game.points %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Punkt"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Punkte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "game.stars": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sternenfänger"
+          }
+        }
+      }
+    },
+    "game.stars.hint": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fang die Sterne und weich den Wolken aus!"
+          }
+        }
+      }
+    },
+    "game.timeUp": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit ist um!"
+          }
+        }
+      }
+    },
+    "garden.clear": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wegräumen"
+          }
+        }
+      }
+    },
+    "garden.grown": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig gewachsen!"
+          }
+        }
+      }
+    },
+    "garden.grows %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Wächst in %lld Tag weiter"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Wächst in %lld Tagen weiter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.hint": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle etwas aus und tippe auf ein freies Beet."
+          }
+        }
+      }
+    },
+    "garden.item.bee": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biene"
+          }
+        }
+      }
+    },
+    "garden.item.butterfly": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schmetterling"
+          }
+        }
+      }
+    },
+    "garden.item.flower": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blume"
+          }
+        }
+      }
+    },
+    "garden.item.fountain": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brunnen"
+          }
+        }
+      }
+    },
+    "garden.item.house": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Häuschen"
+          }
+        }
+      }
+    },
+    "garden.item.ladybug": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marienkäfer"
+          }
+        }
+      }
+    },
+    "garden.item.mushroom": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilz"
+          }
+        }
+      }
+    },
+    "garden.item.snail": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnecke"
+          }
+        }
+      }
+    },
+    "garden.item.stone": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stein"
+          }
+        }
+      }
+    },
+    "garden.item.tree": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baum"
+          }
+        }
+      }
+    },
+    "garden.subtitle": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pflanze Blumen und Bäume. Sie wachsen jeden Tag ein bisschen."
+          }
+        }
+      }
+    },
+    "garden.title": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pips Garten"
           }
         }
       }
@@ -789,6 +1221,162 @@
           "stringUnit": {
             "state": "translated",
             "value": "Profil wechseln"
+          }
+        }
+      }
+    },
+    "play.back": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück"
+          }
+        }
+      }
+    },
+    "play.dailyLimit": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für heute ist die Spielecke zu. Morgen geht's weiter!"
+          }
+        }
+      }
+    },
+    "play.left %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Heute noch %lld Spiel"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Heute noch %lld Spiele"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "play.missing %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Noch %lld Stern bis zum nächsten Spiel. Spiel eine Lernrunde!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Noch %lld Sterne bis zum nächsten Spiel. Spiel eine Lernrunde!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "play.start %lld": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielen für %lld ⭐"
+          }
+        }
+      }
+    },
+    "play.subtitle": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tausche deine Sterne gegen ein Spiel!"
+          }
+        }
+      }
+    },
+    "play.ticket %lld": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Spiel = %lld ⭐"
+          }
+        }
+      }
+    },
+    "play.title": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielecke"
+          }
+        }
+      }
+    },
+    "play.unlimited": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute ohne Limit"
+          }
+        }
+      }
+    },
+    "play.wallet %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Stern zum Ausgeben"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sterne zum Ausgeben"
+                }
+              }
+            }
           }
         }
       }

@@ -261,3 +261,67 @@ p { line-height: 1.4; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Play corner */
+.wallet { font-size: 1.4rem; }
+.play-hero { display: flex; align-items: center; gap: 16px; }
+.play-hero h1 { margin: 0; }
+.play-status { padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.play-note { margin: 6px 0 0; font-weight: 600; }
+
+.game-screen { display: flex; flex-direction: column; }
+.game-timer { flex: 1; margin: 0; }
+.game-title { text-align: center; margin: 12px 0 0; font-size: 1.5rem; }
+.game-hint { text-align: center; font-weight: 700; margin: 6px 0 12px; }
+.game-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; }
+.game-over { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center; z-index: 15; padding: 20px; }
+.game-over-card { padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; max-width: 420px; width: 100%; }
+.game-over-card h1 { margin: 0; }
+
+.memory-grid { display: grid; gap: 10px; }
+.memory-card {
+  aspect-ratio: 1; border-radius: 18px; font-size: clamp(1.8rem, 8vw, 3rem);
+  background: linear-gradient(135deg, #8a63f2, #b28bff); color: #fff; box-shadow: var(--shadow);
+  transition: transform 0.25s, background 0.2s;
+}
+.memory-card.up { background: var(--card); transform: rotateY(0deg) scale(1.02); }
+.memory-card.matched { background: color-mix(in srgb, var(--correct) 25%, var(--card)); }
+
+.play-field { position: relative; height: min(62vh, 560px); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow); user-select: none; -webkit-user-select: none; }
+.sky { background: linear-gradient(#bfe6ff, #eaf7ff); }
+.night { background: linear-gradient(#24305e, #4b3f8f); }
+
+.balloon { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
+.balloon-body {
+  width: 64px; height: 78px; border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.6), transparent 30%), var(--balloon);
+  color: #fff; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; justify-content: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); box-shadow: inset -6px -8px 0 rgba(0, 0, 0, 0.08);
+}
+.balloon-string { width: 2px; height: 28px; background: rgba(43, 37, 64, 0.35); }
+.balloon.popped .balloon-body { animation: pop-out 0.3s forwards; }
+.balloon.popped .balloon-string { opacity: 0; }
+.balloon.wobble { animation: wobble 0.4s; }
+@keyframes pop-out { to { transform: scale(1.6); opacity: 0; } }
+@keyframes wobble { 25% { transform: translateX(-50%) rotate(-10deg); } 75% { transform: translateX(-50%) rotate(10deg); } }
+
+.faller { position: absolute; transform: translate(-50%, -50%); font-size: 2.2rem; pointer-events: none; }
+.catcher { position: absolute; bottom: 8px; transform: translateX(-50%); transition: left 0.06s linear; pointer-events: none; }
+.catcher.dizzy { animation: wobble 0.5s infinite; }
+.catcher.sparkle { filter: drop-shadow(0 0 12px #ffd76a); }
+
+.shop { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x proximity; }
+.shop-item { flex: none; width: 82px; min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; scroll-snap-align: start; border: 3px solid transparent; }
+.shop-item.selected { border-color: var(--sun); }
+.shop-item:disabled { opacity: 0.4; }
+.shop-emoji { font-size: 2.2rem; }
+.shop-price { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+.garden-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 14px; border-radius: var(--radius-card);
+  background: linear-gradient(#9be08a, #6cc25c); box-shadow: var(--shadow);
+}
+.plot { aspect-ratio: 1; border-radius: 14px; background: rgba(120, 72, 30, 0.35); font-size: clamp(1.6rem, 7vw, 2.6rem); display: flex; align-items: center; justify-content: center; }
+.plot.planted { background: rgba(120, 72, 30, 0.2); }
+@media (max-width: 420px) { .garden-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.play-card { background: linear-gradient(135deg, #ff7a59, #e2558f); }

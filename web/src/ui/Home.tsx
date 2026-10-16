@@ -4,10 +4,11 @@ import { t } from "../services/i18n";
 import { CircleButton, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
 /** The child's home: greeting, streak and stars, one big card per subject. */
-export function Home({ profile, language, onStart, onSwitchProfile, onGrownUps }: {
+export function Home({ profile, language, onStart, onPlay, onSwitchProfile, onGrownUps }: {
   profile: Profile;
   language: ContentLanguage;
   onStart: (s: SubjectDescriptor) => void;
+  onPlay: () => void;
   onSwitchProfile: () => void;
   onGrownUps: () => void;
 }) {
@@ -54,6 +55,15 @@ export function Home({ profile, language, onStart, onSwitchProfile, onGrownUps }
               </button>
             );
           })}
+          {profile.gamesEnabled && (
+            <button class="card subject-card play-card pressable" onClick={onPlay} data-testid="play-corner">
+              <span class="subject-icon" aria-hidden="true">🎮</span>
+              <span class="subject-text">
+                <span class="subject-title">{t("play.title")}</span>
+                <span class="subject-sub">{t("play.wallet %lld", profile.walletStars)}</span>
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </main>

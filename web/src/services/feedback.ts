@@ -29,7 +29,7 @@ export function stopSpeaking(): void {
 
 // MARK: Sounds (same notes as the iOS app's SoundService)
 
-export type Effect = "correct" | "gentle" | "finish";
+export type Effect = "correct" | "gentle" | "finish" | "pop";
 
 interface Note { frequency: number; start: number; duration: number; volume: number }
 
@@ -42,6 +42,10 @@ export const NOTES: Record<Effect, Note[]> = {
   gentle: [
     { frequency: 392.0, start: 0, duration: 0.22, volume: 0.14 },
     { frequency: 329.6, start: 0.14, duration: 0.32, volume: 0.12 },
+  ],
+  pop: [
+    { frequency: 880, start: 0, duration: 0.09, volume: 0.12 },
+    { frequency: 1320, start: 0.03, duration: 0.08, volume: 0.08 },
   ],
   finish: [
     { frequency: 523.3, start: 0, duration: 0.2, volume: 0.2 },
@@ -77,7 +81,9 @@ export function playSound(effect: Effect): void {
 // MARK: Vibration (Android; iPhones ignore it)
 
 export function vibrate(kind: "correct" | "gentle"): void {
-  navigator.vibrate?.(kind === "correct" ? [18, 40, 18] : 12);
+  // Browsers only allow vibration after the user has really touched the page.
+  const activated = (navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation?.hasBeenActive ?? true;
+  if (activated) navigator.vibrate?.(kind === "correct" ? [18, 40, 18] : 12);
 }
 
 export const prefersReducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
