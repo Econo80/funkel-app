@@ -325,3 +325,6 @@ p { line-height: 1.4; }
 @media (max-width: 420px) { .garden-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .play-card { background: linear-gradient(135deg, #ff7a59, #e2558f); }
+
+.play-bonus { padding: 14px 20px; background: linear-gradient(135deg, #fff1c7, #ffe08a); color: #2b2540; font-size: 1.1rem; }
+.grown-up-link { align-self: center; margin-top: 18px; color: var(--muted); font-size: 0.95rem; }

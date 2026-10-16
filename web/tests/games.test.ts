@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   GARDEN_SIZE,
   balloonRuleForAge,
+  bonusGamesLeftToday,
+  gameAge,
+  grantBonusGames,
   buyTicket,
   checkTicket,
   clearPlot,
@@ -74,6 +77,45 @@ describe("game tickets", () => {
     for (let i = 0; i < 8; i++) unlimited = buyTicket(unlimited, day(1));
     expect(unlimited.walletStars).toBe(20);
     expect(gamesLeftToday(unlimited, day(1))).toBeUndefined();
+  });
+});
+
+describe("grown-up bonus games", () => {
+  it("are free, skip the daily limit and expire at midnight", () => {
+    let p = child(0);
+    for (let i = 0; i < 3; i++) p = buyTicket({ ...p, walletStars: 100 }, day(1));
+    p = { ...p, walletStars: 0 };
+    expect(checkTicket(p, day(1))).toEqual({ ok: false, reason: "dailyLimit" });
+
+    p = grantBonusGames(p, 2, day(1));
+    expect(bonusGamesLeftToday(p, day(1))).toBe(2);
+    expect(checkTicket(p, day(1))).toEqual({ ok: true, free: true });
+    p = buyTicket(p, day(1));
+    expect(p.walletStars).toBe(0);
+    expect(bonusGamesLeftToday(p, day(1))).toBe(1);
+    expect(bonusGamesLeftToday(p, day(2))).toBe(0);
+  });
+
+  it("add up but are capped", () => {
+    const p = grantBonusGames(grantBonusGames(child(0), 3, day(1)), 3, day(1));
+    expect(bonusGamesLeftToday(p, day(1))).toBe(6);
+    expect(bonusGamesLeftToday(grantBonusGames(p, 50, day(1)), day(1))).toBe(10);
+  });
+});
+
+describe("game difficulty", () => {
+  it("shifts the games two years either way", () => {
+    expect(gameAge({ age: 5, gameDifficulty: "normal" })).toBe(5);
+    expect(gameAge({ age: 5, gameDifficulty: "hard" })).toBe(7);
+    expect(gameAge({ age: 5, gameDifficulty: "easy" })).toBe(4);
+    expect(gameAge({ age: 14, gameDifficulty: "hard" })).toBe(14);
+  });
+
+  it("starts a 5-year-old's memory at 6 pairs and grows each board", () => {
+    const rng = seededRng(8);
+    expect(memoryBoard(5, rng)).toHaveLength(12);
+    expect(memoryBoard(5, rng, 1)).toHaveLength(16);
+    expect(memoryBoard(5, rng, 99)).toHaveLength(30);
   });
 });
 

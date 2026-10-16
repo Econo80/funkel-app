@@ -14,12 +14,22 @@ export const GAME_COST_CHOICES = [5, 10, 15, 20] as const;
 /** 0 = no daily limit. */
 export const GAMES_PER_DAY_CHOICES = [1, 2, 3, 5, 0] as const;
 
-export const DEFAULT_GAME_SETTINGS = { gamesEnabled: true, gameCost: 10, gamesPerDay: 3 };
+export type GameDifficulty = "easy" | "normal" | "hard";
+export const GAME_DIFFICULTIES: readonly GameDifficulty[] = ["easy", "normal", "hard"];
+/** Games are pitched to the child's age, shifted by the grown-up's choice. */
+const DIFFICULTY_OFFSET: Record<GameDifficulty, number> = { easy: -2, normal: 0, hard: 2 };
+
+export const DEFAULT_GAME_SETTINGS = { gamesEnabled: true, gameCost: 10, gamesPerDay: 3, gameDifficulty: "normal" as GameDifficulty };
+
+/** The age the games are pitched at (independent of the quiz difficulty). */
+export function gameAge(p: Pick<Profile, "age" | "gameDifficulty">): number {
+  return Math.min(14, Math.max(4, p.age + DIFFICULTY_OFFSET[p.gameDifficulty ?? "normal"]));
+}
 
 // MARK: Tickets
 
 export type TicketCheck =
-  | { ok: true }
+  | { ok: true; free: boolean }
   | { ok: false; reason: "disabled" }
   | { ok: false; reason: "notEnoughStars"; missing: number }
   | { ok: false; reason: "dailyLimit" };
@@ -32,17 +42,34 @@ export function gamesLeftToday(p: Profile, now: Date): number | undefined {
   return p.gamesPerDay === 0 ? undefined : Math.max(0, p.gamesPerDay - gamesPlayedToday(p, now));
 }
 
-export function checkTicket(p: Profile, now: Date): TicketCheck {
-  if (!p.gamesEnabled) return { ok: false, reason: "disabled" };
-  if (p.gamesPerDay > 0 && gamesPlayedToday(p, now) >= p.gamesPerDay) return { ok: false, reason: "dailyLimit" };
-  if (p.walletStars < p.gameCost) return { ok: false, reason: "notEnoughStars", missing: p.gameCost - p.walletStars };
-  return { ok: true };
+/** Extra games a grown-up unlocked for today (free, outside the daily limit). */
+export function bonusGamesLeftToday(p: Profile, now: Date): number {
+  return p.bonusDay === dayKey(now) ? p.bonusGames : 0;
 }
 
-/** Spends one ticket. Returns the same profile if a ticket isn't allowed. */
+export function checkTicket(p: Profile, now: Date): TicketCheck {
+  if (!p.gamesEnabled) return { ok: false, reason: "disabled" };
+  if (bonusGamesLeftToday(p, now) > 0) return { ok: true, free: true };
+  if (p.gamesPerDay > 0 && gamesPlayedToday(p, now) >= p.gamesPerDay) return { ok: false, reason: "dailyLimit" };
+  if (p.walletStars < p.gameCost) return { ok: false, reason: "notEnoughStars", missing: p.gameCost - p.walletStars };
+  return { ok: true, free: false };
+}
+
+/** Spends one ticket: a bonus game first (free), otherwise stars. Same profile if not allowed. */
 export function buyTicket(p: Profile, now: Date): Profile {
-  if (!checkTicket(p, now).ok) return p;
+  const check = checkTicket(p, now);
+  if (!check.ok) return p;
+  if (check.free) return { ...p, bonusGames: bonusGamesLeftToday(p, now) - 1, bonusDay: dayKey(now) };
   return { ...p, walletStars: p.walletStars - p.gameCost, gameDay: dayKey(now), gamesToday: gamesPlayedToday(p, now) + 1 };
+}
+
+export const BONUS_CHOICES = [1, 2, 3] as const;
+const MAX_BONUS = 10;
+
+/** Grown-up override: unlock extra free games for today only. */
+export function grantBonusGames(p: Profile, count: number, now: Date): Profile {
+  const total = Math.min(MAX_BONUS, bonusGamesLeftToday(p, now) + Math.max(0, Math.round(count)));
+  return { ...p, bonusGames: total, bonusDay: dayKey(now) };
 }
 
 // MARK: Memory
@@ -52,17 +79,24 @@ export const MEMORY_PICTURES = [
   "🐧", "🦋", "🐢", "🐙", "🦄", "🍎", "🍌", "🍓", "🍒", "🥕", "🌻", "🚗", "🚀", "🎈", "🧸",
 ];
 
+/** Starting board size; each cleared board adds MEMORY_GROWTH pairs. */
 export function memoryPairsForAge(age: number): number {
-  if (age <= 5) return 4;
-  if (age <= 7) return 6;
-  if (age <= 10) return 8;
-  return 10;
+  if (age <= 4) return 4;
+  if (age <= 5) return 6;
+  if (age <= 7) return 8;
+  if (age <= 10) return 10;
+  return 12;
 }
+
+export const MEMORY_GROWTH = 2;
+export const MEMORY_MAX_PAIRS = 15;
 
 export interface MemoryCard { id: number; picture: string }
 
-export function memoryBoard(age: number, rng: Rng): MemoryCard[] {
-  const pictures = shuffled(rng, MEMORY_PICTURES).slice(0, memoryPairsForAge(age));
+/** @param boardsCleared boards already solved this game; the board grows with each. */
+export function memoryBoard(age: number, rng: Rng, boardsCleared = 0): MemoryCard[] {
+  const pairs = Math.min(MEMORY_MAX_PAIRS, memoryPairsForAge(age) + boardsCleared * MEMORY_GROWTH);
+  const pictures = shuffled(rng, MEMORY_PICTURES).slice(0, pairs);
   return shuffled(rng, [...pictures, ...pictures]).map((picture, id) => ({ id, picture }));
 }
 

@@ -193,6 +193,54 @@
         }
       }
     },
+    "editor.games.difficulty": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwierigkeit der Spiele"
+          }
+        }
+      }
+    },
+    "editor.games.difficulty.easy": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leicht"
+          }
+        }
+      }
+    },
+    "editor.games.difficulty.hard": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwer"
+          }
+        }
+      }
+    },
+    "editor.games.difficulty.normal": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittel"
+          }
+        }
+      }
+    },
     "editor.games.enabled": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -212,7 +260,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ein Spiel dauert etwa 2 Minuten. Ausgegeben werden nur gesammelte Sterne; die Gesamtzahl bleibt als Erfolg erhalten."
+            "value": "Ein Spiel dauert etwa 2 Minuten. Ausgegeben werden nur gesammelte Sterne; die Gesamtzahl bleibt als Erfolg erhalten. Die Schwierigkeit der Spiele richtet sich nach dem Alter und lässt sich hier leichter oder schwerer stellen."
           }
         }
       }
@@ -1237,6 +1285,30 @@
         }
       }
     },
+    "play.bonus %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Heute %lld Extra-Spiel, gratis!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Heute %lld Extra-Spiele, gratis!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "play.dailyLimit": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1309,6 +1381,18 @@
         }
       }
     },
+    "play.startFree": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratis spielen 🎁"
+          }
+        }
+      }
+    },
     "play.subtitle": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1353,6 +1437,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heute ohne Limit"
+          }
+        }
+      }
+    },
+    "play.unlock": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra-Spiel freischalten"
+          }
+        }
+      }
+    },
+    "play.unlock.count %lld": {
+      "comment": "UI text with count. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Extra-Spiel"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Extra-Spiele"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "play.unlock.footer": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gilt nur für heute."
+          }
+        }
+      }
+    },
+    "play.unlock.message %@": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viele Extra-Spiele darf %@ heute spielen? Sie kosten keine Sterne und zählen nicht zum Tageslimit."
           }
         }
       }

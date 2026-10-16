@@ -2,7 +2,7 @@
 // StreakCalculator.swift, ProgressRecorder.swift and ProfileSettings.swift.
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdjustment } from "./difficulty";
-import { DEFAULT_GAME_SETTINGS, emptyGarden, type Garden } from "./games";
+import { DEFAULT_GAME_SETTINGS, emptyGarden, type Garden, type GameDifficulty } from "./games";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -45,6 +45,8 @@ export interface ProfileSettings {
   gameCost: number;
   /** 0 = no daily limit. */
   gamesPerDay: number;
+  /** Shifts the games' difficulty by two years either way (independent of the quizzes). */
+  gameDifficulty: GameDifficulty;
 }
 
 export interface Profile extends ProfileSettings {
@@ -58,6 +60,9 @@ export interface Profile extends ProfileSettings {
   /** Day of the last game ticket, and how many tickets were used that day. */
   gameDay?: string;
   gamesToday: number;
+  /** Free extra games a grown-up unlocked for `bonusDay` only. */
+  bonusGames: number;
+  bonusDay?: string;
   garden: Garden;
   currentStreak: number;
   longestStreak: number;
@@ -105,6 +110,8 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     ...p,
     walletStars: p.walletStars ?? p.totalStars ?? 0,
     gamesToday: p.gamesToday ?? 0,
+    bonusGames: p.bonusGames ?? 0,
+    gameDifficulty: p.gameDifficulty ?? base.gameDifficulty,
     garden: p.garden ?? emptyGarden(),
     gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
     gameCost: p.gameCost ?? base.gameCost,
@@ -126,6 +133,7 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
       totalStars: 0,
       walletStars: 0,
       gamesToday: 0,
+      bonusGames: 0,
       garden: emptyGarden(),
       currentStreak: 0,
       longestStreak: 0,
@@ -190,6 +198,7 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     gamesEnabled: s.gamesEnabled,
     gameCost: clamp(Math.round(s.gameCost), 1, 100),
     gamesPerDay: clamp(Math.round(s.gamesPerDay), 0, 20),
+    gameDifficulty: s.gameDifficulty,
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
   };
 }

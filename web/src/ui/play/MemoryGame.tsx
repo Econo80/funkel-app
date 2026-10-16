@@ -11,12 +11,14 @@ export function MemoryGame({ age, sound, addPoints, running }: GameApi & { age: 
   const [open, setOpen] = useState<number[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [cleared, setCleared] = useState(0);
 
-  // Board cleared: deal a fresh one.
+  // Board cleared: deal a fresh, slightly bigger one.
   useEffect(() => {
     if (matched.size === 0 || matched.size < board.length) return;
     const timer = setTimeout(() => {
-      setBoard(memoryBoard(age, systemRng));
+      setCleared((c) => c + 1);
+      setBoard(memoryBoard(age, systemRng, cleared + 1));
       setMatched(new Set());
       setOpen([]);
     }, 900);
@@ -41,7 +43,7 @@ export function MemoryGame({ age, sound, addPoints, running }: GameApi & { age: 
     }
   };
 
-  const columns = board.length <= 12 ? 4 : board.length <= 16 ? 4 : 5;
+  const columns = board.length <= 16 ? 4 : board.length <= 24 ? 5 : 6;
   return (
     <div class="memory">
       <p class="game-hint">{t("game.memory.hint")}</p>

@@ -65,6 +65,15 @@ Grown-ups can change the price per game, the number of games per day, or turn
 the play corner off: ⚙️ → solve the question → the child's profile → **Spielecke**.
 Defaults: 10 ⭐ per game, 3 games a day.
 
+**Extra games on special occasions:** in the play corner, tap **🔓 Extra-Spiel
+freischalten** (bottom), solve the grown-up question, and choose 1–3 extra games.
+They're free (no stars) and outside the daily limit, and they expire at midnight.
+
+**Game difficulty:** the games follow the child's age (Memory starts at 6 pairs
+for a 5-year-old and adds 2 pairs with every cleared board). In the child's
+profile under **Spielecke** you can set them to *Leicht*, *Mittel* or *Schwer*,
+which works like being two years younger or older. It doesn't change the quizzes.
+
 ## Good to know
 
 - **Each device keeps its own profiles and stars.** Nothing is sent anywhere,

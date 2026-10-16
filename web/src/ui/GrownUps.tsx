@@ -2,7 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import { Tuning } from "../domain/difficulty";
-import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES } from "../domain/games";
+import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES, GAME_DIFFICULTIES } from "../domain/games";
 import { isGateAnswerCorrect, randomGate } from "../domain/gate";
 import {
   ROUND_LENGTH_CHOICES,
@@ -210,6 +210,13 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
             <div class="list segmented" role="radiogroup" aria-label={t("editor.games.cost")}>
               {GAME_COST_CHOICES.map((n) => (
                 <button key={n} role="radio" aria-checked={s.gameCost === n} class={s.gameCost === n ? "selected" : ""} onClick={() => set({ gameCost: n })}>{n} ⭐</button>
+              ))}
+            </div>
+            <p class="footnote">{t("editor.games.difficulty")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.games.difficulty")}>
+              {GAME_DIFFICULTIES.map((d) => (
+                <button key={d} role="radio" aria-checked={s.gameDifficulty === d} class={s.gameDifficulty === d ? "selected" : ""}
+                  onClick={() => set({ gameDifficulty: d })} data-testid={`difficulty-${d}`}>{t(`editor.games.difficulty.${d}`)}</button>
               ))}
             </div>
             <p class="footnote">{t("editor.games.perDay")}</p>

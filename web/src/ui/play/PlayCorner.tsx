@@ -1,8 +1,9 @@
 import { useState } from "preact/hooks";
-import { buyTicket, checkTicket, gamesLeftToday, type GameId } from "../../domain/games";
+import { BONUS_CHOICES, bonusGamesLeftToday, buyTicket, checkTicket, gameAge, gamesLeftToday, grantBonusGames, type GameId } from "../../domain/games";
 import type { Profile } from "../../domain/profile";
 import { t } from "../../services/i18n";
-import { CircleButton, Pip, avatarColor } from "../components";
+import { BigButton, CircleButton, Pip, Sheet, avatarColor } from "../components";
+import { GrownUpGate } from "../GrownUps";
 import { BalloonPop } from "./BalloonPop";
 import { GameFrame } from "./GameFrame";
 import { Garden } from "./Garden";
@@ -22,9 +23,12 @@ export function PlayCorner({ profile, onSave, onBack }: {
   profile: Profile; onSave: (p: Profile) => Promise<void>; onBack: () => void;
 }) {
   const [view, setView] = useState<View>({ kind: "corner" });
+  const [unlocking, setUnlocking] = useState(false);
   const now = new Date();
   const ticket = checkTicket(profile, now);
   const left = gamesLeftToday(profile, now);
+  const bonus = bonusGamesLeftToday(profile, now);
+  const free = ticket.ok && ticket.free;
 
   if (view.kind === "garden") {
     return <Garden profile={profile} onSave={onSave} onBack={() => setView({ kind: "corner" })} />;
@@ -35,9 +39,9 @@ export function PlayCorner({ profile, onSave, onBack }: {
     return (
       <GameFrame profile={profile} gameId={view.id} onDone={back}>
         {(api) =>
-          view.id === "memory" ? <MemoryGame age={profile.age} sound={profile.soundEnabled} {...api} />
-          : view.id === "balloons" ? <BalloonPop age={profile.age} sound={profile.soundEnabled} {...api} />
-          : <StarCatcher age={profile.age} sound={profile.soundEnabled} color={avatarColor(profile.avatarColor)} {...api} />
+          view.id === "memory" ? <MemoryGame age={gameAge(profile)} sound={profile.soundEnabled} {...api} />
+          : view.id === "balloons" ? <BalloonPop age={gameAge(profile)} sound={profile.soundEnabled} {...api} />
+          : <StarCatcher age={gameAge(profile)} sound={profile.soundEnabled} color={avatarColor(profile.avatarColor)} {...api} />
         }
       </GameFrame>
     );
@@ -66,6 +70,12 @@ export function PlayCorner({ profile, onSave, onBack }: {
           </div>
         </div>
 
+        {bonus > 0 && (
+          <div class="card play-bonus" aria-live="polite">
+            <span aria-hidden="true">🎁</span> <strong>{t("play.bonus %lld", bonus)}</strong>
+          </div>
+        )}
+
         <div class="card play-status" aria-live="polite">
           <strong>{t("play.ticket %lld", profile.gameCost)}</strong>
           <span class="muted">{left === undefined ? t("play.unlimited") : t("play.left %lld", left)}</span>
@@ -80,7 +90,7 @@ export function PlayCorner({ profile, onSave, onBack }: {
               <span class="subject-icon" aria-hidden="true">{g.icon}</span>
               <span class="subject-text">
                 <span class="subject-title">{t(g.title)}</span>
-                <span class="subject-sub">{t("play.start %lld", profile.gameCost)}</span>
+                <span class="subject-sub">{free ? t("play.startFree") : t("play.start %lld", profile.gameCost)}</span>
               </span>
             </button>
           ))}
@@ -92,7 +102,31 @@ export function PlayCorner({ profile, onSave, onBack }: {
             </span>
           </button>
         </div>
+
+        <button class="link grown-up-link" onClick={() => setUnlocking(true)} data-testid="bonus-unlock">🔓 {t("play.unlock")}</button>
       </div>
+
+      {unlocking && (
+        <GrownUpGate onCancel={() => setUnlocking(false)}>
+          <Sheet label={t("play.unlock")}>
+            <div class="sheet-bar"><button class="link" onClick={() => setUnlocking(false)}>{t("editor.cancel")}</button></div>
+            <div class="column narrow center">
+              <div class="lock" aria-hidden="true">🎁</div>
+              <h1>{t("play.unlock")}</h1>
+              <p class="muted">{t("play.unlock.message %@", profile.name)}</p>
+              {BONUS_CHOICES.map((n) => (
+                <BigButton key={n} color="#8A63F2" testId={`bonus-${n}`} onClick={async () => {
+                  await onSave(grantBonusGames(profile, n, new Date()));
+                  setUnlocking(false);
+                }}>
+                  {t("play.unlock.count %lld", n)}
+                </BigButton>
+              ))}
+              <p class="footnote">{t("play.unlock.footer")}</p>
+            </div>
+          </Sheet>
+        </GrownUpGate>
+      )}
     </main>
   );
 }
