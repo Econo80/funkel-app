@@ -16,3 +16,6 @@ __pycache__/
 
 # Screenshots downloaded from CI
 /screenshots/
+
+# Builds downloaded from CI
+/build/
