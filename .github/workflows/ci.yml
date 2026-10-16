@@ -24,10 +24,10 @@ jobs:
       - run: python3 scripts/check_strings.py
 
   build-and-test:
-    name: Build & test (iOS Simulator)
+    name: Build, test & screenshots (iOS Simulator)
     needs: content
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
 
@@ -50,8 +50,19 @@ jobs:
           ')
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
-      # Tests run inside the host app, so a passing test run also proves the app launches.
+      - name: Boot simulator with a clean status bar
+        run: |
+          xcrun simctl boot "${{ steps.sim.outputs.udid }}" || true
+          xcrun simctl bootstatus "${{ steps.sim.outputs.udid }}" -b
+          xcrun simctl status_bar "${{ steps.sim.outputs.udid }}" override \
+            --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularBars 4 \
+            --batteryState charged --batteryLevel 100 || true
+
+      # Unit tests run inside the host app, so a pass also proves the app launches.
+      # The UI test walks the main screens and writes PNGs to ./screenshots.
       - name: Build and test
+        env:
+          TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/screenshots
         run: |
           set -o pipefail
           xcodebuild test \
@@ -76,3 +87,11 @@ jobs:
           name: xcodebuild-log
           path: xcodebuild.log
           retention-days: 7
+
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots/*.png
+          if-no-files-found: warn
+          retention-days: 30

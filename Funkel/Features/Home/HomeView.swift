@@ -52,6 +52,7 @@ struct HomeView: View {
                     .frame(width: 84, height: 84)
                 Spacer()
                 CircleIconButton(systemImage: "person.2.fill", label: "home.switchProfile", action: onSwitchProfile)
+                    .accessibilityIdentifier("switch-profile")
             }
 
             Text("home.greeting \(profile.name)")
@@ -122,5 +123,6 @@ private struct SubjectCard: View {
         .disabled(!isAvailable)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("subject-\(subject.id)")
     }
 }

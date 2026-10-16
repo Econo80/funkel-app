@@ -37,6 +37,10 @@ private struct ChoiceGrid: View {
                 ChoiceButton(option: option, state: state(for: index), color: color) {
                     viewModel.choose(optionIndex: index)
                 }
+                #if DEBUG
+                // Lets UI tests pick a right or wrong answer. Debug builds only.
+                .accessibilityIdentifier(index == correctIndex ? "answer-correct" : "answer-wrong")
+                #endif
             }
         }
     }
@@ -152,6 +156,7 @@ private struct NumberPad: View {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(1...9, id: \.self) { digit in
                     key(Text(String(digit)), label: Text(String(digit))) { viewModel.appendDigit(digit) }
+                        .accessibilityIdentifier("key-\(digit)")
                 }
                 if viewModel.difficulty.maths.allowsNegativeResults {
                     key(Text(verbatim: "±"), label: Text("round.sign")) { viewModel.toggleSign() }
@@ -166,6 +171,7 @@ private struct NumberPad: View {
             BigButton(title: "round.check", systemImage: "checkmark", color: color) {
                 viewModel.submitNumber()
             }
+            .accessibilityIdentifier("key-check")
             .disabled(!viewModel.canSubmitNumber)
             .opacity(viewModel.canSubmitNumber || viewModel.phase != .answering ? 1 : 0.5)
         }

@@ -72,7 +72,9 @@ struct SummaryView: View {
 
                 VStack(spacing: 14) {
                     BigButton(title: "summary.again", systemImage: "arrow.clockwise", color: color, action: onAgain)
+                        .accessibilityIdentifier("summary-again")
                     BigButton(title: "summary.done", systemImage: "house.fill", color: Palette.ink.opacity(0.75), action: onDone)
+                        .accessibilityIdentifier("summary-done")
                 }
             }
             .padding(24)

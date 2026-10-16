@@ -5,7 +5,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppEnvironment.self) private var environment
     @Query(sort: \ChildProfile.createdAt) private var profiles: [ChildProfile]
-    @AppStorage("activeProfileID") private var activeProfileID = ""
+    @AppStorage(AppLaunch.activeProfileKey) private var activeProfileID = ""
 
     private var activeProfile: ChildProfile? {
         profiles.first { $0.id.uuidString == activeProfileID }

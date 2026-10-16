@@ -108,5 +108,6 @@ private struct ProfileTile: View {
         .buttonStyle(PressableStyle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("profile-\(profile.name)")
     }
 }

@@ -18,12 +18,20 @@
 			remoteGlobalIDString = F0A1000000000000000D0001;
 			remoteInfo = Funkel;
 		};
+		F0A1000000000000000C0002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F0A100000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F0A1000000000000000D0001;
+			remoteInfo = Funkel;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		F0A1000000000000000B0001 /* Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Content; sourceTree = "<group>"; };
 		F0A1000000000000000B0002 /* Funkel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Funkel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0A1000000000000000B0003 /* FunkelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FunkelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0A1000000000000000B0004 /* FunkelUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FunkelUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,6 +43,11 @@
 		F0A1000000000000000E0002 /* FunkelTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = FunkelTests;
+			sourceTree = "<group>";
+		};
+		F0A1000000000000000E0003 /* FunkelUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FunkelUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -54,6 +67,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F0A1000000000000000F0003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -63,6 +83,7 @@
 				F0A1000000000000000E0001 /* Funkel */,
 				F0A1000000000000000B0001 /* Content */,
 				F0A1000000000000000E0002 /* FunkelTests */,
+				F0A1000000000000000E0003 /* FunkelUITests */,
 				F0A100000000000000100002 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -72,6 +93,7 @@
 			children = (
 				F0A1000000000000000B0002 /* Funkel.app */,
 				F0A1000000000000000B0003 /* FunkelTests.xctest */,
+				F0A1000000000000000B0004 /* FunkelUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,6 +146,29 @@
 			productReference = F0A1000000000000000B0003 /* FunkelTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		F0A1000000000000000D0003 /* FunkelUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0A100000000000000110004 /* Build configuration list for PBXNativeTarget "FunkelUITests" */;
+			buildPhases = (
+				F0A100000000000000120003 /* Sources */,
+				F0A1000000000000000F0003 /* Frameworks */,
+				F0A100000000000000130003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F0A100000000000000140002 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F0A1000000000000000E0003 /* FunkelUITests */,
+			);
+			name = FunkelUITests;
+			packageProductDependencies = (
+			);
+			productName = FunkelUITests;
+			productReference = F0A1000000000000000B0004 /* FunkelUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -138,6 +183,10 @@
 						CreatedOnToolsVersion = 16.0;
 					};
 					F0A1000000000000000D0002 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = F0A1000000000000000D0001;
+					};
+					F0A1000000000000000D0003 = {
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = F0A1000000000000000D0001;
 					};
@@ -159,6 +208,7 @@
 			targets = (
 				F0A1000000000000000D0001 /* Funkel */,
 				F0A1000000000000000D0002 /* FunkelTests */,
+				F0A1000000000000000D0003 /* FunkelUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -173,6 +223,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F0A100000000000000130002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F0A100000000000000130003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -196,6 +253,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F0A100000000000000120003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -203,6 +267,11 @@
 			isa = PBXTargetDependency;
 			target = F0A1000000000000000D0001 /* Funkel */;
 			targetProxy = F0A1000000000000000C0001 /* PBXContainerItemProxy */;
+		};
+		F0A100000000000000140002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F0A1000000000000000D0001 /* Funkel */;
+			targetProxy = F0A1000000000000000C0002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -360,6 +429,40 @@
 			};
 			name = Release;
 		};
+		F0A100000000000000150007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.funkel.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Funkel;
+			};
+			name = Debug;
+		};
+		F0A100000000000000150008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.funkel.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Funkel;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -386,6 +489,15 @@
 			buildConfigurations = (
 				F0A100000000000000150005 /* Debug */,
 				F0A100000000000000150006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F0A100000000000000110004 /* Build configuration list for PBXNativeTarget "FunkelUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F0A100000000000000150007 /* Debug */,
+				F0A100000000000000150008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

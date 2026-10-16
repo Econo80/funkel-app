@@ -40,6 +40,17 @@
                ReferencedContainer = "container:Funkel.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F0A1000000000000000D0003"
+               BuildableName = "FunkelUITests.xctest"
+               BlueprintName = "FunkelUITests"
+               ReferencedContainer = "container:Funkel.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

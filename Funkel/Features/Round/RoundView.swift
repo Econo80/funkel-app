@@ -69,6 +69,7 @@ struct RoundView: View {
         VStack(spacing: 10) {
             HStack(spacing: 12) {
                 CircleIconButton(systemImage: "xmark", label: "round.close", action: onClose)
+                    .accessibilityIdentifier("round-close")
                 ProgressDots(results: viewModel.results, total: viewModel.questions.count, color: color)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text("round.progress \(viewModel.questionNumber) \(viewModel.questions.count)"))
@@ -204,6 +205,7 @@ private struct FeedbackBar: View {
                             .foregroundStyle(Palette.ink.opacity(0.8))
                     }
                     BigButton(title: "round.next", systemImage: "arrow.right", color: Palette.ink, action: onNext)
+                        .accessibilityIdentifier("round-next")
                         .padding(.top, 4)
                 }
                 .foregroundStyle(Palette.ink)
