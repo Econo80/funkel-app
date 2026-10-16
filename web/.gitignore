@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# Copied from ../Content by `npm run content`
+public/Content/
+# Generated from the iOS String Catalog by `npm run content`
+public/ui-strings.json

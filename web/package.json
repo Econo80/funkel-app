@@ -1,0 +1,23 @@
+{
+  "name": "funkel-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Funkel as an offline web app (PWA) for any device. Learning content is shared with the iOS app.",
+  "type": "module",
+  "scripts": {
+    "content": "node scripts/copy-content.mjs",
+    "dev": "npm run content && vite",
+    "build": "npm run content && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "preact": "^11.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}

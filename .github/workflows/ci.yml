@@ -23,6 +23,23 @@ jobs:
       - run: python3 scripts/validate_content.py
       - run: python3 scripts/check_strings.py
 
+  web:
+    name: Web app (test & build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
   build-and-test:
     name: Build, test & screenshots (iOS Simulator)
     needs: content

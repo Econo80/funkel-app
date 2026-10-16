@@ -1,0 +1,133 @@
+import { describe, expect, it } from "vitest";
+import { isGateAnswerCorrect, randomGate } from "../src/domain/gate";
+import {
+  applySettings,
+  createProfile,
+  defaultSettings,
+  displayedStreak,
+  isLastEnabledSubject,
+  recordRound,
+  resetProgress,
+  updatedStreak,
+  withLanguage,
+  withSubject,
+} from "../src/domain/profile";
+import { makeQuestion } from "../src/domain/question";
+import { seededRng } from "../src/domain/random";
+import {
+  appendDigit, canSubmitNumber, canSubmitSequence, choose, deleteDigit, next,
+  placeTile, removeTile, startRound, submitNumber, submitSequence, toggleSign,
+} from "../src/domain/round";
+
+const day = (d: number, hour = 10) => new Date(2026, 2, d, hour);
+
+describe("streaks (mirrors StreakCalculatorTests.swift)", () => {
+  it("starts, holds, grows and resets", () => {
+    expect(updatedStreak(0, 0, undefined, day(1)).current).toBe(1);
+    expect(updatedStreak(3, 5, "2026-03-02", day(2, 19))).toMatchObject({ current: 3, longest: 5 });
+    expect(updatedStreak(3, 3, "2026-03-02", day(3, 7))).toMatchObject({ current: 4, longest: 4 });
+    expect(updatedStreak(6, 6, "2026-03-02", day(5))).toMatchObject({ current: 1, longest: 6 });
+  });
+
+  it("lapses on display after a missed day", () => {
+    expect(displayedStreak({ currentStreak: 4, lastPlayedDay: "2026-03-02" }, day(3))).toBe(4);
+    expect(displayedStreak({ currentStreak: 4, lastPlayedDay: "2026-03-02" }, day(4))).toBe(0);
+  });
+});
+
+describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () => {
+  const base = () => createProfile({ ...defaultSettings(), name: "Lena", age: 7 }, day(1));
+
+  it("records stars, streak, progress and history", () => {
+    const outcome = { subjectId: "maths", languageCode: "de", correct: 10, total: 10, correctContentIds: ["a"], effectiveAge: 7 };
+    const first = recordRound(base(), outcome, day(1));
+    expect(first.summary).toMatchObject({ starsEarned: 10, streak: 1, streakGrew: true });
+    expect(first.profile.difficultyAdjustment).toBeCloseTo(0.15);
+    const second = recordRound(first.profile, outcome, day(2));
+    expect(second.summary.streak).toBe(2);
+    const progress = second.profile.progress["de/maths"];
+    expect(progress).toMatchObject({ roundsPlayed: 2, correctAnswers: 20, recentCorrectContentIds: ["a", "a"] });
+    expect(second.profile.rounds).toHaveLength(2);
+
+    const reset = resetProgress(second.profile);
+    expect(reset).toMatchObject({ totalStars: 0, currentStreak: 0, progress: {}, rounds: [], name: "Lena" });
+  });
+
+  it("keeps at least one subject and stores 'all' as empty", () => {
+    const all = ["maths", "vocabulary", "generalKnowledge"];
+    let s = defaultSettings();
+    s = withSubject(s, "maths", false, all);
+    expect(s.enabledSubjectIds).toEqual(["generalKnowledge", "vocabulary"]);
+    s = withSubject(s, "vocabulary", false, all);
+    expect(isLastEnabledSubject(s, "generalKnowledge", all)).toBe(true);
+    expect(withSubject(s, "generalKnowledge", false, all)).toBe(s);
+    s = withSubject(withSubject(s, "maths", true, all), "vocabulary", true, all);
+    expect(s.enabledSubjectIds).toEqual([]);
+    expect(withLanguage({ ...s, enabledSubjectIds: ["maths"] }, "fr").enabledSubjectIds).toEqual([]);
+  });
+
+  it("resets adaptivity on a new age and allows the timer only from 9", () => {
+    const emil = { ...createProfile({ ...defaultSettings(), name: "Emil", age: 10 }), difficultyAdjustment: 0.9 };
+    const same = applySettings(emil, { ...emil, name: "  Emilio ", gentleTimerEnabled: true });
+    expect(same).toMatchObject({ name: "Emilio", gentleTimerEnabled: true, difficultyAdjustment: 0.9 });
+    const younger = applySettings(same, { ...same, age: 7 });
+    expect(younger).toMatchObject({ age: 7, difficultyAdjustment: 0, gentleTimerEnabled: false });
+  });
+
+  it("gates with a two-digit × one-digit sum", () => {
+    const rng = seededRng(21);
+    for (let i = 0; i < 200; i++) {
+      const g = randomGate(rng);
+      expect(g.a * g.b).toBeGreaterThanOrEqual(36);
+      expect(isGateAnswerCorrect(g, String(g.a * g.b))).toBe(true);
+      expect(isGateAnswerCorrect(g, String(g.a * g.b + 1))).toBe(false);
+    }
+  });
+});
+
+describe("round state machine (mirrors RoundViewModel tests)", () => {
+  const choiceQ = () => makeQuestion({
+    subjectId: "maths", prompt: "1 + 1?",
+    format: { kind: "multipleChoice", options: [{ id: 0, text: "1" }, { id: 1, text: "2" }, { id: 2, text: "3" }], correctIndex: 1 },
+  });
+
+  it("runs multiple choice", () => {
+    let s = startRound([choiceQ(), choiceQ()], false);
+    s = choose(s, 1);
+    expect(s.phase).toBe("correct");
+    expect(choose(s, 0).results).toEqual([true]);
+    s = next(s);
+    expect(s).toMatchObject({ phase: "answering", selectedOptionIndex: undefined });
+    s = next(choose(s, 2));
+    expect(s.phase).toBe("finished");
+    expect(s.results).toEqual([true, false]);
+  });
+
+  it("handles the number pad", () => {
+    let s = startRound([makeQuestion({ subjectId: "maths", prompt: "?", format: { kind: "numberEntry", answer: 42 } })], false);
+    expect(canSubmitNumber(s)).toBe(false);
+    for (const d of [0, 4, 2, 2, 2, 2]) s = appendDigit(s, d);
+    expect(s.numberInput).toBe("4222");
+    s = toggleSign(deleteDigit(deleteDigit(s)));
+    expect(s.numberInput).toBe("42");
+    expect(submitNumber(s).phase).toBe("correct");
+
+    let neg = startRound([makeQuestion({ subjectId: "maths", prompt: "?", format: { kind: "numberEntry", answer: -7 } })], true);
+    neg = toggleSign(appendDigit(neg, 7));
+    expect(neg.numberInput).toBe("-7");
+    expect(submitNumber(neg).phase).toBe("correct");
+  });
+
+  it("builds sequences", () => {
+    let s = startRound([makeQuestion({ subjectId: "v", prompt: "?", format: { kind: "buildSequence", tiles: ["u", "H", "n", "d", "x"], answer: ["H", "u", "n", "d"] } })], false);
+    s = placeTile(placeTile(s, 1), 1);
+    expect(s.placedTiles).toEqual([1]);
+    s = placeTile(placeTile(s, 0), 4);
+    expect(canSubmitSequence(s)).toBe(false);
+    s = placeTile(placeTile(s, 2), 3);
+    expect(s.placedTiles).toEqual([1, 0, 4, 2]);
+    s = placeTile(removeTile(s, 2), 3);
+    expect(s.placedTiles).toEqual([1, 0, 2, 3]);
+    expect(submitSequence(s).phase).toBe("correct");
+  });
+});

@@ -1,0 +1,17 @@
+{
+  "name": "Funkel – Lernen für Kinder",
+  "short_name": "Funkel",
+  "description": "Wörter, Mathe und Wissen für Kinder. Offline, ohne Werbung, ohne Konto.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8EE",
+  "theme_color": "#FFF8EE",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

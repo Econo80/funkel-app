@@ -19,3 +19,6 @@ __pycache__/
 
 # Builds downloaded from CI
 /build/
+
+# Local preview config (machine-specific)
+/.claude/
