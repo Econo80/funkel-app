@@ -96,14 +96,19 @@ final class ScreenshotTests: XCTestCase {
         profile.tap()
     }
 
-    /// Taps the correct answer whenever one is on screen and enabled. Checks
-    /// the frame instead of `isHittable`, which fails while a question slides out.
+    /// Taps the correct answer whenever one is on screen and enabled.
+    ///
+    /// Questions slide in and out, so the button can vanish between two queries.
+    /// `snapshot()` reads frame and state in one go and throws (instead of
+    /// failing the test) when the button is gone; the tap goes to a screen
+    /// coordinate, which never fails.
     @MainActor
     private func answerCorrectlyUntil(_ target: XCUIElement, _ app: XCUIApplication) {
+        let origin = app.coordinate(withNormalizedOffset: .zero)
         for _ in 0..<60 where !target.exists {
-            let answer = app.buttons["answer-correct"].firstMatch
-            if answer.exists, answer.isEnabled, app.frame.contains(answer.frame) {
-                answer.tap()
+            if let answer = try? app.buttons["answer-correct"].firstMatch.snapshot(),
+               answer.isEnabled, app.frame.contains(answer.frame) {
+                origin.withOffset(CGVector(dx: answer.frame.midX, dy: answer.frame.midY)).tap()
             }
             pause(0.5)
         }
