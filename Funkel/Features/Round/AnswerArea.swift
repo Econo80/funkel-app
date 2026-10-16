@@ -42,7 +42,7 @@ private struct ChoiceGrid: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 14) {
             ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
-                ChoiceButton(option: option, state: state(for: index), color: color) {
+                ChoiceButton(option: option, state: state(for: index), color: color, usesCompactText: usesCompactText) {
                     viewModel.choose(optionIndex: index)
                 }
                 #if DEBUG
@@ -51,6 +51,11 @@ private struct ChoiceGrid: View {
                 #endif
             }
         }
+    }
+
+    /// One text size for the whole grid, so options never look mismatched.
+    private var usesCompactText: Bool {
+        options.contains { $0.emoji == nil && $0.text.count > 12 }
     }
 
     private func state(for index: Int) -> ChoiceButton.AnswerState {
@@ -67,6 +72,7 @@ private struct ChoiceButton: View {
     let option: AnswerOption
     let state: AnswerState
     let color: Color
+    var usesCompactText = false
     let action: () -> Void
 
     @ScaledMetric(relativeTo: .largeTitle) private var textSize: CGFloat = 34
@@ -121,7 +127,7 @@ private struct ChoiceButton: View {
                 .font(.system(size: emoji.count == 1 ? pictureSize : emojiSize))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
-        } else if option.text.count > 12 {
+        } else if usesCompactText {
             Text(option.text)
                 .font(.system(size: longTextSize, weight: .semibold, design: .rounded))
                 .multilineTextAlignment(.center)
