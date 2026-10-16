@@ -6,6 +6,7 @@ struct ProfilePickerView: View {
     let onSelect: (ChildProfile) -> Void
 
     @State private var isAddingProfile = false
+    @State private var showsGrownUps = false
 
     private let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 20)]
 
@@ -37,10 +38,24 @@ struct ProfilePickerView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Palette.background.ignoresSafeArea())
-        .sheet(isPresented: $isAddingProfile) {
-            ProfileEditorView(profile: nil) { created in
-                onSelect(created)
+        .overlay(alignment: .topTrailing) {
+            CircleIconButton(systemImage: "gearshape.fill", label: "grownups.button") {
+                showsGrownUps = true
             }
+            .accessibilityIdentifier("grown-ups")
+            .padding(20)
+        }
+        .sheet(isPresented: $isAddingProfile) {
+            GrownUpGate {
+                NavigationStack {
+                    ProfileEditorView(profile: nil) { created in
+                        onSelect(created)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showsGrownUps) {
+            GrownUpGate { GrownUpsView() }
         }
     }
 

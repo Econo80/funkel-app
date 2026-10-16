@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 5 verified in CI._
+_Last updated: 2026-10-16 — Milestone 6 (grown-up area)._
 
 ---
 
@@ -18,8 +18,8 @@ _Last updated: 2026-10-16 — Milestone 5 verified in CI._
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ✅ CI, 31/31 tests |
 | 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ✅ CI, 38/38 tests + screenshots |
 | 5 | General Knowledge (question bank) | done | ✅ CI, 45/45 tests + screenshots |
-| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | next | |
-| 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |
+| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | done | ⏳ pending CI |
+| 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | next | |
 
 "Build verified" means the GitHub Actions workflow (`.github/workflows/ci.yml`) built the app and passed the unit tests on a macOS runner with an iOS Simulator. The tests run inside the app, so a pass also means it launches. Development happens on Windows, so CI is the only compiler; every slice is pushed and must be green before the next one starts.
 The JSON
@@ -274,7 +274,7 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 4. ✅ **Maths end-to-end** — generator, `RoundViewModel`, round/feedback/summary views, progress + streak persistence. *Verify build.*
 5. ✅ Vocabulary — `VocabularyQuestionGenerator` + letter-tile spelling view. *Verify build.*
 6. ✅ General Knowledge — `QuestionBankProvider`. *Verify build.*
-7. Grown-up gate + settings + profile management. *Verify build.*
+7. ✅ Grown-up gate + settings + profile management. *Verify build.*
 8. Polish — Pip animations, confetti, sounds (synthesised via AVAudioEngine; no audio assets needed), haptics, read-aloud, VoiceOver/Dynamic Type audit, iPad layout pass.
 
 ---
@@ -286,7 +286,6 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-15** — Project file is hand-written (Xcode 16 format, `objectVersion = 77`). Requires **Xcode 16+** to open.
 - **2026-10-15** — Bundle ID placeholder `com.example.funkel`; set your Team in Signing & Capabilities.
 - **2026-10-16** — No Mac available, so builds run on GitHub Actions (`macos-15`, private repo `Econo80/funkel`). macOS minutes are limited on the free plan, so a newer push cancels the running build.
-- **2026-10-16** — Until the grown-up gate exists (milestone 6), "Profil anlegen" on the picker is ungated. The gate will wrap it.
 - **2026-10-16** — Closing a round early saves nothing: no stars, no streak. Low-pressure, and it can't be gamed by quitting.
 - **2026-10-16** — Maths read-aloud uses words from `strings.json` (`maths.word.*`: "plus", "mal", "geteilt durch") so the voice never has to guess at "·" or ":".
 - **2026-10-16** — Sound effects moved to milestone 7 (synthesised, no assets). Haptics and visual feedback ship now.
@@ -297,3 +296,8 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-16** — General Knowledge: 125 German questions in six categories (animals, nature, body, geography, science, everyday), ages 4–14, including tap-in-order questions (life cycles, weekdays, planets), so the `buildSequence` path that Grammar will use is already exercised. A round mixes categories: each pick halves the weight of its category for the rest of the round. A bank too small for the round length gives a shorter round, never repeats.
 - **2026-10-16** — Sequence distractor tiles only appear from age 8, so younger children just order the given tiles.
 - **2026-10-16** — **Content gap:** 4-year-olds have 22 general-knowledge questions, about two rounds' worth before repeats are down-weighted. Worth growing alongside the 12–14 vocabulary.
+- **2026-10-16** — Grown-up gate: a two-digit × one-digit sum (12–19 × 3–9, e.g. "14 × 7"). A wrong answer quietly swaps in a new sum. It guards the gear button (picker and home) and "Profil anlegen". It's deliberately light; it isn't security.
+- **2026-10-16** — Profile settings are edited as a value copy (`ProfileSettings`) and written back on save. "All subjects on" is stored as an empty list, so subjects a language adds later (e.g. Grammar) appear automatically; at least one subject always stays on. Changing the learning language turns all of its subjects on.
+- **2026-10-16** — "Fortschritt zurücksetzen" clears stars, streaks, per-subject progress, history and adaptivity, but keeps name, age and settings. "Profil löschen" removes everything (cascade). Both ask for confirmation.
+- **2026-10-16** — The sound toggle is stored now; sound effects arrive in milestone 7.
+- **2026-10-16** — Polish backlog: iOS shrinks long answers per button (minimumScaleFactor), so text sizes can still differ slightly within a grid. Measure the longest option and scale them all together.

@@ -65,6 +65,18 @@ final class ScreenshotTests: XCTestCase {
         snap("10-knowledge-age-10", app, waitFor: app.buttons["round-close"], settle: 1.2)
         app.buttons["round-close"].tap()
 
+        // Grown-up area: gate, overview, Emil's settings
+        open("grown-ups", app)
+        let question = app.staticTexts["gate-question"]
+        snap("12-gate", app, waitFor: question)
+        solveGate(question.label, app)
+        let emilRow = app.descendants(matching: .any).matching(identifier: "settings-profile-Emil").firstMatch
+        snap("13-grown-ups", app, waitFor: emilRow, settle: 1.0)
+        emilRow.tap()
+        snap("14-profile-settings", app, waitFor: app.buttons["editor-save"], settle: 1.0)
+        app.swipeUp()
+        snap("15-profile-settings-more", app, settle: 1.0)
+
         // Emil (10): spelling with letter tiles (forced via a Debug-only launch argument)
         app.terminate()
         let spellingApp = launch(extra: ["-forceVocabularyType", "spelling"])
@@ -90,10 +102,22 @@ final class ScreenshotTests: XCTestCase {
     }
 
     @MainActor
-    private func open(_ subjectID: String, _ app: XCUIApplication) {
-        let card = app.buttons[subjectID]
-        XCTAssertTrue(card.waitForExistence(timeout: 8), "missing \(subjectID)")
-        card.tap()
+    private func open(_ identifier: String, _ app: XCUIApplication) {
+        let button = app.buttons[identifier]
+        XCTAssertTrue(button.waitForExistence(timeout: 8), "missing \(identifier)")
+        button.tap()
+    }
+
+    /// Reads "Wie viel ist 14 × 7?" off the screen and types the answer, as a grown-up would.
+    @MainActor
+    private func solveGate(_ question: String, _ app: XCUIApplication) {
+        let numbers = question.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        XCTAssertEqual(numbers.count, 2, "unexpected gate question: \(question)")
+        guard numbers.count == 2 else { return }
+        for digit in String(numbers[0] * numbers[1]) {
+            app.buttons["gate-key-\(digit)"].tap()
+        }
+        app.buttons["gate-check"].tap()
     }
 
     @MainActor

@@ -16,15 +16,15 @@ import sys
 # Not resolve(): on Windows it can expand to a path past the 260-character limit.
 ROOT = pathlib.Path(__file__).absolute().parent.parent
 CATALOG = ROOT / "Funkel/Resources/Localizable.xcstrings"
-PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|settings"
+PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups"
 LITERAL = re.compile(r'"((?:' + PREFIXES + r')\.[^"]*)"')
 INTERPOLATION = re.compile(r"\\\(([^)]*\)?)\)")
 # Interpolated values that are strings; everything else is assumed to be an Int.
-STRING_HINTS = ("name", "Answer", "title", "text")
+STRING_HINTS = ("name", "answer", "title", "text")
 
 
 def specifier(expr: str) -> str:
-    return "%@" if any(h in expr for h in STRING_HINTS) else "%lld"
+    return "%@" if any(h in expr.lower() for h in STRING_HINTS) else "%lld"
 
 
 def main() -> int:

@@ -7,6 +7,7 @@ struct HomeView: View {
     let onSwitchProfile: () -> Void
 
     @State private var activeSubject: SubjectDescriptor?
+    @State private var showsGrownUps = false
 
     private let columns = [GridItem(.adaptive(minimum: 280, maximum: 420), spacing: 20)]
 
@@ -43,6 +44,9 @@ struct HomeView: View {
         .fullScreenCover(item: $activeSubject) { subject in
             RoundContainerView(subject: subject, profile: profile)
         }
+        .sheet(isPresented: $showsGrownUps) {
+            GrownUpGate { GrownUpsView() }
+        }
     }
 
     private var header: some View {
@@ -51,6 +55,10 @@ struct HomeView: View {
                 Pip(color: Palette.avatarColor(profile.avatarColor), mood: .happy)
                     .frame(width: 84, height: 84)
                 Spacer()
+                CircleIconButton(systemImage: "gearshape.fill", label: "grownups.button") {
+                    showsGrownUps = true
+                }
+                .accessibilityIdentifier("grown-ups")
                 CircleIconButton(systemImage: "person.2.fill", label: "home.switchProfile", action: onSwitchProfile)
                     .accessibilityIdentifier("switch-profile")
             }

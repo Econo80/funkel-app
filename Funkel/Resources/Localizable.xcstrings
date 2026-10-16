@@ -133,6 +133,78 @@
         }
       }
     },
+    "editor.delete": {
+      "comment": "Delete-profile button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil löschen"
+          }
+        }
+      }
+    },
+    "editor.delete.action": {
+      "comment": "Confirm deleting a profile.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "editor.delete.confirm %@": {
+      "comment": "Delete confirmation, with the child's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Profil „%@“ und sein ganzer Fortschritt werden gelöscht."
+          }
+        }
+      }
+    },
+    "editor.haptics": {
+      "comment": "Toggle: haptic feedback.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vibration"
+          }
+        }
+      }
+    },
+    "editor.language": {
+      "comment": "Picker: language of the learning content.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lernsprache"
+          }
+        }
+      }
+    },
+    "editor.language.footer": {
+      "comment": "Explains learning vs. device language.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Sprache der Fragen und der Vorlesestimme. Menüs folgen der Gerätesprache."
+          }
+        }
+      }
+    },
     "editor.name": {
       "comment": "Profile editor section.",
       "extractionState": "manual",
@@ -157,6 +229,18 @@
         }
       }
     },
+    "editor.options": {
+      "comment": "Section: sound, read-aloud, haptics, timer.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen"
+          }
+        }
+      }
+    },
     "editor.privacy": {
       "comment": "Privacy note in the profile editor.",
       "extractionState": "manual",
@@ -169,6 +253,90 @@
         }
       }
     },
+    "editor.progress": {
+      "comment": "Section: stars, rounds, reset.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortschritt"
+          }
+        }
+      }
+    },
+    "editor.readAloud": {
+      "comment": "Toggle: read questions aloud automatically.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragen vorlesen"
+          }
+        }
+      }
+    },
+    "editor.reset": {
+      "comment": "Reset-progress button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortschritt zurücksetzen"
+          }
+        }
+      }
+    },
+    "editor.reset.action": {
+      "comment": "Confirm resetting progress.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurücksetzen"
+          }
+        }
+      }
+    },
+    "editor.reset.confirm": {
+      "comment": "Reset confirmation.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Sterne, Serien und Fortschritte dieses Profils löschen? Name und Einstellungen bleiben."
+          }
+        }
+      }
+    },
+    "editor.roundLength": {
+      "comment": "Section/picker: questions per round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragen pro Runde"
+          }
+        }
+      }
+    },
+    "editor.rounds": {
+      "comment": "Label: rounds played.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runden"
+          }
+        }
+      }
+    },
     "editor.save": {
       "comment": "Save button.",
       "extractionState": "manual",
@@ -177,6 +345,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "Speichern"
+          }
+        }
+      }
+    },
+    "editor.sound": {
+      "comment": "Toggle: sound effects.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Töne"
+          }
+        }
+      }
+    },
+    "editor.stars": {
+      "comment": "Label: total stars.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sterne"
+          }
+        }
+      }
+    },
+    "editor.subjects": {
+      "comment": "Section: which subjects are shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fächer"
+          }
+        }
+      }
+    },
+    "editor.subjects.footer": {
+      "comment": "Explains why the last subject can't be switched off.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindestens ein Fach bleibt immer aktiv."
+          }
+        }
+      }
+    },
+    "editor.timer": {
+      "comment": "Toggle: optional soft timer for older children.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sanfter Timer"
+          }
+        }
+      }
+    },
+    "editor.timer.footer": {
+      "comment": "Explains the soft timer.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Balken zeigt die Zeit an. Fragen laufen nie ab. Ab 9 Jahren verfügbar."
           }
         }
       }
@@ -285,6 +525,138 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fast!"
+          }
+        }
+      }
+    },
+    "gate.message": {
+      "comment": "Grown-up gate explanation.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte löse diese Aufgabe, um fortzufahren."
+          }
+        }
+      }
+    },
+    "gate.question %lld %lld": {
+      "comment": "Grown-up gate maths question.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viel ist %1$lld × %2$lld?"
+          }
+        }
+      }
+    },
+    "gate.title": {
+      "comment": "Grown-up gate title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur für Erwachsene"
+          }
+        }
+      }
+    },
+    "gate.wrong": {
+      "comment": "Grown-up gate after a wrong answer.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das war nicht richtig. Hier ist eine neue Aufgabe."
+          }
+        }
+      }
+    },
+    "grownups.button": {
+      "comment": "Accessibility label of the settings (gear) button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Erwachsene"
+          }
+        }
+      }
+    },
+    "grownups.done": {
+      "comment": "Close the grown-up area.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "grownups.privacy.text": {
+      "comment": "Privacy statement.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funkel funktioniert komplett ohne Internet. Es gibt keine Konten, keine Werbung, keine In-App-Käufe und keine Datenweitergabe. Gespeichert werden nur Vorname, Alter und Lernfortschritt – und zwar nur auf diesem Gerät."
+          }
+        }
+      }
+    },
+    "grownups.privacy.title": {
+      "comment": "Section title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenschutz"
+          }
+        }
+      }
+    },
+    "grownups.profiles": {
+      "comment": "Section title: children's profiles.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
+          }
+        }
+      }
+    },
+    "grownups.title": {
+      "comment": "Grown-up area title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Erwachsene"
+          }
+        }
+      }
+    },
+    "grownups.version": {
+      "comment": "App version label.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
           }
         }
       }
