@@ -118,10 +118,16 @@ final class ScreenshotTests: XCTestCase {
         return app
     }
 
+    /// Lazy grids only create on-screen cells, so scroll until the button exists.
     @MainActor
     private func open(_ identifier: String, _ app: XCUIApplication) {
         let button = app.buttons[identifier]
-        XCTAssertTrue(button.waitForExistence(timeout: 8), "missing \(identifier)")
+        var swipes = 0
+        while !button.waitForExistence(timeout: swipes == 0 ? 8 : 2) && swipes < 4 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(button.exists, "missing \(identifier)")
         button.tap()
     }
 

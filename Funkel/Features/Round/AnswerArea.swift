@@ -156,9 +156,11 @@ private struct ChoiceButton: View {
     @ViewBuilder
     private var content: some View {
         if let emoji = option.emoji {
-            // One emoji = a picture answer; several = a group to count.
+            // A word with a picture (vocabulary) is shown big; a numbered
+            // group of objects (maths) keeps the counting size, even for one.
+            let isCountingGroup = Int(option.text) != nil
             Text(verbatim: emoji)
-                .font(.system(size: emoji.count == 1 ? pictureSize : emojiSize))
+                .font(.system(size: isCountingGroup ? emojiSize : pictureSize))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
         } else {

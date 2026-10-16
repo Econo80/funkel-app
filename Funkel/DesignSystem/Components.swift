@@ -67,12 +67,15 @@ struct CircleIconButton: View {
     let label: LocalizedStringKey
     let action: () -> Void
 
+    // Grows with Dynamic Type, but less than text, so the icon always fits its circle.
+    @ScaledMetric(relativeTo: .body) private var diameter: CGFloat = 52
+
     var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .font(.title3.weight(.bold))
+                .font(.system(size: min(diameter, 72) * 0.4, weight: .bold))
                 .foregroundStyle(Palette.ink)
-                .frame(width: 52, height: 52)
+                .frame(width: min(diameter, 72), height: min(diameter, 72))
                 .background(Palette.card, in: .circle)
                 .shadow(color: .black.opacity(0.08), radius: 6, y: 3)
         }
