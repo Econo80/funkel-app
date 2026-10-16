@@ -30,11 +30,11 @@ enum TextFitting {
     ) -> CGFloat {
         guard width > 0 else { return maxSize }
         let words = texts.flatMap { $0.split(whereSeparator: \.isWhitespace).map(String.init) }
-        guard let longest = words.max(by: { width(of: $0, size: maxSize, weight: weight) < width(of: $1, size: maxSize, weight: weight) }) else {
+        guard let longest = words.max(by: { Self.width(of: $0, size: maxSize, weight: weight) < Self.width(of: $1, size: maxSize, weight: weight) }) else {
             return maxSize
         }
         var size = maxSize.rounded(.down)
-        while size > minSize && width(of: longest, size: size, weight: weight) > width {
+        while size > minSize && Self.width(of: longest, size: size, weight: weight) > width {
             size -= 1
         }
         return max(size, minSize)
