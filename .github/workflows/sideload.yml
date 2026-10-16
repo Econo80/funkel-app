@@ -1,0 +1,61 @@
+name: Sideload build
+
+# Builds an UNSIGNED Funkel.ipa for sideloading with a free Apple ID
+# (AltStore / Sideloadly sign it on your PC). No Apple Developer Program needed.
+# Run it by hand: Actions → Sideload build → Run workflow, or `gh workflow run sideload.yml`.
+# Guide: docs/SIDELOAD.md
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    name: Build unsigned .ipa
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate content & strings
+        run: |
+          python3 scripts/validate_content.py
+          python3 scripts/check_strings.py
+
+      - name: Build Release for iPhone/iPad (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Funkel.xcodeproj \
+            -scheme Funkel \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Funkel.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            2>&1 | tee build.log | tail -n 5
+
+      - name: Package Funkel.ipa
+        run: |
+          APP="$RUNNER_TEMP/Funkel.xcarchive/Products/Applications/Funkel.app"
+          test -d "$APP" || { echo "::error::Funkel.app not found in archive"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry Funkel.ipa Payload)
+          mv "$RUNNER_TEMP/ipa/Funkel.ipa" Funkel.ipa
+          ls -lh Funkel.ipa
+          echo "### Funkel.ipa ready (build ${{ github.run_number }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download it from *Artifacts* below, then follow docs/SIDELOAD.md." >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: Funkel-ipa
+          path: Funkel.ipa
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: sideload-build-log
+          path: build.log
+          retention-days: 7
