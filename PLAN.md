@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 6 (grown-up area)._
+_Last updated: 2026-10-16 — Milestone 6 verified in CI._
 
 ---
 
@@ -18,7 +18,7 @@ _Last updated: 2026-10-16 — Milestone 6 (grown-up area)._
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ✅ CI, 31/31 tests |
 | 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ✅ CI, 38/38 tests + screenshots |
 | 5 | General Knowledge (question bank) | done | ✅ CI, 45/45 tests + screenshots |
-| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | done | ⏳ pending CI |
+| 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | done | ✅ CI, 53/53 tests + screenshots |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | next | |
 
 "Build verified" means the GitHub Actions workflow (`.github/workflows/ci.yml`) built the app and passed the unit tests on a macOS runner with an iOS Simulator. The tests run inside the app, so a pass also means it launches. Development happens on Windows, so CI is the only compiler; every slice is pushed and must be green before the next one starts.
