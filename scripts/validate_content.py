@@ -23,6 +23,8 @@ PLACEHOLDER = re.compile(r"\{(\w+)\}")
 REQUIRED_PHRASES = {
     "maths": [
         "maths.symbol.plus", "maths.symbol.minus", "maths.symbol.times", "maths.symbol.divide",
+        "maths.word.plus", "maths.word.minus", "maths.word.times", "maths.word.divide",
+        "maths.word.equals", "maths.word.blank",
         "maths.counting", "maths.numberRecognition", "maths.equation", "maths.missingNumber",
         "maths.wordProblem",
     ],

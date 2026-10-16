@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   content:
-    name: Validate content
+    name: Validate content & strings
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -21,6 +21,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 scripts/validate_content.py
+      - run: python3 scripts/check_strings.py
 
   build-and-test:
     name: Build & test (iOS Simulator)

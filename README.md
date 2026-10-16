@@ -21,11 +21,17 @@ From the command line:
 xcodebuild -project Funkel.xcodeproj -scheme Funkel -destination 'platform=iOS Simulator,name=iPhone 16' build test
 ```
 
-To check content without Xcode (any OS with Python 3):
+To check content and UI strings without Xcode (any OS with Python 3):
 
 ```bash
 python3 scripts/validate_content.py
 ```
+
+```bash
+python3 scripts/check_strings.py
+```
+
+Every push to `main` runs both checks, plus the iOS build and unit tests, on GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Project structure
 

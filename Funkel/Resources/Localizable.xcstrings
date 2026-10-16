@@ -1,20 +1,726 @@
 {
-  "sourceLanguage" : "de",
-  "strings" : {
-    "app.name" : {
-      "comment" : "App name shown on the start screen.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Funkel" } }
+  "sourceLanguage": "de",
+  "strings": {
+    "app.name": {
+      "comment": "App name.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funkel"
+          }
+        }
       }
     },
-    "content.missing" : {
-      "comment" : "Shown if no learning content could be loaded (should never happen in a release build).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hier fehlen noch Inhalte." } }
+    "color.berry": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beerenrot"
+          }
+        }
+      }
+    },
+    "color.coral": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koralle"
+          }
+        }
+      }
+    },
+    "color.grape": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traubenlila"
+          }
+        }
+      }
+    },
+    "color.leaf": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blattgrün"
+          }
+        }
+      }
+    },
+    "color.sky": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Himmelblau"
+          }
+        }
+      }
+    },
+    "color.sun": {
+      "comment": "Avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonnengelb"
+          }
+        }
+      }
+    },
+    "content.missing": {
+      "comment": "No learning content found (should never happen in a release build).",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier fehlen noch Inhalte."
+          }
+        }
+      }
+    },
+    "editor.age": {
+      "comment": "Profile editor section.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alter"
+          }
+        }
+      }
+    },
+    "editor.cancel": {
+      "comment": "Cancel button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbrechen"
+          }
+        }
+      }
+    },
+    "editor.color": {
+      "comment": "Profile editor section: avatar colour.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbe"
+          }
+        }
+      }
+    },
+    "editor.name": {
+      "comment": "Profile editor section.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
+    "editor.name.placeholder": {
+      "comment": "Name field placeholder.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorname"
+          }
+        }
+      }
+    },
+    "editor.privacy": {
+      "comment": "Privacy note in the profile editor.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles bleibt auf diesem Gerät. Gespeichert werden nur Vorname, Alter und Lernfortschritt."
+          }
+        }
+      }
+    },
+    "editor.save": {
+      "comment": "Save button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichern"
+          }
+        }
+      }
+    },
+    "editor.title.edit": {
+      "comment": "Profile editor title when editing.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil bearbeiten"
+          }
+        }
+      }
+    },
+    "editor.title.new": {
+      "comment": "Profile editor title when creating.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neues Profil"
+          }
+        }
+      }
+    },
+    "feedback.correct.1": {
+      "comment": "Correct-answer praise.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super!"
+          }
+        }
+      }
+    },
+    "feedback.correct.2": {
+      "comment": "Correct-answer praise.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Richtig!"
+          }
+        }
+      }
+    },
+    "feedback.correct.3": {
+      "comment": "Correct-answer praise.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasse gemacht!"
+          }
+        }
+      }
+    },
+    "feedback.correct.4": {
+      "comment": "Correct-answer praise.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toll!"
+          }
+        }
+      }
+    },
+    "feedback.correct.5": {
+      "comment": "Correct-answer praise.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spitze!"
+          }
+        }
+      }
+    },
+    "feedback.wrong.answer %@": {
+      "comment": "Reveals the right answer after a wrong one.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die richtige Antwort ist: %@"
+          }
+        }
+      }
+    },
+    "feedback.wrong.title": {
+      "comment": "Gentle heading after a wrong answer. Never negative.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast!"
+          }
+        }
+      }
+    },
+    "home.greeting %@": {
+      "comment": "Home greeting with the child's first name.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hallo, %@!"
+          }
+        }
+      }
+    },
+    "home.stars %lld": {
+      "comment": "Accessibility: total stars.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Stern"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Sterne"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "home.streak %lld": {
+      "comment": "Accessibility: daily streak.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tag in Folge gelernt"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tage in Folge gelernt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "home.subject.comingSoon": {
+      "comment": "Subject not yet available.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bald da!"
+          }
+        }
+      }
+    },
+    "home.subject.rounds %lld": {
+      "comment": "Subject card: rounds played.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runde gespielt"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runden gespielt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "home.subject.start": {
+      "comment": "Subject card subtitle before the first round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los geht's!"
+          }
+        }
+      }
+    },
+    "home.subtitle": {
+      "comment": "Home subtitle.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was möchtest du heute üben?"
+          }
+        }
+      }
+    },
+    "home.switchProfile": {
+      "comment": "Accessibility label of the switch-profile button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil wechseln"
+          }
+        }
+      }
+    },
+    "profile.age %lld": {
+      "comment": "Child's age. Ages are 4–14, always plural.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Jahre"
+          }
+        }
+      }
+    },
+    "profiles.add": {
+      "comment": "Button to create a child profile.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil anlegen"
+          }
+        }
+      }
+    },
+    "profiles.empty.message": {
+      "comment": "First launch hint, addressed to the child.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte einen Erwachsenen, ein Profil für dich anzulegen."
+          }
+        }
+      }
+    },
+    "profiles.empty.title": {
+      "comment": "First launch, no profiles yet. Pip is the mascot.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hallo, ich bin Pip!"
+          }
+        }
+      }
+    },
+    "profiles.title": {
+      "comment": "Profile picker title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wer lernt heute?"
+          }
+        }
+      }
+    },
+    "round.check": {
+      "comment": "Submit the typed number.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prüfen"
+          }
+        }
+      }
+    },
+    "round.close": {
+      "comment": "Accessibility label of the close button in a round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runde beenden"
+          }
+        }
+      }
+    },
+    "round.delete": {
+      "comment": "Accessibility label of the delete key.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "round.error": {
+      "comment": "Shown if a round's content cannot be loaded.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Runde konnte nicht geladen werden."
+          }
+        }
+      }
+    },
+    "round.next": {
+      "comment": "Next question button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter"
+          }
+        }
+      }
+    },
+    "round.progress %lld %lld": {
+      "comment": "Accessibility: question number and total.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frage %1$lld von %2$lld"
+          }
+        }
+      }
+    },
+    "round.readAloud": {
+      "comment": "Accessibility label of the read-aloud button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorlesen"
+          }
+        }
+      }
+    },
+    "round.sign": {
+      "comment": "Accessibility label of the ± key.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus oder Minus"
+          }
+        }
+      }
+    },
+    "summary.again": {
+      "comment": "Play another round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nochmal"
+          }
+        }
+      }
+    },
+    "summary.done": {
+      "comment": "Back to home.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "summary.message.good": {
+      "comment": "Summary, 50 %+.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gut gemacht! Du wirst immer besser."
+          }
+        }
+      }
+    },
+    "summary.message.great": {
+      "comment": "Summary, 80 %+.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super gemacht!"
+          }
+        }
+      }
+    },
+    "summary.message.keepGoing": {
+      "comment": "Summary, under 50 %. Encouraging, never negative.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schön, dass du geübt hast! Beim nächsten Mal klappt es noch besser."
+          }
+        }
+      }
+    },
+    "summary.message.perfect": {
+      "comment": "Summary, 100 %.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles richtig – fantastisch!"
+          }
+        }
+      }
+    },
+    "summary.score %lld %lld": {
+      "comment": "Correct answers out of total.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld von %2$lld richtig"
+          }
+        }
+      }
+    },
+    "summary.stars %lld": {
+      "comment": "Stars earned this round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld Stern"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "+%lld Sterne"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary.streak %lld": {
+      "comment": "Daily streak on the summary.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tag in Folge!"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tage in Folge!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary.title": {
+      "comment": "End-of-round title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschafft!"
+          }
+        }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

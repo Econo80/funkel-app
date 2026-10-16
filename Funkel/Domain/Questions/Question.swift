@@ -14,6 +14,8 @@ struct Question: Identifiable, Equatable, Sendable {
     let format: QuestionFormat
     /// Shown gently after a wrong answer, e.g. "Wale sind Säugetiere."
     let explanation: String?
+    /// Overrides what read-aloud says, e.g. "3 plus 4" instead of "3 + 4".
+    let spoken: String?
 
     init(
         id: UUID = UUID(),
@@ -23,7 +25,8 @@ struct Question: Identifiable, Equatable, Sendable {
         sentence: String? = nil,
         visual: QuestionVisual? = nil,
         format: QuestionFormat,
-        explanation: String? = nil
+        explanation: String? = nil,
+        spoken: String? = nil
     ) {
         self.id = id
         self.subjectID = subjectID
@@ -33,10 +36,12 @@ struct Question: Identifiable, Equatable, Sendable {
         self.visual = visual
         self.format = format
         self.explanation = explanation
+        self.spoken = spoken
     }
 
     /// Text handed to the speech synthesiser.
     var spokenText: String {
+        if let spoken { return spoken }
         guard let sentence else { return prompt }
         return prompt + " " + sentence.replacingOccurrences(of: "___", with: "…")
     }

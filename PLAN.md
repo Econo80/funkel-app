@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestone 1 verified in CI._
+_Last updated: 2026-10-16 — Milestones 2–3 (home, profiles, Maths end-to-end)._
 
 ---
 
@@ -14,9 +14,9 @@ _Last updated: 2026-10-16 — Milestone 1 verified in CI._
 |---|-----------|-------|-----------------|
 | 0 | PLAN.md, README.md, Xcode project scaffold, CI | done | ✅ CI (Xcode 16.4, iOS 26.2 sim) |
 | 1 | Data model, age scaling, content loader, `de` manifest | done | ✅ CI, 19/19 tests |
-| 2 | Home screen + profile picker | next | |
-| 3 | Maths end-to-end (generator → round → feedback → summary → progress) | | |
-| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | | |
+| 2 | Home screen + profile picker | done | ⏳ pending CI |
+| 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ⏳ pending CI |
+| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | next | |
 | 5 | General Knowledge (question bank) | | |
 | 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | | |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |
@@ -268,8 +268,8 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 
 1. ✅ PLAN.md, README.md, project scaffold
 2. ✅ SwiftData models, `DifficultyScale`, `ContentLibrary`, `de` manifest
-3. Home + profile picker (with a seeded preview profile)
-4. **Maths end-to-end** — generator, `RoundViewModel`, round/feedback/summary views, progress + streak persistence. *Verify build.*
+3. ✅ Home + profile picker
+4. ✅ **Maths end-to-end** — generator, `RoundViewModel`, round/feedback/summary views, progress + streak persistence. *Verify build.*
 5. Vocabulary — `WordListProvider` + letter-tile spelling view. *Verify build.*
 6. General Knowledge — `QuestionBankProvider`. *Verify build.*
 7. Grown-up gate + settings + profile management. *Verify build.*
@@ -284,3 +284,8 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-15** — Project file is hand-written (Xcode 16 format, `objectVersion = 77`). Requires **Xcode 16+** to open.
 - **2026-10-15** — Bundle ID placeholder `com.example.funkel`; set your Team in Signing & Capabilities.
 - **2026-10-16** — No Mac available, so builds run on GitHub Actions (`macos-15`, private repo `Econo80/funkel`). macOS minutes are limited on the free plan, so a newer push cancels the running build.
+- **2026-10-16** — Until the grown-up gate exists (milestone 6), "Profil anlegen" on the picker is ungated. The gate will wrap it.
+- **2026-10-16** — Closing a round early saves nothing: no stars, no streak. Low-pressure, and it can't be gamed by quitting.
+- **2026-10-16** — Maths read-aloud uses words from `strings.json` (`maths.word.*`: "plus", "mal", "geteilt durch") so the voice never has to guess at "·" or ":".
+- **2026-10-16** — Sound effects moved to milestone 7 (synthesised, no assets). Haptics and visual feedback ship now.
+- **2026-10-16** — `scripts/check_strings.py` runs in CI: every UI key used in Swift must exist in the String Catalog.
