@@ -100,6 +100,7 @@ def validate_word_list(path, data, report):
         report.error(path, "'words' must be a non-empty list")
         return
     seen = set()
+    emojis = {}
     for i, w in enumerate(words):
         where = f"{path} words[{i}] ({w.get('word', '?')})"
         if not nonempty_str(w.get("word")):
@@ -108,6 +109,13 @@ def validate_word_list(path, data, report):
         if w["word"] in seen:
             report.error(where, "duplicate word")
         seen.add(w["word"])
+        if w.get("emoji"):
+            if w["emoji"] in emojis:
+                report.error(where, f"emoji {w['emoji']} already used by '{emojis[w['emoji']]}'; picture questions would be ambiguous")
+            emojis[w["emoji"]] = w["word"]
+        both = set(w.get("synonyms", [])) & set(w.get("antonyms", []))
+        if both:
+            report.error(where, f"{sorted(both)} listed as both synonym and antonym")
         check_age(where, w, report)
         if isinstance(w.get("minAge"), int) and w["minAge"] < 7 and not w.get("emoji"):
             report.warn(where, "words for under-7s should have an 'emoji' for picture matching")

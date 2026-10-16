@@ -13,10 +13,7 @@ final class ScreenshotTests: XCTestCase {
 
     @MainActor
     func testCaptureMainScreens() throws {
-        let app = XCUIApplication()
-        // Sample profiles in an in-memory store; German UI regardless of the simulator's language.
-        app.launchArguments = ["-uiTesting", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
-        app.launch()
+        let app = launch()
 
         // Profile picker
         snap("01-profile-picker", app, waitFor: app.buttons["profile-Lena"])
@@ -43,30 +40,74 @@ final class ScreenshotTests: XCTestCase {
 
         // Answer the rest correctly to reach the summary
         let done = app.buttons["summary-done"]
-        for _ in 0..<40 where !done.exists {
-            let next = app.buttons["answer-correct"].firstMatch
-            if next.exists, next.isHittable, next.isEnabled {
-                next.tap()
-            }
-            pause(0.5)
-        }
+        answerCorrectlyUntil(done, app)
         snap("06-summary", app, waitFor: done, settle: 2.5)
 
-        // Emil (10): number pad
+        // Lena (5): vocabulary picture question
         done.tap()
-        let switchProfile = app.buttons["switch-profile"]
-        XCTAssertTrue(switchProfile.waitForExistence(timeout: 8))
-        switchProfile.tap()
-        let emil = app.buttons["profile-Emil"]
-        XCTAssertTrue(emil.waitForExistence(timeout: 8))
-        emil.tap()
-        let maths = app.buttons["subject-maths"]
-        XCTAssertTrue(maths.waitForExistence(timeout: 8))
-        maths.tap()
-        snap("07-maths-age-10", app, waitFor: app.buttons["key-check"], settle: 1.0)
+        open("subject-vocabulary", app)
+        snap("07-vocab-age-5", app, waitFor: app.buttons["answer-correct"].firstMatch, settle: 1.2)
+        app.buttons["round-close"].tap()
+
+        // Emil (10): number pad
+        switchTo("Emil", app)
+        open("subject-maths", app)
+        snap("08-maths-age-10", app, waitFor: app.buttons["key-check"], settle: 1.0)
+        app.buttons["round-close"].tap()
+
+        // Emil (10): spelling with letter tiles (forced via a Debug-only launch argument)
+        app.terminate()
+        let spellingApp = launch(extra: ["-forceVocabularyType", "spelling"])
+        spellingApp.buttons["profile-Emil"].tap()
+        open("subject-vocabulary", spellingApp)
+        let firstTile = spellingApp.buttons["tile-0"]
+        XCTAssertTrue(firstTile.waitForExistence(timeout: 8))
+        pause(1.0)
+        firstTile.tap()
+        spellingApp.buttons["tile-1"].tap()
+        snap("09-vocab-spelling-age-10", spellingApp, settle: 0.8)
     }
 
     // MARK: Helpers
+
+    @MainActor
+    private func launch(extra: [String] = []) -> XCUIApplication {
+        let app = XCUIApplication()
+        // Sample profiles in an in-memory store; German UI regardless of the simulator's language.
+        app.launchArguments = ["-uiTesting", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"] + extra
+        app.launch()
+        return app
+    }
+
+    @MainActor
+    private func open(_ subjectID: String, _ app: XCUIApplication) {
+        let card = app.buttons[subjectID]
+        XCTAssertTrue(card.waitForExistence(timeout: 8), "missing \(subjectID)")
+        card.tap()
+    }
+
+    @MainActor
+    private func switchTo(_ name: String, _ app: XCUIApplication) {
+        let switchProfile = app.buttons["switch-profile"]
+        XCTAssertTrue(switchProfile.waitForExistence(timeout: 8))
+        switchProfile.tap()
+        let profile = app.buttons["profile-\(name)"]
+        XCTAssertTrue(profile.waitForExistence(timeout: 8))
+        profile.tap()
+    }
+
+    /// Taps the correct answer whenever one is on screen and enabled. Checks
+    /// the frame instead of `isHittable`, which fails while a question slides out.
+    @MainActor
+    private func answerCorrectlyUntil(_ target: XCUIElement, _ app: XCUIApplication) {
+        for _ in 0..<60 where !target.exists {
+            let answer = app.buttons["answer-correct"].firstMatch
+            if answer.exists, answer.isEnabled, app.frame.contains(answer.frame) {
+                answer.tap()
+            }
+            pause(0.5)
+        }
+    }
 
     @MainActor
     private func snap(_ name: String, _ app: XCUIApplication, waitFor element: XCUIElement? = nil, settle: TimeInterval = 0.8) {

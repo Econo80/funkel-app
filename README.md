@@ -31,7 +31,11 @@ python3 scripts/validate_content.py
 python3 scripts/check_strings.py
 ```
 
-Every push to `main` runs both checks, plus the iOS build and unit tests, on GitHub Actions (`.github/workflows/ci.yml`).
+Every push to `main` runs both checks, plus the iOS build, unit tests and a UI test that captures screenshots of the main screens, on GitHub Actions (`.github/workflows/ci.yml`). Download the screenshots from the run's *Artifacts* section, or:
+
+```bash
+gh run download --name screenshots
+```
 
 ## Project structure
 
@@ -78,8 +82,9 @@ The app picks how many to show based on age.
 ```
 
 Words for under-7s should have an emoji, since they're used for picture
-matching. Add `synonyms`/`antonyms` and the word becomes eligible for those
-question types.
+matching. Each emoji may only be used once. Add `synonyms`/`antonyms` and the
+word becomes eligible for those question types. Give very easy words a
+`maxAge` so older children aren't offered them.
 
 **Maths** is generated, so it never runs out. `maths.json` only holds names,
 countable items and word-problem templates (`{name}`, `{a}`, `{b}`, `{items}`).

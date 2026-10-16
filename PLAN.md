@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-16 — Milestones 2–3 verified in CI._
+_Last updated: 2026-10-16 — Milestone 4 (Vocabulary) and CI screenshots._
 
 ---
 
@@ -16,8 +16,8 @@ _Last updated: 2026-10-16 — Milestones 2–3 verified in CI._
 | 1 | Data model, age scaling, content loader, `de` manifest | done | ✅ CI, 19/19 tests |
 | 2 | Home screen + profile picker | done | ✅ CI, 31/31 tests |
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | done | ✅ CI, 31/31 tests |
-| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | next | |
-| 5 | General Knowledge (question bank) | | |
+| 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | done | ⏳ pending CI |
+| 5 | General Knowledge (question bank) | next | |
 | 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | | |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |
 
@@ -178,6 +178,8 @@ weight = 3   if minAge ≥ effectiveAge − 2      (current band)
        × 0.2 if answered correctly in the last 3 rounds (recently seen)
 ```
 
+Synonym/opposite distractors exclude the word's whole *family* (its synonyms and antonyms, and theirs), so "riesig" is never a wrong answer for "Gegenteil von klein".
+
 Vocabulary question types unlock by age: picture match (4+), word→picture (4+),
 meaning (6+), spelling (5.5+, word length ≤ `spellingMaxLength`: 4 at 5 → 6 at
 7 → 10 at 10 → 14 at 12), opposites (7+), synonyms (8+). Spelling adds
@@ -270,7 +272,7 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 2. ✅ SwiftData models, `DifficultyScale`, `ContentLibrary`, `de` manifest
 3. ✅ Home + profile picker
 4. ✅ **Maths end-to-end** — generator, `RoundViewModel`, round/feedback/summary views, progress + streak persistence. *Verify build.*
-5. Vocabulary — `WordListProvider` + letter-tile spelling view. *Verify build.*
+5. ✅ Vocabulary — `VocabularyQuestionGenerator` + letter-tile spelling view. *Verify build.*
 6. General Knowledge — `QuestionBankProvider`. *Verify build.*
 7. Grown-up gate + settings + profile management. *Verify build.*
 8. Polish — Pip animations, confetti, sounds (synthesised via AVAudioEngine; no audio assets needed), haptics, read-aloud, VoiceOver/Dynamic Type audit, iPad layout pass.
@@ -289,3 +291,6 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-16** — Maths read-aloud uses words from `strings.json` (`maths.word.*`: "plus", "mal", "geteilt durch") so the voice never has to guess at "·" or ":".
 - **2026-10-16** — Sound effects moved to milestone 7 (synthesised, no assets). Haptics and visual feedback ship now.
 - **2026-10-16** — `scripts/check_strings.py` runs in CI: every UI key used in Swift must exist in the String Catalog.
+- **2026-10-16** — CI now also runs `FunkelUITests/ScreenshotTests`, which walks the main screens with sample profiles (Debug-only `-uiTesting` launch mode, in-memory store) and uploads PNGs as the `screenshots` artifact (kept 30 days).
+- **2026-10-16** — The earliest vocabulary words carry a `maxAge` (4 → 8, 5 → 9, 6 → 11), so older children aren't offered "der Hund". **Content gap:** ages 12–14 have only 5–14 words in their current band. Needs more advanced words before release.
+- **2026-10-16** — Nouns are shown with their article ("der Hund") in picture questions, so children learn the article with the word.

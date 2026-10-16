@@ -12,9 +12,8 @@ struct AnswerArea: View {
             ChoiceGrid(options: options, correctIndex: correctIndex, viewModel: viewModel, color: color)
         case .numberEntry:
             NumberPad(viewModel: viewModel, color: color)
-        case .buildSequence:
-            // Arrives with vocabulary spelling (milestone 4).
-            EmptyView()
+        case let .buildSequence(tiles, answer):
+            SequenceBuilder(tiles: tiles, answerLength: answer.count, viewModel: viewModel, color: color)
         }
     }
 }
@@ -27,8 +26,16 @@ private struct ChoiceGrid: View {
     let viewModel: RoundViewModel
     let color: Color
 
+    /// Long answers (definitions) get one column, words two, short answers fill the row.
     private var columns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 14), count: options.count == 3 ? 3 : 2)
+        let longest = options.filter { $0.emoji == nil }.map(\.text.count).max() ?? 0
+        let count: Int
+        switch longest {
+        case 23...: count = 1
+        case 9...: count = 2
+        default: count = options.count == 3 ? 3 : 2
+        }
+        return Array(repeating: GridItem(.flexible(), spacing: 14), count: count)
     }
 
     var body: some View {
@@ -62,7 +69,9 @@ private struct ChoiceButton: View {
     let action: () -> Void
 
     @ScaledMetric(relativeTo: .largeTitle) private var textSize: CGFloat = 34
+    @ScaledMetric(relativeTo: .title2) private var longTextSize: CGFloat = 22
     @ScaledMetric(relativeTo: .largeTitle) private var emojiSize: CGFloat = 30
+    @ScaledMetric(relativeTo: .largeTitle) private var pictureSize: CGFloat = 60
 
     private var background: Color {
         switch state {
@@ -106,10 +115,17 @@ private struct ChoiceButton: View {
     @ViewBuilder
     private var content: some View {
         if let emoji = option.emoji {
+            // One emoji = a picture answer; several = a group to count.
             Text(emoji)
-                .font(.system(size: emojiSize))
+                .font(.system(size: emoji.count == 1 ? pictureSize : emojiSize))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.5)
+        } else if option.text.count > 12 {
+            Text(option.text)
+                .font(.system(size: longTextSize, weight: .semibold, design: .rounded))
+                .multilineTextAlignment(.center)
+                .lineLimit(4)
+                .minimumScaleFactor(0.7)
         } else {
             Text(option.text)
                 .font(.system(size: textSize, weight: .bold, design: .rounded))
@@ -187,5 +203,97 @@ private struct NumberPad: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityLabel(label)
+    }
+}
+
+// MARK: - Letter / word tiles
+
+/// Tap tiles to fill the slots in order; tap a placed tile to take it back.
+private struct SequenceBuilder: View {
+    let tiles: [String]
+    let answerLength: Int
+    let viewModel: RoundViewModel
+    let color: Color
+
+    @ScaledMetric(relativeTo: .largeTitle) private var tileSize: CGFloat = 52
+
+    private var isLetters: Bool { tiles.allSatisfy { $0.count == 1 } }
+
+    private var slotColumns: [GridItem] {
+        isLetters
+            ? [GridItem(.adaptive(minimum: tileSize, maximum: tileSize + 8), spacing: 8)]
+            : [GridItem(.adaptive(minimum: 90), spacing: 8)]
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Slots
+            LazyVGrid(columns: slotColumns, spacing: 8) {
+                ForEach(0..<answerLength, id: \.self) { position in
+                    slot(at: position)
+                }
+            }
+            .padding(14)
+            .funkelCard()
+
+            // Tile pool
+            LazyVGrid(columns: slotColumns, spacing: 10) {
+                ForEach(Array(tiles.enumerated()), id: \.offset) { index, tile in
+                    let used = viewModel.placedTileIndices.contains(index)
+                    Button {
+                        viewModel.placeTile(index)
+                    } label: {
+                        tileFace(tile, filled: true)
+                    }
+                    .buttonStyle(PressableStyle())
+                    .opacity(used ? 0.15 : 1)
+                    .disabled(used || viewModel.phase != .answering)
+                    .accessibilityLabel(Text(verbatim: tile))
+                    .accessibilityIdentifier("tile-\(index)")
+                }
+            }
+
+            BigButton(title: "round.check", systemImage: "checkmark", color: color) {
+                viewModel.submitSequence()
+            }
+            .disabled(!viewModel.canSubmitSequence)
+            .opacity(viewModel.canSubmitSequence || viewModel.phase != .answering ? 1 : 0.5)
+            .accessibilityIdentifier("sequence-check")
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: viewModel.placedTileIndices)
+    }
+
+    @ViewBuilder
+    private func slot(at position: Int) -> some View {
+        if viewModel.placedTileIndices.indices.contains(position) {
+            let tile = tiles[viewModel.placedTileIndices[position]]
+            Button {
+                viewModel.removePlacedTile(at: position)
+            } label: {
+                tileFace(tile, filled: true)
+            }
+            .buttonStyle(PressableStyle())
+            .disabled(viewModel.phase != .answering)
+            .accessibilityLabel(Text(verbatim: tile))
+            .accessibilityHint(Text("round.tile.remove"))
+            .transition(.scale.combined(with: .opacity))
+        } else {
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(color.opacity(0.35), style: StrokeStyle(lineWidth: 3, dash: [6, 5]))
+                .frame(height: tileSize)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func tileFace(_ text: String, filled: Bool) -> some View {
+        Text(verbatim: text)
+            .font(.system(size: isLetters ? tileSize * 0.55 : 22, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .padding(.horizontal, isLetters ? 0 : 10)
+            .frame(maxWidth: .infinity, minHeight: tileSize)
+            .background(color, in: .rect(cornerRadius: 14))
+            .shadow(color: color.opacity(0.3), radius: 4, y: 2)
     }
 }

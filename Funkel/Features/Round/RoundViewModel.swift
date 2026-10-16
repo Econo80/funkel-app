@@ -92,6 +92,40 @@ final class RoundViewModel {
         record(isCorrect: value == answer)
     }
 
+    // MARK: Tiles (spelling, sentence building)
+
+    /// Indices into the question's tiles, in the order the child placed them.
+    private(set) var placedTileIndices: [Int] = []
+
+    private var sequence: (tiles: [String], answer: [String])? {
+        guard case let .buildSequence(tiles, answer)? = current?.format else { return nil }
+        return (tiles, answer)
+    }
+
+    func placeTile(_ tileIndex: Int) {
+        guard phase == .answering, let sequence, sequence.tiles.indices.contains(tileIndex),
+              !placedTileIndices.contains(tileIndex), placedTileIndices.count < sequence.answer.count else { return }
+        placedTileIndices.append(tileIndex)
+    }
+
+    func removePlacedTile(at position: Int) {
+        guard phase == .answering, placedTileIndices.indices.contains(position) else { return }
+        placedTileIndices.remove(at: position)
+    }
+
+    var canSubmitSequence: Bool {
+        guard phase == .answering, let sequence else { return false }
+        return placedTileIndices.count == sequence.answer.count
+    }
+
+    func submitSequence() {
+        guard canSubmitSequence, let sequence else { return }
+        let built = placedTileIndices.map { sequence.tiles[$0] }
+        record(isCorrect: built == sequence.answer)
+    }
+
+    // MARK: Advancing
+
     /// From feedback to the next question, or to the end of the round.
     func next() {
         guard case .feedback = phase else { return }
@@ -101,6 +135,7 @@ final class RoundViewModel {
             index += 1
             selectedOptionIndex = nil
             numberInput = ""
+            placedTileIndices = []
             phase = .answering
         }
     }

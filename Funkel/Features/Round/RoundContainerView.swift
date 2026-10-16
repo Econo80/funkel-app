@@ -60,7 +60,10 @@ struct RoundContainerView: View {
                 loadFailed = true
                 return
             }
-            let difficulty = profile.difficulty
+            var difficulty = profile.difficulty
+            if let forced = AppLaunch.forcedVocabularyType {
+                difficulty.vocabulary.questionTypeWeights = [forced: 1]
+            }
             let recent = profile.subjectProgress(for: subject.id, language: subject.languageCode)?.recentCorrectContentIDs ?? []
             let questions = provider.makeQuestions(count: profile.roundLength, difficulty: difficulty, recentlyCorrect: Set(recent))
             viewModel = RoundViewModel(subject: subject, questions: questions, difficulty: difficulty)

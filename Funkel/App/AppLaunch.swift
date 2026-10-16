@@ -14,6 +14,17 @@ enum AppLaunch {
         #endif
     }
 
+    /// `-forceVocabularyType spelling` makes every vocabulary question that type (Debug only).
+    static var forcedVocabularyType: VocabularyQuestionType? {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        guard let flag = args.firstIndex(of: "-forceVocabularyType"), args.indices.contains(flag + 1) else { return nil }
+        return VocabularyQuestionType(rawValue: args[flag + 1])
+        #else
+        return nil
+        #endif
+    }
+
     @MainActor
     static func makeContainer() -> ModelContainer {
         let schema = Schema([ChildProfile.self, SubjectProgress.self, RoundRecord.self])

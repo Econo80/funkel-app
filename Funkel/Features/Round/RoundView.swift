@@ -70,7 +70,7 @@ struct RoundView: View {
             HStack(spacing: 12) {
                 CircleIconButton(systemImage: "xmark", label: "round.close", action: onClose)
                     .accessibilityIdentifier("round-close")
-                ProgressDots(results: viewModel.results, total: viewModel.questions.count, color: color)
+                ProgressDots(results: viewModel.results, current: viewModel.index, total: viewModel.questions.count, color: color)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text("round.progress \(viewModel.questionNumber) \(viewModel.questions.count)"))
                 CircleIconButton(systemImage: "speaker.wave.2.fill", label: "round.readAloud", action: readAloud)
@@ -113,6 +113,7 @@ struct RoundView: View {
 
 private struct ProgressDots: View {
     let results: [Bool]
+    let current: Int
     let total: Int
     let color: Color
 
@@ -121,7 +122,7 @@ private struct ProgressDots: View {
             ForEach(0..<total, id: \.self) { index in
                 Capsule()
                     .fill(fill(for: index))
-                    .frame(height: index == results.count ? 14 : 10)
+                    .frame(height: index == current ? 14 : 10)
             }
         }
         .frame(maxWidth: .infinity)
@@ -130,7 +131,7 @@ private struct ProgressDots: View {
 
     private func fill(for index: Int) -> Color {
         if index < results.count { return results[index] ? Palette.correct : Palette.reveal }
-        if index == results.count { return color }
+        if index == current { return color }
         return Color.secondary.opacity(0.2)
     }
 }

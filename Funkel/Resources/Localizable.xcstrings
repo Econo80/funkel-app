@@ -577,6 +577,18 @@
         }
       }
     },
+    "round.tile.remove": {
+      "comment": "Accessibility hint on a placed letter/word tile.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antippen, um es zurückzulegen."
+          }
+        }
+      }
+    },
     "summary.again": {
       "comment": "Play another round.",
       "extractionState": "manual",
