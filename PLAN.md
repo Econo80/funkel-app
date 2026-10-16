@@ -4,7 +4,7 @@ Funkel is an offline, child-safe iOS learning app for vocabulary, maths and
 general knowledge. The mascot is **Pip**, an original round "spark" creature
 drawn purely in SwiftUI shapes (no image assets, no resemblance to any brand).
 
-_Last updated: 2026-10-15 — Milestone 1 (plan, scaffold, foundations)._
+_Last updated: 2026-10-16 — Milestone 1 verified in CI._
 
 ---
 
@@ -12,8 +12,8 @@ _Last updated: 2026-10-15 — Milestone 1 (plan, scaffold, foundations)._
 
 | # | Milestone | State | Build verified? |
 |---|-----------|-------|-----------------|
-| 0 | PLAN.md, README.md, Xcode project scaffold | done | ⚠️ no (no Xcode on dev machine) |
-| 1 | Data model, age scaling, content loader, `de` manifest | done | ⚠️ no |
+| 0 | PLAN.md, README.md, Xcode project scaffold, CI | done | ✅ CI (Xcode 16.4, iOS 26.2 sim) |
+| 1 | Data model, age scaling, content loader, `de` manifest | done | ✅ CI, 19/19 tests |
 | 2 | Home screen + profile picker | next | |
 | 3 | Maths end-to-end (generator → round → feedback → summary → progress) | | |
 | 4 | Vocabulary (picture match, meaning, synonyms/opposites, spelling) | | |
@@ -21,8 +21,8 @@ _Last updated: 2026-10-15 — Milestone 1 (plan, scaffold, foundations)._
 | 6 | Grown-up area: gate, profiles, ages, language, toggles, round length | | |
 | 7 | Polish: animations, haptics, sound, read-aloud, accessibility audit | | |
 
-"Build verified" means `xcodebuild -scheme Funkel -destination 'platform=iOS Simulator,name=iPhone 16' build`
-succeeded. Until then, code is written carefully but **unverified**. The JSON
+"Build verified" means the GitHub Actions workflow (`.github/workflows/ci.yml`) built the app and passed the unit tests on a macOS runner with an iOS Simulator. The tests run inside the app, so a pass also means it launches. Development happens on Windows, so CI is the only compiler; every slice is pushed and must be green before the next one starts.
+The JSON
 content *is* verified on every milestone via `scripts/validate_content.py`.
 
 ---
@@ -283,3 +283,4 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-15** — Pictures are emoji rendered large. Zero asset licensing risk, works offline, every language shares them. Can be swapped for custom illustrations later via an optional `image` field.
 - **2026-10-15** — Project file is hand-written (Xcode 16 format, `objectVersion = 77`). Requires **Xcode 16+** to open.
 - **2026-10-15** — Bundle ID placeholder `com.example.funkel`; set your Team in Signing & Capabilities.
+- **2026-10-16** — No Mac available, so builds run on GitHub Actions (`macos-15`, private repo `Econo80/funkel`). macOS minutes are limited on the free plan, so a newer push cancels the running build.
