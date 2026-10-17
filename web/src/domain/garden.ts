@@ -5,8 +5,8 @@
 import { dayKey, type Profile } from "./profile";
 import { randomElement, type Rng } from "./random";
 
-export type GardenCategory = "plants" | "animals" | "buildings" | "decor";
-export const GARDEN_CATEGORIES: readonly GardenCategory[] = ["plants", "animals", "buildings", "decor"];
+export type GardenCategory = "plants" | "animals" | "buildings" | "paths" | "decor";
+export const GARDEN_CATEGORIES: readonly GardenCategory[] = ["plants", "animals", "buildings", "paths", "decor"];
 
 export type Produce = "egg" | "milk";
 export const PRODUCE_EMOJI: Record<Produce, string> = { egg: "🥚", milk: "🥛" };
@@ -31,6 +31,8 @@ export interface GardenItem {
   needs?: HomeGroup;
   /** Grown animals give this once a day. */
   produce?: Produce;
+  /** Roads, paths and fences join up with neighbours of the same kind. */
+  connects?: boolean;
 }
 
 const BUILDING = "🚧";
@@ -64,9 +66,12 @@ export const GARDEN_ITEMS: GardenItem[] = [
   { id: "pond", price: 25, category: "buildings", stages: [BUILDING, "art:pond"], days: [0, 1], size: [2, 1], houses: { group: "duck", capacity: 3 } },
   { id: "barn", price: 40, category: "buildings", stages: [BUILDING, "art:barn"], days: [0, 2], size: [2, 2], houses: { group: "farm", capacity: 4 } },
   { id: "farmhouse", price: 60, category: "buildings", stages: [BUILDING, "art:farmhouse"], days: [0, 3], size: [2, 2], houses: { group: "cat", capacity: 2 } },
+  // Roads, paths and fences are free, so children can lay out their farm.
+  { id: "road", price: 0, category: "paths", stages: ["art:road"], days: [0], connects: true },
+  { id: "path", price: 0, category: "paths", stages: ["art:path"], days: [0], connects: true },
+  { id: "fence", price: 0, category: "paths", stages: ["art:fence"], days: [0], connects: true },
   // Decorations
   { id: "stone", price: 1, category: "decor", stages: ["🪨"], days: [0] },
-  { id: "fence", price: 2, category: "decor", stages: ["art:fence"], days: [0] },
   { id: "mailbox", price: 3, category: "decor", stages: ["📫"], days: [0] },
   { id: "fountain", price: 20, category: "decor", stages: ["⛲"], days: [0] },
 ];
@@ -78,12 +83,33 @@ export const shopPicture = (item: GardenItem) => item.variants?.[0] ?? item.stag
 
 // MARK: Land
 
-export const GARDEN_COLUMNS = 6;
-export const GARDEN_START_ROWS = 4;
+/** Wider than a screen: the garden scrolls. */
+export const GARDEN_COLUMNS = 16;
+export const GARDEN_START_ROWS = 8;
 export const GARDEN_SIZE = GARDEN_COLUMNS * GARDEN_START_ROWS;
-/** Each purchase adds two rows. */
-export const LAND_ROWS_PER_PURCHASE = 2;
+/** Each purchase adds four rows. */
+export const LAND_ROWS_PER_PURCHASE = 4;
 export const LAND_PRICES = [25, 40, 60];
+
+/** Gardens saved before the farm was widened were 6 columns wide, 4 rows plus 2 per land purchase. */
+export const LEGACY_COLUMNS = 6;
+const LEGACY_START_ROWS = 4;
+const LEGACY_ROWS_PER_PURCHASE = 2;
+
+/**
+ * Moves an old 6-column garden into the wide one: everything keeps its row and
+ * column, and each piece of land bought earlier still counts as one purchase.
+ */
+export function widenGarden(old: Garden): Garden {
+  const oldRows = Math.ceil(old.length / LEGACY_COLUMNS);
+  const purchases = Math.max(0, Math.ceil((oldRows - LEGACY_START_ROWS) / LEGACY_ROWS_PER_PURCHASE));
+  const rows = GARDEN_START_ROWS + Math.min(purchases, LAND_PRICES.length) * LAND_ROWS_PER_PURCHASE;
+  const garden: Garden = Array.from({ length: rows * GARDEN_COLUMNS }, () => null);
+  old.forEach((plot, i) => {
+    if (plot) garden[Math.floor(i / LEGACY_COLUMNS) * GARDEN_COLUMNS + (i % LEGACY_COLUMNS)] = plot;
+  });
+  return garden;
+}
 
 export interface GardenPlot {
   itemId: string;
@@ -174,6 +200,19 @@ function fits(garden: Garden, anchor: number, item: GardenItem): boolean {
   if (anchor < 0 || col + w > GARDEN_COLUMNS || row + h > gardenRows(garden)) return false;
   for (let r = row; r < row + h; r++) for (let c = col; c < col + w; c++) if (covered[r * GARDEN_COLUMNS + c] !== undefined) return false;
   return true;
+}
+
+/** Which neighbours (up, right, down, left) hold the same road, path or fence. */
+export function connections(garden: Garden, cell: number): { n: boolean; e: boolean; s: boolean; w: boolean } {
+  const id = garden[cell]?.itemId;
+  const same = (i: number) => i >= 0 && i < garden.length && garden[i]?.itemId === id;
+  const col = cell % GARDEN_COLUMNS;
+  return {
+    n: same(cell - GARDEN_COLUMNS),
+    s: same(cell + GARDEN_COLUMNS),
+    w: col > 0 && same(cell - 1),
+    e: col < GARDEN_COLUMNS - 1 && same(cell + 1),
+  };
 }
 
 // MARK: Homes

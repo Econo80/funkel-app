@@ -7,6 +7,7 @@ import {
   canClear,
   clearPlot,
   collectProduce,
+  connections,
   daysUntilNextStage,
   gardenRows,
   homeSpace,
@@ -102,31 +103,59 @@ describe("farm animals", () => {
 });
 
 describe("more land", () => {
-  it("adds two rows at a time, three times", () => {
+  it("adds four rows at a time, three times", () => {
     let p = rich(200);
-    expect(gardenRows(p.garden)).toBe(4);
+    expect(gardenRows(p.garden)).toBe(8);
     for (const price of [25, 40, 60]) {
       expect(nextLandPrice(p.garden)).toBe(price);
       const before = p.walletStars;
       p = buyLand(p);
       expect(p.walletStars).toBe(before - price);
     }
-    expect(gardenRows(p.garden)).toBe(10);
+    expect(gardenRows(p.garden)).toBe(20);
     expect(nextLandPrice(p.garden)).toBeUndefined();
     expect(buyLand(p)).toBe(p);
   });
 
-  it("keeps old gardens working", () => {
+  it("moves old 6-column gardens into the wide farm, keeping land already bought", () => {
     const old = normalizeProfile({ id: "x", garden: [{ itemId: "flower", plantedDay: "2026-10-01" }] as Profile["garden"] });
     expect(old.garden).toHaveLength(GARDEN_SIZE);
     expect(old.farmGoods).toEqual({ egg: 0, milk: 0 });
+
+    // 6 columns × 6 rows = one land purchase; a barn at row 1, column 4.
+    const legacy: Profile["garden"] = Array.from({ length: 36 }, () => null);
+    legacy[6 + 4] = { itemId: "barn", plantedDay: "2026-10-01" };
+    legacy[35] = { itemId: "stone", plantedDay: "2026-10-01" };
+    const moved = normalizeProfile({ id: "y", garden: legacy });
+    expect(gardenRows(moved.garden)).toBe(12);
+    expect(moved.garden[GARDEN_COLUMNS + 4]?.itemId).toBe("barn");
+    expect(moved.garden[5 * GARDEN_COLUMNS + 5]?.itemId).toBe("stone");
+    expect(nextLandPrice(moved.garden)).toBe(40);
+    // Saved again, it is not moved a second time.
+    expect(normalizeProfile(moved).garden).toEqual(moved.garden);
   });
 
   it("has a name-able, buyable picture for every item", () => {
     for (const item of GARDEN_ITEMS) {
       expect(item.stages).toHaveLength(item.days.length);
-      expect(item.price).toBeGreaterThan(0);
+      expect(item.price).toBeGreaterThanOrEqual(item.connects ? 0 : 1);
+      expect(item.price === 0).toBe(item.category === "paths");
       if (item.needs) expect(GARDEN_ITEMS.some((h) => h.houses?.group === item.needs)).toBe(true);
     }
+  });
+});
+
+describe("roads, paths and fences", () => {
+  it("are free and join up with their neighbours", () => {
+    let p = rich(0);
+    for (const cell of [0, 1, 2, 2 + GARDEN_COLUMNS]) p = place(p, cell, "road");
+    p = place(p, 3, "fence");
+    expect(p.walletStars).toBe(0);
+    expect(connections(p.garden, 0)).toEqual({ n: false, e: true, s: false, w: false });
+    expect(connections(p.garden, 2)).toEqual({ n: false, e: false, s: true, w: true });
+    // A road doesn't join a fence; the right edge doesn't wrap to the next row.
+    expect(connections(p.garden, 3)).toEqual({ n: false, e: false, s: false, w: false });
+    const edge = place(place(rich(0), GARDEN_COLUMNS - 1, "path"), GARDEN_COLUMNS, "path");
+    expect(connections(edge.garden, GARDEN_COLUMNS - 1).e).toBe(false);
   });
 });

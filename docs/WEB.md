@@ -80,7 +80,11 @@ card on the home screen) they can spend stars:
     Scheune, cat → a house. Each home has room for a few animals.
   - Hens lay an egg and cows give milk every day: tap them to collect. 5 eggs or
     milk sell for 1 ⭐ at the farm shop, so learning stays the main way to earn stars.
-  - When the garden is full, buy more land (25, 40, then 60 ⭐ for two more rows).
+  - **Roads, footpaths and fences are free** (tab "Wege"): choose one and drag a
+    finger across the squares to draw; they join up into corners and crossings.
+  - The farm is 16 squares wide, wider than the screen: swipe inside it to look
+    around, and use − / + to zoom.
+  - When the garden is full, buy more land (25, 40, then 60 ⭐ for four more rows each).
 
 The lifetime star count never goes down; only the "stars to spend" are used.
 Grown-ups can change the price per game, the number of games per day, or turn

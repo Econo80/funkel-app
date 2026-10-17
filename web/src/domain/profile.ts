@@ -3,7 +3,7 @@
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity } from "./difficulty";
 import { DEFAULT_GAME_SETTINGS, gameAge, type GameDifficulty } from "./games";
-import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, type Garden, type Produce } from "./garden";
+import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, widenGarden, type Garden, type Produce } from "./garden";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -71,6 +71,8 @@ export interface Profile extends ProfileSettings {
   bonusGames: number;
   bonusDay?: string;
   garden: Garden;
+  /** Columns the garden was saved with (missing: the old 6-column garden). */
+  gardenColumns?: number;
   /** Eggs and milk collected on the farm, not yet sold. */
   farmGoods: Record<Produce, number>;
   currentStreak: number;
@@ -123,7 +125,8 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesToday: p.gamesToday ?? 0,
     bonusGames: p.bonusGames ?? 0,
     gameDifficulty: p.gameDifficulty ?? base.gameDifficulty,
-    garden: normalizeGarden(p.garden),
+    garden: normalizeGarden(p.garden && p.gardenColumns !== GARDEN_COLUMNS ? widenGarden(p.garden) : p.garden),
+    gardenColumns: GARDEN_COLUMNS,
     farmGoods: { egg: 0, milk: 0, ...p.farmGoods },
     gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
     gameCost: p.gameCost ?? base.gameCost,
@@ -157,6 +160,7 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
       gamesToday: 0,
       bonusGames: 0,
       garden: emptyGarden(),
+      gardenColumns: GARDEN_COLUMNS,
       farmGoods: { egg: 0, milk: 0 },
       currentStreak: 0,
       longestStreak: 0,

@@ -66,6 +66,42 @@ export function FarmArt({ id }: { id: string }) {
   }
 }
 
+type Links = { n: boolean; e: boolean; s: boolean; w: boolean };
+
+/**
+ * Roads, footpaths and fences drawn to join their neighbours: straight pieces,
+ * corners, T-junctions and crossings all come from the same four "arms".
+ * A piece on its own lies left to right.
+ */
+export function PathArt({ id, links }: { id: string; links: Links }) {
+  const l = links.n || links.e || links.s || links.w ? links : { n: false, e: true, s: false, w: true };
+  if (id === "fence") {
+    const rails = (y: number) => <path d={`M${l.w ? 0 : 50} ${y} H${l.e ? 100 : 50} M${50 - (y - 50)} ${l.n ? 0 : 50} V${l.s ? 100 : 50}`} />;
+    return (
+      <svg viewBox="0 0 100 100" class="path-art" preserveAspectRatio="none" aria-hidden="true">
+        <g stroke="#B07A4A" stroke-width="7" stroke-linecap="square" fill="none">{rails(40)}{rails(62)}</g>
+        <path d="M43 80 V30 L50 22 L57 30 V80 Z" fill="#8A5A3C" />
+      </svg>
+    );
+  }
+  const road = id === "road";
+  const [a, b] = road ? [20, 80] : [32, 68];
+  const arms = [
+    l.n && `M${a} 0 H${b} V50 H${a} Z`,
+    l.s && `M${a} 50 H${b} V100 H${a} Z`,
+    l.w && `M0 ${a} H50 V${b} H0 Z`,
+    l.e && `M50 ${a} H100 V${b} H50 Z`,
+  ].filter(Boolean).join(" ");
+  const dashes = [l.n && "M50 4 V36", l.s && "M50 64 V96", l.w && "M4 50 H36", l.e && "M64 50 H96"].filter(Boolean).join(" ");
+  return (
+    <svg viewBox="0 0 100 100" class="path-art" preserveAspectRatio="none" aria-hidden="true">
+      <path d={`${arms} M${a} ${a} H${b} V${b} H${a} Z`} fill={road ? "#6E737B" : "#E6CC9C"} />
+      {road ? <path d={dashes} stroke="#F4F1E8" stroke-width="4" stroke-dasharray="10 8" fill="none" />
+        : <g fill="#C9A86E"><circle cx="42" cy="44" r="3" /><circle cx="58" cy="57" r="2.5" /><circle cx="47" cy="60" r="2" /></g>}
+    </svg>
+  );
+}
+
 /** An emoji, or a drawn building for "art:<id>". */
 export function GardenPicture({ picture }: { picture: string }) {
   return picture.startsWith("art:") ? <FarmArt id={picture.slice(4)} /> : <>{picture}</>;

@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import {
   GARDEN_CATEGORIES,
   GARDEN_COLUMNS,
@@ -9,6 +9,7 @@ import {
   canClear,
   clearPlot,
   collectProduce,
+  connections,
   daysUntilNextStage,
   gardenItem,
   homeFor,
@@ -31,26 +32,34 @@ import { systemRng } from "../../domain/random";
 import { playSound } from "../../services/feedback";
 import { t } from "../../services/i18n";
 import { CircleButton, Pip, avatarColor } from "../components";
-import { GardenPicture } from "./FarmArt";
+import { GardenPicture, PathArt } from "./FarmArt";
 
 type Tool = { kind: "item"; id: string } | { kind: "clear" } | undefined;
 
-const TAB_ICONS: Record<GardenCategory, string> = { plants: "🌱", animals: "🐾", buildings: "🏠", decor: "✨" };
+const TAB_ICONS: Record<GardenCategory, string> = { plants: "🌱", animals: "🐾", buildings: "🏠", paths: "🛤️", decor: "✨" };
+/** Zoom steps: the size of one square in pixels. */
+const CELL_SIZES = [40, 56, 76];
 
 /**
  * Pip's garden, growing into a farm: plants grow, buildings take days, animals
  * need a home, hens and cows give eggs and milk every day, and there is more
  * land to buy. No timer, no ticket.
  */
-export function Garden({ profile, onSave, onBack }: { profile: Profile; onSave: (p: Profile) => Promise<void>; onBack: () => void }) {
+export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; onSave: (p: Profile) => Promise<void>; onBack: () => void }) {
   const [tab, setTab] = useState<GardenCategory>("plants");
   const [tool, setTool] = useState<Tool>();
   const [info, setInfo] = useState("");
+  const [zoom, setZoom] = useState(1);
+  // While drawing a road with a finger, changes collect here and are saved when the finger lifts.
+  const [draft, setDraft] = useState<Profile>();
+  const drawing = useRef<Profile | undefined>(undefined);
+  const profile = draft ?? saved;
   const now = new Date();
   const garden = profile.garden;
   const covered = occupancy(garden);
   const sound = (kind: "pop" | "gentle" | "finish") => profile.soundEnabled && playSound(kind);
   const name = (id: string) => t(`garden.item.${id}`);
+  const price = (item: GardenItem) => (item.price === 0 ? t("garden.free") : `${item.price} ⭐`);
 
   const save = async (next: Profile, message = "", kind: "pop" | "finish" = "pop") => {
     if (next === profile) return;
@@ -83,6 +92,7 @@ export function Garden({ profile, onSave, onBack }: { profile: Profile; onSave: 
       const produce = readyProduce(plot, now)!;
       return save(collectProduce(profile, cell, now), t(`garden.collect.${produce}`));
     }
+    if (drawTool) return; // roads, paths and fences are drawn (see below)
     if (tool?.kind === "clear" && anchor !== undefined) {
       if (!canClear(profile, cell, now)) { sound("gentle"); return setInfo(t("garden.clearBlocked")); }
       return save(clearPlot(profile, cell, now));
@@ -106,7 +116,31 @@ export function Garden({ profile, onSave, onBack }: { profile: Profile; onSave: 
     setTool(selected ? undefined : { kind: "item", id: item.id });
     if (selected) return setInfo("");
     if (item.needs && homeSpace(garden, item.needs, now).capacity === 0) setInfo(t("garden.needs %@", name(homeFor(item.needs).id)));
-    else setInfo(itemSize(item)[0] > 1 ? t("garden.big") : "");
+    else setInfo(item.connects ? t("garden.draw") : itemSize(item)[0] > 1 ? t("garden.big") : "");
+  };
+
+  // Drawing roads, paths and fences: press and drag across the squares.
+  const drawTool = tool?.kind === "item" && gardenItem(tool.id)?.connects ? tool.id : undefined;
+  const drawAt = (target: EventTarget | null) => {
+    const cellAttr = (target as HTMLElement | null)?.closest?.("[data-cell]")?.getAttribute("data-cell");
+    if (!drawTool || !drawing.current || cellAttr == null) return;
+    const next = placeInGarden(drawing.current, Number(cellAttr), drawTool, new Date(), systemRng);
+    if (next === drawing.current) return;
+    drawing.current = next;
+    setDraft(next);
+    if (saved.soundEnabled) playSound("pop");
+  };
+  const startDrawing = (e: PointerEvent) => {
+    if (!drawTool) return;
+    drawing.current = saved;
+    setInfo("");
+    drawAt(e.target);
+  };
+  const stopDrawing = async () => {
+    const result = drawing.current;
+    drawing.current = undefined;
+    if (result && result !== saved) await onSave(result);
+    setDraft(undefined);
   };
 
   const goods = profile.farmGoods.egg + profile.farmGoods.milk;
@@ -157,11 +191,13 @@ export function Garden({ profile, onSave, onBack }: { profile: Profile; onSave: 
             const locked = !!item.needs && homeSpace(garden, item.needs, now).capacity === 0;
             return (
               <button key={item.id} class={`card shop-item pressable${selected ? " selected" : ""}${locked ? " locked" : ""}`} disabled={!affordable}
-                aria-pressed={selected} aria-label={`${name(item.id)}, ${item.price} ⭐`}
+                aria-pressed={selected} aria-label={`${name(item.id)}, ${price(item)}`}
                 onClick={() => chooseItem(item)} data-testid={`shop-${item.id}`}>
-                <span class="shop-emoji" aria-hidden="true"><GardenPicture picture={shopPicture(item)} /></span>
+                <span class="shop-emoji" aria-hidden="true">
+                  {item.connects ? <PathArt id={item.id} links={{ n: false, e: true, s: false, w: true }} /> : <GardenPicture picture={shopPicture(item)} />}
+                </span>
                 <span class="shop-name" aria-hidden="true">{name(item.id)}</span>
-                <span class="shop-price" aria-hidden="true">{locked ? "🔒 " : ""}{item.price} ⭐</span>
+                <span class="shop-price" aria-hidden="true">{locked ? "🔒 " : ""}{price(item)}</span>
               </button>
             );
           })}
@@ -173,24 +209,39 @@ export function Garden({ profile, onSave, onBack }: { profile: Profile; onSave: 
         </div>
         <p class="game-hint" aria-live="polite" data-testid="garden-info">{info || t("garden.hint")}</p>
 
-        <div class="garden-grid" style={{ gridTemplateColumns: `repeat(${GARDEN_COLUMNS}, 1fr)` }}>
-          {garden.map((plot, i) => {
-            const col = i % GARDEN_COLUMNS, row = Math.floor(i / GARDEN_COLUMNS);
-            if (covered[i] !== undefined && covered[i] !== i) return null; // part of a bigger item
-            const item = plot && gardenItem(plot.itemId);
-            const [w, h] = item ? itemSize(item) : [1, 1];
-            const picture = plot ? plotPicture(plot, now) : "";
-            const produce = plot && readyProduce(plot, now);
-            const building = plot && isUnderConstruction(plot, now);
-            return (
-              <button key={i} class={`plot pressable${plot ? " planted" : ""}${w > 1 || h > 1 ? " big" : ""}${building ? " building" : ""}`}
-                style={{ gridColumn: `${col + 1} / span ${w}`, gridRow: `${row + 1} / span ${h}` }}
-                onClick={() => tapCell(i)} aria-label={plot ? name(plot.itemId) : "—"} data-testid="garden-plot" data-item={plot?.itemId}>
-                <span class="plot-picture" aria-hidden="true"><GardenPicture picture={picture} /></span>
-                {produce && <span class="plot-produce" aria-hidden="true">{PRODUCE_EMOJI[produce]}</span>}
-              </button>
-            );
-          })}
+        <div class="row-between garden-zoom">
+          <span class="muted">{t("garden.scroll")}</span>
+          <div class="row gap">
+            <CircleButton label={t("garden.zoomOut")} onClick={() => setZoom((z) => Math.max(0, z - 1))} testId="garden-zoom-out">−</CircleButton>
+            <CircleButton label={t("garden.zoomIn")} onClick={() => setZoom((z) => Math.min(CELL_SIZES.length - 1, z + 1))} testId="garden-zoom-in">+</CircleButton>
+          </div>
+        </div>
+        <div class="garden-scroll" data-testid="garden-scroll">
+          <div class={`garden-grid${drawTool ? " drawing" : ""}`}
+            style={{ "--cell": `${CELL_SIZES[zoom]}px`, gridTemplateColumns: `repeat(${GARDEN_COLUMNS}, var(--cell))` } as never}
+            onPointerDown={startDrawing}
+            onPointerMove={(e) => drawing.current && drawAt(document.elementFromPoint(e.clientX, e.clientY))}
+            onPointerUp={stopDrawing} onPointerCancel={stopDrawing} onPointerLeave={() => drawing.current && stopDrawing()}>
+            {garden.map((plot, i) => {
+              const col = i % GARDEN_COLUMNS, row = Math.floor(i / GARDEN_COLUMNS);
+              if (covered[i] !== undefined && covered[i] !== i) return null; // part of a bigger item
+              const item = plot && gardenItem(plot.itemId);
+              const [w, h] = item ? itemSize(item) : [1, 1];
+              const picture = plot ? plotPicture(plot, now) : "";
+              const produce = plot && readyProduce(plot, now);
+              const building = plot && isUnderConstruction(plot, now);
+              return (
+                <button key={i} class={`plot pressable${plot ? " planted" : ""}${w > 1 || h > 1 ? " big" : ""}${building ? " building" : ""}${item?.connects ? " way" : ""}`}
+                  style={{ gridColumn: `${col + 1} / span ${w}`, gridRow: `${row + 1} / span ${h}` }}
+                  onClick={() => tapCell(i)} aria-label={plot ? name(plot.itemId) : "—"} data-testid="garden-plot" data-item={plot?.itemId} data-cell={i}>
+                  <span class="plot-picture" aria-hidden="true">
+                    {item?.connects ? <PathArt id={item.id} links={connections(garden, i)} /> : <GardenPicture picture={picture} />}
+                  </span>
+                  {produce && <span class="plot-produce" aria-hidden="true">{PRODUCE_EMOJI[produce]}</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {landPrice !== undefined && (
