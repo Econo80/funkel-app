@@ -102,24 +102,43 @@ export function memoryBoard(age: number, rng: Rng, boardsCleared = 0): MemoryCar
 
 // MARK: Ballon-Pop
 
+/** Four colours that are easy to tell apart and to name. */
+export const BALLOON_COLORS = { red: "#F0453A", yellow: "#FFC21A", blue: "#3D8BFF", green: "#2FBF60" } as const;
+export type BalloonColor = keyof typeof BALLOON_COLORS;
+const BALLOON_COLOR_IDS = Object.keys(BALLOON_COLORS) as BalloonColor[];
+
+/** The target colour switches this often, so the child has to keep watching. */
+export const BALLOON_COLOR_SECONDS = 30;
+
 export type BalloonRule =
   | { kind: "all" }
+  | { kind: "color"; color: BalloonColor }
   | { kind: "even" }
   | { kind: "product"; target: number };
 
-/** Little ones pop everything; older children pop by a maths rule. */
+/** The youngest pop everything, then by colour; older children pop by a maths rule. */
 export function balloonRuleForAge(age: number, rng: Rng): BalloonRule {
-  if (age < 7) return { kind: "all" };
+  if (age < 5) return { kind: "all" };
+  if (age < 7) return { kind: "color", color: randomElement(rng, BALLOON_COLOR_IDS) ?? "red" };
   if (age < 9) return { kind: "even" };
   return { kind: "product", target: randomElement(rng, [12, 18, 24, 36]) ?? 24 };
 }
 
-export interface BalloonSpec { label?: string; good: boolean }
+/** The next colour rule: always a different colour from the current one. */
+export function nextBalloonColor(current: BalloonColor, rng: Rng): BalloonColor {
+  return randomElement(rng, BALLOON_COLOR_IDS.filter((c) => c !== current)) ?? current;
+}
+
+export interface BalloonSpec { label?: string; color?: BalloonColor; good: boolean }
 
 export function spawnBalloon(rule: BalloonRule, rng: Rng): BalloonSpec {
   switch (rule.kind) {
     case "all":
       return { good: true };
+    case "color": {
+      const color = rng() < 0.4 ? rule.color : randomElement(rng, BALLOON_COLOR_IDS.filter((c) => c !== rule.color))!;
+      return { color, good: color === rule.color };
+    }
     case "even": {
       const n = randomInt(rng, 1, 20);
       return { label: String(n), good: n % 2 === 0 };

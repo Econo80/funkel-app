@@ -12,6 +12,7 @@ import {
   gamesLeftToday,
   memoryBoard,
   memoryPairsForAge,
+  nextBalloonColor,
   placeInGarden,
   plotPicture,
   spawnBalloon,
@@ -136,7 +137,8 @@ describe("memory", () => {
 describe("balloons", () => {
   it("uses age-appropriate rules that are always correct", () => {
     const rng = seededRng(5);
-    expect(balloonRuleForAge(5, rng)).toEqual({ kind: "all" });
+    expect(balloonRuleForAge(4, rng)).toEqual({ kind: "all" });
+    expect(balloonRuleForAge(5, rng).kind).toBe("color");
     expect(balloonRuleForAge(8, rng)).toEqual({ kind: "even" });
     const rule = balloonRuleForAge(11, rng);
     expect(rule.kind).toBe("product");
@@ -152,6 +154,19 @@ describe("balloons", () => {
       const b = spawnBalloon({ kind: "even" }, rng);
       expect(b.good).toBe(Number(b.label) % 2 === 0);
     }
+  });
+
+  it("gives 5- and 6-year-olds a colour to look for, with plenty of wrong colours", () => {
+    const rng = seededRng(9);
+    let good = 0;
+    for (let i = 0; i < 400; i++) {
+      const b = spawnBalloon({ kind: "color", color: "red" }, rng);
+      expect(b.good).toBe(b.color === "red");
+      if (b.good) good++;
+    }
+    expect(good).toBeGreaterThan(120);
+    expect(good).toBeLessThan(200);
+    for (let i = 0; i < 20; i++) expect(nextBalloonColor("blue", rng)).not.toBe("blue");
   });
 });
 

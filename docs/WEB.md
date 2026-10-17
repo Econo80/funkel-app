@@ -55,7 +55,8 @@ Children earn one star per correct answer. In the **Spielecke** (the colourful
 card on the home screen) they can spend stars:
 
 - **Games** (2 minutes each): **Memory** (find pairs), **Ballon-Pop** (pop
-  balloons; from age 7 only even numbers, from 9 only the multiplications that
+  balloons; at 4 all of them, at 5–6 only one colour, which changes every 30
+  seconds, from 7 only even numbers, from 9 only the multiplications that
   make a target number, e.g. 24) and **Sternenfänger** (move Pip to catch stars and dodge clouds).
 - **Pips Garten:** buy seeds, trees and decorations. Plants grow over the
   next days and weeks. No timer.

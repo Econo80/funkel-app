@@ -673,6 +673,54 @@
         }
       }
     },
+    "game.balloons.color.blue": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die blauen Ballons!"
+          }
+        }
+      }
+    },
+    "game.balloons.color.green": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die grünen Ballons!"
+          }
+        }
+      }
+    },
+    "game.balloons.color.red": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die roten Ballons!"
+          }
+        }
+      }
+    },
+    "game.balloons.color.yellow": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platze nur die gelben Ballons!"
+          }
+        }
+      }
+    },
     "game.balloons.even": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -681,6 +729,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Platze nur die Ballons mit geraden Zahlen!"
+          }
+        }
+      }
+    },
+    "game.balloons.name.blue": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blauer Ballon"
+          }
+        }
+      }
+    },
+    "game.balloons.name.green": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grüner Ballon"
+          }
+        }
+      }
+    },
+    "game.balloons.name.red": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roter Ballon"
+          }
+        }
+      }
+    },
+    "game.balloons.name.yellow": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelber Ballon"
           }
         }
       }
