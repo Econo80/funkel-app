@@ -841,6 +841,18 @@
         }
       }
     },
+    "game.balloons.penalty": {
+      "comment": "UI text. (Play corner; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achtung: Ein falscher Ballon kostet einen Punkt."
+          }
+        }
+      }
+    },
     "game.balloons.product %lld": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -961,6 +973,42 @@
         }
       }
     },
+    "garden.big": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das ist gross und braucht mehrere Felder."
+          }
+        }
+      }
+    },
+    "garden.builds %lld": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Wird gebaut – fertig in %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Wird gebaut – fertig in %lld Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "garden.clear": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -969,6 +1017,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wegräumen"
+          }
+        }
+      }
+    },
+    "garden.clearBlocked": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier wohnen noch Tiere. Sie brauchen ihr Zuhause."
+          }
+        }
+      }
+    },
+    "garden.collect.egg": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein frisches Ei! 🥚"
+          }
+        }
+      }
+    },
+    "garden.collect.milk": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frische Milch! 🥛"
+          }
+        }
+      }
+    },
+    "garden.full %@": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles besetzt! Bau noch mehr: %@"
+          }
+        }
+      }
+    },
+    "garden.goods %lld %lld": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Eier, %2$lld Milch"
           }
         }
       }
@@ -1016,7 +1124,19 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wähle etwas aus und tippe auf ein freies Beet."
+            "value": "Wähle etwas aus und tippe auf ein freies Feld."
+          }
+        }
+      }
+    },
+    "garden.item.barn": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheune"
           }
         }
       }
@@ -1045,6 +1165,114 @@
         }
       }
     },
+    "garden.item.cat": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Katze"
+          }
+        }
+      }
+    },
+    "garden.item.chick": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Küken"
+          }
+        }
+      }
+    },
+    "garden.item.coop": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hühnerstall"
+          }
+        }
+      }
+    },
+    "garden.item.cow": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kuh"
+          }
+        }
+      }
+    },
+    "garden.item.dog": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hund"
+          }
+        }
+      }
+    },
+    "garden.item.doghouse": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hundehütte"
+          }
+        }
+      }
+    },
+    "garden.item.duck": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ente"
+          }
+        }
+      }
+    },
+    "garden.item.farmhouse": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bauernhaus"
+          }
+        }
+      }
+    },
+    "garden.item.fence": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaun"
+          }
+        }
+      }
+    },
     "garden.item.flower": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1065,6 +1293,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Brunnen"
+          }
+        }
+      }
+    },
+    "garden.item.goat": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziege"
+          }
+        }
+      }
+    },
+    "garden.item.horse": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pferd"
           }
         }
       }
@@ -1093,6 +1345,18 @@
         }
       }
     },
+    "garden.item.mailbox": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Briefkasten"
+          }
+        }
+      }
+    },
     "garden.item.mushroom": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1101,6 +1365,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pilz"
+          }
+        }
+      }
+    },
+    "garden.item.pig": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwein"
+          }
+        }
+      }
+    },
+    "garden.item.pond": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teich"
+          }
+        }
+      }
+    },
+    "garden.item.rabbit": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hase"
+          }
+        }
+      }
+    },
+    "garden.item.sheep": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schaf"
           }
         }
       }
@@ -1141,6 +1453,126 @@
         }
       }
     },
+    "garden.item.vegetable": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemüse"
+          }
+        }
+      }
+    },
+    "garden.item.wheat": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weizen"
+          }
+        }
+      }
+    },
+    "garden.land %lld": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr Land kaufen: %lld ⭐"
+          }
+        }
+      }
+    },
+    "garden.landBought": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr Platz für deinen Hof!"
+          }
+        }
+      }
+    },
+    "garden.needs %@": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuerst brauchst du: %@"
+          }
+        }
+      }
+    },
+    "garden.noSpace": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier ist nicht genug Platz."
+          }
+        }
+      }
+    },
+    "garden.places %lld": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Platz frei"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Plätze frei"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.sell %lld": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eier und Milch im Hofladen verkaufen: +%lld ⭐"
+          }
+        }
+      }
+    },
+    "garden.sold": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkauft! Danke für die frischen Sachen."
+          }
+        }
+      }
+    },
     "garden.subtitle": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1148,7 +1580,55 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pflanze Blumen und Bäume. Sie wachsen jeden Tag ein bisschen."
+            "value": "Pflanzen, Tiere und Häuser: Jeden Tag wächst dein Hof ein bisschen."
+          }
+        }
+      }
+    },
+    "garden.tab.animals": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiere"
+          }
+        }
+      }
+    },
+    "garden.tab.buildings": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bauen"
+          }
+        }
+      }
+    },
+    "garden.tab.decor": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deko"
+          }
+        }
+      }
+    },
+    "garden.tab.plants": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pflanzen"
           }
         }
       }
@@ -1161,6 +1641,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pips Garten"
+          }
+        }
+      }
+    },
+    "garden.tomorrow": {
+      "comment": "UI text. (Pip's garden and farm; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morgen gibt es wieder etwas."
           }
         }
       }

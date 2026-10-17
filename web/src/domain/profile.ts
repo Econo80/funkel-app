@@ -2,7 +2,8 @@
 // StreakCalculator.swift, ProgressRecorder.swift and ProfileSettings.swift.
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity } from "./difficulty";
-import { DEFAULT_GAME_SETTINGS, emptyGarden, gameAge, type Garden, type GameDifficulty } from "./games";
+import { DEFAULT_GAME_SETTINGS, gameAge, type GameDifficulty } from "./games";
+import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, type Garden, type Produce } from "./garden";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -70,6 +71,8 @@ export interface Profile extends ProfileSettings {
   bonusGames: number;
   bonusDay?: string;
   garden: Garden;
+  /** Eggs and milk collected on the farm, not yet sold. */
+  farmGoods: Record<Produce, number>;
   currentStreak: number;
   longestStreak: number;
   /** Local calendar day, "YYYY-MM-DD". */
@@ -120,13 +123,22 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesToday: p.gamesToday ?? 0,
     bonusGames: p.bonusGames ?? 0,
     gameDifficulty: p.gameDifficulty ?? base.gameDifficulty,
-    garden: p.garden ?? emptyGarden(),
+    garden: normalizeGarden(p.garden),
+    farmGoods: { egg: 0, milk: 0, ...p.farmGoods },
     gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
     gameCost: p.gameCost ?? base.gameCost,
     gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
     sudokuEnabled: p.sudokuEnabled ?? base.sudokuEnabled,
     sudokuDifficulty: p.sudokuDifficulty ?? base.sudokuDifficulty,
   } as Profile;
+}
+
+/** At least the starting size, in whole rows. */
+function normalizeGarden(garden: Garden | undefined): Garden {
+  const g = garden ? [...garden] : emptyGarden();
+  const size = Math.max(GARDEN_SIZE, Math.ceil(g.length / GARDEN_COLUMNS) * GARDEN_COLUMNS);
+  while (g.length < size) g.push(null);
+  return g;
 }
 
 export function newId(): string {
@@ -145,6 +157,7 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
       gamesToday: 0,
       bonusGames: 0,
       garden: emptyGarden(),
+      farmGoods: { egg: 0, milk: 0 },
       currentStreak: 0,
       longestStreak: 0,
       progress: {},
@@ -379,7 +392,7 @@ export function recordSudoku(p: Profile, stars: number, now = new Date()): Profi
 export function resetProgress(p: Profile): Profile {
   return {
     ...p,
-    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(),
+    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: { egg: 0, milk: 0 },
     currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [],
   };
 }

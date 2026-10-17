@@ -18,10 +18,11 @@ interface Balloon {
   label?: string;
   good: boolean;
   poppedAt?: number;
-  wobbleAt?: number;
+  /** Popped by mistake: it costs a point. */
+  wrong?: boolean;
 }
 
-/** Balloons float up; tap to pop. Most children pop only those matching a rule. */
+/** Balloons float up; tap to pop. Most children pop only those matching a rule; a wrong one costs a point. */
 export function BalloonPop({ age, sound, addPoints, running }: GameApi & { age: number; sound: boolean }) {
   const rule = useRef<BalloonRule>(balloonRuleForAge(age, systemRng));
   const ruleAge = useRef(0);
@@ -56,17 +57,20 @@ export function BalloonPop({ age, sound, addPoints, running }: GameApi & { age: 
       });
     }
     for (const b of balloons.current) if (!b.poppedAt) b.y += b.speed * dt;
-    balloons.current = balloons.current.filter((b) => b.y < 1.15 && !(b.poppedAt && now - b.poppedAt > 350));
+    balloons.current = balloons.current.filter((b) => b.y < 1.15 && !(b.poppedAt && now - b.poppedAt > (b.wrong ? 700 : 350)));
   });
 
   const tap = (b: Balloon) => {
     if (!running || b.poppedAt) return;
+    b.poppedAt = performance.now();
     if (b.good) {
-      b.poppedAt = performance.now();
       if (sound) playSound("pop");
       addPoints();
     } else {
-      b.wobbleAt = performance.now(); // a gentle "nope", no penalty
+      // Tapping everything shouldn't pay off: a wrong balloon bursts grey and costs a point.
+      b.wrong = true;
+      if (sound) playSound("gentle");
+      addPoints(-1);
     }
   };
 
@@ -77,24 +81,25 @@ export function BalloonPop({ age, sound, addPoints, running }: GameApi & { age: 
     : r.kind === "even" ? t("game.balloons.even")
     : t("game.balloons.product %lld", r.target);
 
-  const now = performance.now();
   return (
     <div class="balloon-game">
       <p class="game-hint" aria-live="polite" data-testid="balloon-hint">
         {r.kind === "color" && <span class="balloon-swatch" style={{ background: BALLOON_COLORS[r.color] }} aria-hidden="true" />}
         {hint}
       </p>
+      {r.kind !== "all" && <p class="game-hint penalty">{t("game.balloons.penalty")}</p>}
       <div class="play-field sky">
         {balloons.current.map((b) => (
           <button
             key={b.id}
-            class={`balloon${b.poppedAt ? " popped" : ""}${b.wobbleAt && now - b.wobbleAt < 400 ? " wobble" : ""}`}
+            class={`balloon${b.poppedAt ? " popped" : ""}${b.wrong ? " wrong" : ""}`}
             style={{ left: `${b.x * 100}%`, bottom: `${b.y * 100}%`, "--balloon": b.color } as never}
             aria-label={b.label ?? (b.colorId ? t(`game.balloons.name.${b.colorId}`) : "Ballon")}
             onPointerDown={() => tap(b)}
             data-good={b.good ? "1" : "0"}
           >
             <span class="balloon-body">{b.label}</span>
+            {b.wrong && <span class="balloon-minus" aria-hidden="true">−1</span>}
             <span class="balloon-string" aria-hidden="true" />
           </button>
         ))}

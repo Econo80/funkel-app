@@ -7,7 +7,7 @@ import { t } from "../../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, avatarColor } from "../components";
 
 export interface GameApi {
-  /** Adds points; games call this when something good happens. */
+  /** Adds points (negative for a mistake; the score never drops below 0). */
   addPoints: (n?: number) => void;
   /** False once the time is up; games should stop spawning/accepting input. */
   running: boolean;
@@ -47,7 +47,7 @@ export function GameFrame({ profile, gameId, onDone, children }: {
       </div>
       <h2 class="game-title">{t(TITLES[gameId])}</h2>
       <div class="game-area">
-        {children({ addPoints: (n = 1) => running && setPoints((p) => p + n), running })}
+        {children({ addPoints: (n = 1) => running && setPoints((p) => Math.max(0, p + n)), running })}
       </div>
 
       {!running && (

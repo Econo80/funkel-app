@@ -67,12 +67,20 @@ in the child's profile under **Sudoku**.
 Children earn one star per correct answer. In the **Spielecke** (the colourful
 card on the home screen) they can spend stars:
 
-- **Games** (2 minutes each): **Memory** (find pairs), **Ballon-Pop** (pop
+- **Games** (2 minutes each): **Memory** (find pairs), **Ballon-Pop** (a wrong balloon costs a point; pop
   balloons; at 4 all of them, at 5–6 only one colour, which changes every 30
   seconds, from 7 only even numbers, from 9 only the multiplications that
   make a target number, e.g. 24) and **Sternenfänger** (move Pip to catch stars and dodge clouds).
-- **Pips Garten:** buy seeds, trees and decorations. Plants grow over the
-  next days and weeks. No timer.
+- **Pips Garten**, which grows into a little farm. No timer.
+  - Plants (flowers, wheat, vegetables, trees) grow over the next days and weeks.
+  - Buildings take 1–3 days to build: Hundehütte, Hühnerstall, Teich, Scheune
+    and Bauernhaus (the big ones use 2×2 squares).
+  - Farm animals need their home first: dog → Hundehütte, chicks → Hühnerstall
+    (they grow into hens), ducks → Teich, cow, pig, sheep, goat and horse →
+    Scheune, cat → a house. Each home has room for a few animals.
+  - Hens lay an egg and cows give milk every day: tap them to collect. 5 eggs or
+    milk sell for 1 ⭐ at the farm shop, so learning stays the main way to earn stars.
+  - When the garden is full, buy more land (25, 40, then 60 ⭐ for two more rows).
 
 The lifetime star count never goes down; only the "stars to spend" are used.
 Grown-ups can change the price per game, the number of games per day, or turn
