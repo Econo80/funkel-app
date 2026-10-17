@@ -23,6 +23,10 @@
   "vocab.spelling": "Schreibe das Wort!",
   "vocab.spelling.spoken": "Schreibe das Wort {word}.",
   "vocab.opposite": "Was ist das Gegenteil von „{word}“?",
+  "vocab.writeWord": "Schreib das Wort zum Bild!",
+  "vocab.dictation": "Hör gut zu und schreib das Wort!",
+  "vocab.copySentence": "Schreib den Satz ab!",
+  "vocab.sentenceDictation": "Hör gut zu und schreib den Satz!",
   "vocab.synonym": "Welches Wort bedeutet fast das Gleiche wie „{word}“?",
   "sequence.build": "Tippe die Teile in der richtigen Reihenfolge an.",
   "speech.answer": "Die richtige Antwort ist: {answer}."

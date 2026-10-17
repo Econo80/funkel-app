@@ -1,6 +1,6 @@
 // Vocabulary from a word list — port of VocabularyQuestionGenerator.swift.
 import type { Phrasing } from "../content/phrasing";
-import type { WordEntry } from "../content/types";
+import type { SentenceEntry, WordEntry } from "../content/types";
 import { VOCABULARY_TYPES, isEligible, selectionWeight, type Difficulty, type VocabularyQuestionType } from "../domain/difficulty";
 import { makeQuestion, type Question, type QuestionFormat } from "../domain/question";
 import { randomElement, shuffled, weightedPick, type Rng } from "../domain/random";
@@ -9,6 +9,7 @@ import type { QuestionProvider } from "./provider";
 const DISTRACTOR_LETTERS = [..."abcdefghiklmnoprstuäöü"];
 
 export const contentIdFor = (word: WordEntry) => `vocab:${word.word}`;
+export const sentenceIdFor = (s: SentenceEntry) => `sentence:${s.text}`;
 
 const isLetter = (ch: string) => /\p{L}/u.test(ch);
 
@@ -16,7 +17,7 @@ const isLetter = (ch: string) => /\p{L}/u.test(ch);
 const display = (w: WordEntry) => (w.article ? `${w.article} ${w.word}` : w.word);
 
 export class VocabularyQuestionGenerator implements QuestionProvider {
-  constructor(readonly subjectId: string, readonly words: WordEntry[], readonly phrasing: Phrasing) {}
+  constructor(readonly subjectId: string, readonly words: WordEntry[], readonly phrasing: Phrasing, readonly sentences: SentenceEntry[] = []) {}
 
   makeQuestions(count: number, difficulty: Difficulty, recentlyCorrect: Set<string>, rng: Rng): Question[] {
     const eligible = this.words.filter((w) => isEligible(difficulty, w.minAge, w.maxAge));
@@ -29,6 +30,13 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
     for (let attempts = 0; questions.length < count && attempts < count * 20; attempts++) {
       const type = weightedPick(rng, typeWeights);
       if (!type) break;
+      if (type === "sentence") {
+        const sentence = this.pickSentence(rng, difficulty, recentlyCorrect, used);
+        if (!sentence) continue;
+        used.add(sentence.text);
+        questions.push(this.sentenceQuestion(sentence, difficulty));
+        continue;
+      }
       let candidates = eligible.filter((w) => this.supports(w, type, difficulty) && !used.has(w.word));
       // Small lists: allow repeats rather than ending the round early.
       if (candidates.length === 0) candidates = eligible.filter((w) => this.supports(w, type, difficulty));
@@ -55,7 +63,35 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
         return (w.antonyms ?? []).length > 0;
       case "synonym":
         return (w.synonyms ?? []).length > 0;
+      case "writeWord":
+        // Only nouns: a picture of a bee could mean "Biene" or "fleissig".
+        return !!w.emoji && !!w.article && [...w.word].every(isLetter) && (!d.vocabulary.writeShowsLength || [...w.word].length <= d.vocabulary.spellingMaxLength + 2);
+      case "dictation":
+        return [...w.word].every(isLetter);
+      case "sentence":
+        return false; // sentences come from their own list
     }
+  }
+
+  private pickSentence(rng: Rng, d: Difficulty, recentlyCorrect: Set<string>, used: Set<string>): SentenceEntry | undefined {
+    const eligible = this.sentences.filter((s) => isEligible(d, s.minAge, s.maxAge));
+    const fresh = eligible.filter((s) => !used.has(s.text));
+    const pool = fresh.length ? fresh : eligible;
+    return weightedPick(rng, pool.map((s) => [s, selectionWeight(d, s.minAge, recentlyCorrect.has(sentenceIdFor(s)))] as const));
+  }
+
+  /** Under 9 the sentence is shown to copy; from 9 it is only heard (dictation). */
+  private sentenceQuestion(sentence: SentenceEntry, d: Difficulty): Question {
+    const dictation = d.vocabulary.sentenceDictation;
+    const prompt = this.phrasing.text(dictation ? "vocab.sentenceDictation" : "vocab.copySentence");
+    return makeQuestion({
+      subjectId: this.subjectId,
+      contentId: sentenceIdFor(sentence),
+      prompt,
+      visual: dictation ? { kind: "listen", text: sentence.text } : { kind: "copy", text: sentence.text },
+      format: { kind: "writeText", answer: sentence.text, caseSensitive: d.vocabulary.writeCaseSensitive, showLength: false },
+      spoken: `${prompt} ${sentence.text}`,
+    });
   }
 
   /**
@@ -145,6 +181,26 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
           subjectId, contentId,
           prompt: this.phrasing.text(type === "opposite" ? "vocab.opposite" : "vocab.synonym", { word: word.word }),
           format,
+        });
+      }
+      case "writeWord":
+      case "dictation": {
+        const format: QuestionFormat = {
+          kind: "writeText", answer: word.word, caseSensitive: d.vocabulary.writeCaseSensitive, showLength: d.vocabulary.writeShowsLength,
+        };
+        if (type === "writeWord") {
+          return makeQuestion({
+            subjectId, contentId, format,
+            prompt: this.phrasing.text("vocab.writeWord"),
+            visual: word.emoji ? { kind: "emoji", emoji: word.emoji } : undefined,
+            spoken: this.phrasing.text("vocab.spelling.spoken", { word: word.word }),
+          });
+        }
+        const prompt = this.phrasing.text("vocab.dictation");
+        return makeQuestion({
+          subjectId, contentId, format, prompt,
+          visual: { kind: "listen", text: word.word },
+          spoken: `${prompt} ${word.word}`,
         });
       }
       case "spelling": {

@@ -13,10 +13,13 @@ export const MATHS_OPERATIONS: readonly MathsOperation[] = [
   "multiplication", "division", "wordProblem", "missingNumber", "numberHouse",
 ];
 
-export type VocabularyQuestionType = "pictureToWord" | "wordToPicture" | "meaning" | "spelling" | "opposite" | "synonym";
+export type VocabularyQuestionType =
+  | "pictureToWord" | "wordToPicture" | "meaning" | "spelling" | "opposite" | "synonym"
+  // Web only for now: typing words and sentences on a keyboard.
+  | "writeWord" | "dictation" | "sentence";
 
 export const VOCABULARY_TYPES: readonly VocabularyQuestionType[] = [
-  "pictureToWord", "wordToPicture", "meaning", "spelling", "opposite", "synonym",
+  "pictureToWord", "wordToPicture", "meaning", "spelling", "opposite", "synonym", "writeWord", "dictation", "sentence",
 ];
 
 /** Piecewise-linear curve over effective age, clamped at both ends. */
@@ -105,9 +108,17 @@ export const Tuning = {
     spelling: new Keyframes([[5.4, 0], [5.5, 1.5], [7, 3], [14, 2.5]]),
     opposite: new Keyframes([[6.9, 0], [7, 1.5], [10, 2], [14, 2]]),
     synonym: new Keyframes([[7.9, 0], [8, 1.5], [14, 2.5]]),
+    /** Picture → type the word. */
+    writeWord: new Keyframes([[6.4, 0], [6.5, 1.5], [8, 2], [10, 1], [14, 0.5]]),
+    /** Hear a word → type it. */
+    dictation: new Keyframes([[7.9, 0], [8, 1.5], [10, 2], [14, 2]]),
+    /** Copy a sentence (under 9), or write it from dictation (9+). */
+    sentence: new Keyframes([[6.9, 0], [7, 1], [9, 2], [14, 2.5]]),
   } satisfies Record<VocabularyQuestionType, Keyframes>,
   spellingMaxLength: new Keyframes([[5, 4], [7, 6], [10, 10], [12, 14]]),
   spellingDistractorLetters: new Keyframes([[7.9, 0], [8, 1], [10, 2], [12, 3]]),
+  /** Writing: letter boxes show the word's length below this age; capitals count and sentences are dictated from it. */
+  writingHelpBelowAge: 9,
 
   eligibilitySlack: 0.5,
   currentBandWidth: 2,
@@ -137,6 +148,12 @@ export interface VocabularyDifficulty {
   questionTypeWeights: Partial<Record<VocabularyQuestionType, number>>;
   spellingMaxLength: number;
   spellingDistractorLetters: number;
+  /** Writing questions: show the word's length as boxes. */
+  writeShowsLength: boolean;
+  /** Writing questions: capital letters must be right. */
+  writeCaseSensitive: boolean;
+  /** Sentences are dictated (heard) rather than copied. */
+  sentenceDictation: boolean;
 }
 
 export interface Difficulty {
@@ -202,6 +219,9 @@ export function difficultyForEffectiveAge(a: number): Difficulty {
       questionTypeWeights: normalised(T.vocabularyTypeWeights, VOCABULARY_TYPES, a),
       spellingMaxLength: T.spellingMaxLength.intValue(a),
       spellingDistractorLetters: T.spellingDistractorLetters.intValue(a),
+      writeShowsLength: a < T.writingHelpBelowAge,
+      writeCaseSensitive: a >= T.writingHelpBelowAge,
+      sentenceDictation: a >= T.writingHelpBelowAge,
     },
   };
 }

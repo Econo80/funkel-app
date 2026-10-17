@@ -130,6 +130,35 @@ def validate_word_list(path, data, report):
     young = [w for w in words if isinstance(w.get("minAge"), int) and w["minAge"] <= 5 and w.get("emoji")]
     if len(young) < 4:
         report.warn(path, f"only {len(young)} picture words for age ≤ 5; picture rounds need at least 4")
+    validate_sentences(path, data.get("sentences"), report)
+
+
+def validate_sentences(path, sentences, report):
+    """Optional sentences for copying and dictation (web app: "Satz abschreiben", "Satz-Diktat")."""
+    if sentences is None:
+        return
+    if not isinstance(sentences, list):
+        report.error(path, "'sentences' must be a list")
+        return
+    seen = set()
+    for i, s in enumerate(sentences):
+        where = f"{path} sentences[{i}]"
+        text = s.get("text") if isinstance(s, dict) else None
+        if not nonempty_str(text):
+            report.error(where, "missing 'text'")
+            continue
+        if text in seen:
+            report.error(where, "duplicate sentence")
+        seen.add(text)
+        if text[-1] not in ".!?":
+            report.error(where, "a sentence must end with . ! or ?")
+        if "  " in text or text != text.strip():
+            report.error(where, "extra spaces would make typing it out ambiguous")
+        check_age(where, s, report)
+    for age in range(7, 15):
+        n = sum(1 for s in sentences if isinstance(s, dict) and s.get("minAge", 99) <= age <= s.get("maxAge", 14))
+        if n < 6:
+            report.warn(path, f"only {n} sentences for age {age}; rounds may repeat them")
 
 
 def validate_question_bank(path, data, report):

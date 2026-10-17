@@ -49,8 +49,16 @@ export interface WordEntry {
   maxAge?: number;
 }
 
+/** A sentence to copy (7–8) or write from dictation (9+). */
+export interface SentenceEntry {
+  text: string;
+  minAge: number;
+  maxAge?: number;
+}
+
 export interface WordList {
   words: WordEntry[];
+  sentences?: SentenceEntry[];
 }
 
 export interface BankItem {

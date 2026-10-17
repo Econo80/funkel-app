@@ -1,6 +1,6 @@
 // One round as a pure state machine — port of RoundViewModel.swift.
 // Every function returns a new state; invalid actions return the same state.
-import { houseCellValue, type Question } from "./question";
+import { houseCellValue, writtenMatches, type Question } from "./question";
 
 export type Phase = "answering" | "correct" | "wrong" | "finished";
 
@@ -15,6 +15,9 @@ export interface RoundState {
   /** Zahlenhaus: what the child typed per hidden cell, and the cell being filled. */
   houseInputs: Record<string, string>;
   houseCell?: string;
+  /** Writing: the typed text, and whether the next letter is a capital. */
+  textInput: string;
+  shift: boolean;
   results: boolean[];
   correctContentIds: string[];
   allowsNegative: boolean;
@@ -29,6 +32,8 @@ export function startRound(questions: Question[], allowsNegative: boolean): Roun
     placedTiles: [],
     houseInputs: {},
     houseCell: firstHouseCell(questions[0]),
+    textInput: "",
+    shift: false,
     results: [],
     correctContentIds: [],
     allowsNegative,
@@ -174,6 +179,43 @@ export function submitHouse(s: RoundState): RoundState {
   return record(s, wrongHouseCells(s).length === 0);
 }
 
+// MARK: Writing
+
+function writing(s: RoundState) {
+  const q = currentQuestion(s);
+  return s.phase === "answering" && q?.format.kind === "writeText" ? q.format : undefined;
+}
+
+/** Types one character; a shifted letter becomes a capital, then shift turns off. */
+export function typeText(s: RoundState, ch: string): RoundState {
+  const format = writing(s);
+  if (!format || [...ch].length !== 1) return s;
+  const limit = format.showLength ? [...format.answer].length : [...format.answer].length + 8;
+  if ([...s.textInput].length >= limit) return s;
+  if (ch === " " && (s.textInput === "" || s.textInput.endsWith(" "))) return s;
+  const typed = s.shift ? ch.toLocaleUpperCase("de") : ch;
+  return { ...s, textInput: s.textInput + typed, shift: false };
+}
+
+export function deleteText(s: RoundState): RoundState {
+  if (!writing(s) || s.textInput === "") return s;
+  return { ...s, textInput: [...s.textInput].slice(0, -1).join("") };
+}
+
+export function toggleShift(s: RoundState): RoundState {
+  return writing(s) ? { ...s, shift: !s.shift } : s;
+}
+
+export function canSubmitText(s: RoundState): boolean {
+  return !!writing(s) && s.textInput.trim() !== "";
+}
+
+export function submitText(s: RoundState): RoundState {
+  const format = writing(s);
+  if (!format || !canSubmitText(s)) return s;
+  return record(s, writtenMatches(s.textInput, format.answer, format.caseSensitive));
+}
+
 // MARK: Advancing
 
 export function next(s: RoundState): RoundState {
@@ -181,6 +223,6 @@ export function next(s: RoundState): RoundState {
   if (isLast(s)) return { ...s, phase: "finished" };
   return {
     ...s, index: s.index + 1, selectedOptionIndex: undefined, numberInput: "", placedTiles: [],
-    houseInputs: {}, houseCell: firstHouseCell(s.questions[s.index + 1]), phase: "answering",
+    houseInputs: {}, houseCell: firstHouseCell(s.questions[s.index + 1]), textInput: "", shift: false, phase: "answering",
   };
 }

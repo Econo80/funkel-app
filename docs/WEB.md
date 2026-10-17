@@ -88,6 +88,20 @@ for a 5-year-old and adds 2 pairs with every cleared board). In the child's
 profile under **Spielecke** you can set them to *Leicht*, *Mittel* or *Schwer*,
 which works like being two years younger or older. It doesn't change the quizzes.
 
+## Writing words and sentences
+
+**Wörter** also asks children to write, on a big keyboard on the screen (a
+real keyboard works too):
+
+- from 6½: **write the word for a picture**, with boxes that show how many letters
+- 7–8: **copy a sentence**
+- from 8: **word dictation**: tap 🔊 *Anhören*, then write the word
+- from 9: **sentence dictation**
+
+From 9 the capital letters must be right. "ss" always counts for "ß", and
+punctuation doesn't count. After a mistake, children see what they wrote next to
+the right spelling.
+
 ## Getting harder by itself
 
 Each subject adapts to the child. After **two rounds in a row with everything

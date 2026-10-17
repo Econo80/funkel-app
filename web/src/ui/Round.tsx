@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/ho
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
 import { recordRound, subjectDifficulty, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
-import { correctAnswerText, houseCellValue, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
+import { correctAnswerText, houseCellValue, onlyCaseDiffers, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
 import { systemRng } from "../domain/random";
 import * as R from "../domain/round";
 import { playSound, speak, stopSpeaking, vibrate } from "../services/feedback";
@@ -113,6 +113,11 @@ function Round({ state, setState, color, profile, speechLocale, library, languag
 
   const readAloud = () => speak(spokenText(question), speechLocale);
 
+  // Writing: after a mistake, show what the child wrote, and a hint if only capitals were wrong.
+  const writeNote = question.format.kind === "writeText" && state.phase === "wrong"
+    ? [t("write.yours %@", state.textInput.trim()), onlyCaseDiffers(state.textInput, question.format.answer) ? t("write.caseHint") : ""].filter(Boolean).join(" ")
+    : undefined;
+
   // Auto read-aloud for each new question.
   useEffect(() => {
     if (profile.readAloudEnabled) readAloud();
@@ -157,11 +162,12 @@ function Round({ state, setState, color, profile, speechLocale, library, languag
       )}
 
       <div class="column round-body" key={question.id}>
-        <QuestionCard question={question} color={color} />
+        <QuestionCard question={question} color={color} onListen={(text) => speak(text, speechLocale)} />
         {question.format.kind === "multipleChoice" && (
           <ChoiceGrid state={state} options={question.format.options} correctIndex={question.format.correctIndex} color={color} onChoose={(i) => update((s) => R.choose(s, i))} />
         )}
         {question.format.kind === "numberEntry" && <NumberPad state={state} color={color} update={update} />}
+        {question.format.kind === "writeText" && <WriteInput state={state} answer={question.format.answer} showLength={question.format.showLength} color={color} update={update} />}
         {question.format.kind === "numberHouse" && <NumberHouseView state={state} house={question.format.house} color={color} update={update} />}
         {question.format.kind === "buildSequence" && <SequenceBuilder state={state} tiles={question.format.tiles} answerLength={question.format.answer.length} color={color} update={update} />}
       </div>
@@ -170,7 +176,7 @@ function Round({ state, setState, color, profile, speechLocale, library, languag
         phase={state.phase}
         praise={t(praise)}
         answer={correctAnswerText(question.format)}
-        explanation={question.explanation}
+        explanation={writeNote ?? question.explanation}
         profileColor={avatarColor(profile.avatarColor)}
         celebration={celebration}
         onNext={() => update(R.next)}
@@ -195,7 +201,7 @@ function ProgressDots({ results, current, total, color }: { results: boolean[]; 
   );
 }
 
-function QuestionCard({ question, color }: { question: Question; color: string }) {
+function QuestionCard({ question, color, onListen }: { question: Question; color: string; onListen: (text: string) => void }) {
   const visual = question.visual;
   // Screen readers hear the same words as read-aloud ("3 plus 4", not "3 · 4");
   // counting questions keep the objects so they can be counted.
@@ -203,6 +209,13 @@ function QuestionCard({ question, color }: { question: Question; color: string }
   return (
     <section class="card question-card" aria-label={label}>
       {visual?.kind === "emoji" && <div class="visual-emoji" aria-hidden="true">{visual.emoji}</div>}
+      {visual?.kind === "listen" && (
+        <button class="listen-button pressable" style={{ background: color }} onClick={() => onListen(visual.text)} data-testid="listen"
+          data-answer={import.meta.env.DEV ? visual.text : undefined}>
+          <span aria-hidden="true">🔊</span> {t("write.listen")}
+        </button>
+      )}
+      {visual?.kind === "copy" && <p class="copy-text" aria-hidden={label ? "true" : undefined}>{visual.text}</p>}
       {visual?.kind === "equation" && <div class="visual-equation" style={{ color }} aria-hidden={label ? "true" : undefined}>{visual.text}</div>}
       {visual?.kind === "countable" && (
         <div class="countables">
@@ -344,6 +357,71 @@ function SequenceBuilder({ state, tiles, answerLength, color, update }: {
         })}
       </div>
       <BigButton color={color} disabled={!R.canSubmitSequence(state)} onClick={() => update(R.submitSequence)} testId="sequence-check">✓ {t("round.check")}</BigButton>
+    </div>
+  );
+}
+
+// MARK: Writing
+
+const KEY_ROWS = ["qwertzuiopü", "asdfghjklöä", "yxcvbnm"];
+
+function WriteInput({ state, answer, showLength, color, update }: {
+  state: R.RoundState; answer: string; showLength: boolean; color: string; update: (fn: (s: R.RoundState) => R.RoundState) => void;
+}) {
+  const answering = state.phase === "answering";
+  const type = (ch: string) => update((s) => R.typeText(s, ch));
+
+  // Hardware keyboards (tablets, computers) work too, including Shift for capitals.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "Backspace") update(R.deleteText);
+      else if (e.key === "Enter") update(R.submitText);
+      else if ([...e.key].length === 1) { e.preventDefault(); type(e.key); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const letters = [...state.textInput];
+  const label = (ch: string) => (state.shift ? ch.toLocaleUpperCase("de") : ch);
+  return (
+    <div class="write">
+      {showLength ? (
+        <div class="card slots" aria-live="polite" aria-label={state.textInput}>
+          {[...answer].map((_, i) => (
+            <span key={i} class={`slot write-slot${letters[i] ? " filled" : ""}`} style={{ borderColor: color, color }}>{letters[i] ?? ""}</span>
+          ))}
+        </div>
+      ) : (
+        <div class="card write-display" style={{ color }} aria-live="polite" data-testid="write-display">
+          {state.textInput}{answering && <span class="caret" aria-hidden="true" />}
+        </div>
+      )}
+      <div class="keyboard" role="group" aria-label={t("write.keyboard")}>
+        {KEY_ROWS.map((row, r) => (
+          <div class="keyboard-row" key={r}>
+            {r === 2 && (
+              <button class={`kb-key wide pressable${state.shift ? " on" : ""}`} disabled={!answering} aria-label={t("write.shift")} aria-pressed={state.shift}
+                onClick={() => update(R.toggleShift)} data-testid="kb-shift">⇧</button>
+            )}
+            {[...row].map((ch) => (
+              <button key={ch} class="kb-key pressable" disabled={!answering} onClick={() => type(ch)} data-testid={`kb-${ch}`}>{label(ch)}</button>
+            ))}
+            {r === 2 && (
+              <button class="kb-key wide pressable" disabled={!answering} aria-label={t("round.delete")} onClick={() => update(R.deleteText)} data-testid="kb-delete">⌫</button>
+            )}
+          </div>
+        ))}
+        {!showLength && (
+          <div class="keyboard-row">
+            <button class="kb-key pressable" disabled={!answering} onClick={() => type(",")}>,</button>
+            <button class="kb-key space pressable" disabled={!answering} aria-label={t("write.space")} onClick={() => type(" ")} data-testid="kb-space">{t("write.space")}</button>
+            <button class="kb-key pressable" disabled={!answering} onClick={() => type(".")}>.</button>
+          </div>
+        )}
+      </div>
+      <BigButton color={color} disabled={!R.canSubmitText(state)} onClick={() => update(R.submitText)} testId="write-check">✓ {t("round.check")}</BigButton>
     </div>
   );
 }

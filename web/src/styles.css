@@ -384,3 +384,23 @@ p { line-height: 1.4; }
 .sudoku-done h2 { margin: 0; }
 .house-room.roof:not(.right):not(.wrong) { color: #2b2540; }
 .level-up { background: color-mix(in srgb, var(--correct) 15%, transparent); border-radius: 99px; padding: 8px 14px; margin: 0; font-weight: 700; }
+
+/* Writing: letter boxes or a text line, and a big QWERTZ keyboard */
+.write { display: flex; flex-direction: column; gap: 12px; }
+.write-slot { display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 800; }
+.write-slot.filled { opacity: 1; border-style: solid; }
+.write-display { min-height: 64px; padding: 14px 18px; font-size: 1.6rem; font-weight: 700; line-height: 1.35; word-break: break-word; }
+.caret { display: inline-block; width: 3px; height: 1.2em; margin-left: 2px; vertical-align: -0.2em; background: currentColor; animation: caret-blink 1s steps(1) infinite; }
+@keyframes caret-blink { 50% { opacity: 0; } }
+.keyboard { display: flex; flex-direction: column; gap: 6px; user-select: none; -webkit-user-select: none; }
+.keyboard-row { display: flex; justify-content: center; gap: 5px; }
+.kb-key {
+  flex: 1 1 0; min-width: 0; max-width: 60px; height: 54px; border: none; border-radius: 12px; background: var(--card); color: var(--ink);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12); font-family: inherit; font-size: 1.35rem; font-weight: 700; padding: 0; touch-action: manipulation;
+}
+.kb-key.wide { flex: 1.5 1 0; max-width: 90px; }
+.kb-key.space { flex: 6 1 0; max-width: 360px; font-size: 1rem; }
+.kb-key.on { background: var(--ink); color: var(--card); }
+.kb-key:disabled { opacity: 0.6; }
+.listen-button { border: none; color: #fff; font-family: inherit; font-size: 1.5rem; font-weight: 800; padding: 16px 28px; border-radius: 99px; box-shadow: var(--shadow); }
+.copy-text { font-size: 1.6rem; font-weight: 700; line-height: 1.4; margin: 0; padding: 12px 16px; border-radius: 16px; background: color-mix(in srgb, var(--sun) 14%, transparent); }

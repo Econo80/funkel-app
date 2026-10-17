@@ -2136,6 +2136,78 @@
           }
         }
       }
+    },
+    "write.caseHint": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achte auf die Gross- und Kleinschreibung."
+          }
+        }
+      }
+    },
+    "write.keyboard": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastatur"
+          }
+        }
+      }
+    },
+    "write.listen": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhören"
+          }
+        }
+      }
+    },
+    "write.shift": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grossbuchstabe"
+          }
+        }
+      }
+    },
+    "write.space": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leerzeichen"
+          }
+        }
+      }
+    },
+    "write.yours %@": {
+      "comment": "UI text. (Writing questions; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast geschrieben: %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

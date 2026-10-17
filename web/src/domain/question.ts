@@ -3,7 +3,11 @@
 export type QuestionVisual =
   | { kind: "emoji"; emoji: string }
   | { kind: "countable"; symbol: string; count: number }
-  | { kind: "equation"; text: string };
+  | { kind: "equation"; text: string }
+  /** Dictation: a big "listen" button; the text is only spoken. */
+  | { kind: "listen"; text: string }
+  /** Copying: the text to write out. */
+  | { kind: "copy"; text: string };
 
 export interface AnswerOption {
   id: number;
@@ -16,7 +20,26 @@ export type QuestionFormat =
   | { kind: "multipleChoice"; options: AnswerOption[]; correctIndex: number }
   | { kind: "numberEntry"; answer: number }
   | { kind: "buildSequence"; tiles: string[]; answer: string[] }
-  | { kind: "numberHouse"; house: NumberHouse };
+  | { kind: "numberHouse"; house: NumberHouse }
+  | { kind: "writeText"; answer: string; caseSensitive: boolean; showLength: boolean };
+
+/**
+ * How written answers are compared: spaces and punctuation don't count, and
+ * "ss" is always right for "ß" (Swiss spelling). Capitals count only when asked.
+ */
+export function normalizeWritten(text: string, caseSensitive: boolean): string {
+  const plain = text.replace(/[.,!?;:"'«»„“”‚‘’()-]/g, " ").replace(/ß/g, "ss").replace(/\s+/g, " ").trim();
+  return caseSensitive ? plain : plain.toLocaleLowerCase("de");
+}
+
+export function writtenMatches(input: string, answer: string, caseSensitive: boolean): boolean {
+  return normalizeWritten(input, caseSensitive) === normalizeWritten(answer, caseSensitive);
+}
+
+/** Right except for capital letters: worth a gentle hint. */
+export function onlyCaseDiffers(input: string, answer: string): boolean {
+  return !writtenMatches(input, answer, true) && writtenMatches(input, answer, false);
+}
 
 /**
  * A Zahlenhaus: the roof number, and floors whose two rooms always add up to it.
@@ -70,6 +93,8 @@ export function correctAnswerText(format: QuestionFormat): string {
       const joiner = format.tiles.every((t) => [...t].length === 1) ? "" : " ";
       return format.answer.join(joiner);
     }
+    case "writeText":
+      return format.answer;
     case "numberHouse": {
       const { roof, floors } = format.house;
       return `${roof} = ${floors.map(([l, r]) => `${l} + ${r}`).join(", ")}`;
