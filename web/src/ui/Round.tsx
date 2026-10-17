@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
-import { profileDifficulty, recordRound, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
+import { recordRound, subjectDifficulty, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
 import { correctAnswerText, houseCellValue, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
 import { systemRng } from "../domain/random";
 import * as R from "../domain/round";
@@ -25,7 +25,8 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
   const [summary, setSummary] = useState<RoundSummary>();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const difficulty = useMemo(() => profileDifficulty(profile), [profile.age, profile.difficultyAdjustment]);
+  // Recomputed for "play again", so a level-up applies to the very next round.
+  const difficulty = useMemo(() => subjectDifficulty(profile, subject.languageCode, subject.id), [profile, attempt]);
 
   // Build the round.
   useEffect(() => {
@@ -465,6 +466,7 @@ function Summary({ summary, color, profile, onAgain, onDone }: {
           </div>
           <p class="muted">{t("summary.score %lld %lld", summary.correct, summary.total)}</p>
           {(summary.streak > 1 || summary.streakGrew) && <p class="streak-pill">🔥 {t("summary.streak %lld", summary.streak)}</p>}
+          {summary.levelUp && <p class="level-up" data-testid="level-up">🚀 {t("summary.levelUp")}</p>}
         </div>
         <BigButton color={color} onClick={onAgain} testId="summary-again">↻ {t("summary.again")}</BigButton>
         <BigButton color="rgba(43,37,64,.75)" onClick={onDone} testId="summary-done">⌂ {t("summary.done")}</BigButton>

@@ -313,6 +313,30 @@
         }
       }
     },
+    "editor.level %@": {
+      "comment": "UI text. (Per-subject level; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niveau wie mit %@ Jahren"
+          }
+        }
+      }
+    },
+    "editor.level.footer": {
+      "comment": "UI text. (Per-subject level; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jedes Fach passt sich an: Nach zwei fehlerfreien Runden in Folge wird es mit jeder weiteren fehlerfreien Runde spürbar schwieriger, bis zu 3 Jahre über dem Alter. Läuft eine Runde nicht gut, wird es wieder etwas leichter. Ein neues Alter oder «Fortschritt zurücksetzen» beginnt von vorn."
+          }
+        }
+      }
+    },
     "editor.name": {
       "comment": "Profile editor section.",
       "extractionState": "manual",
@@ -1977,6 +2001,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fertig"
+          }
+        }
+      }
+    },
+    "summary.levelUp": {
+      "comment": "UI text. (Per-subject level; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles richtig! Ab jetzt wird es ein bisschen kniffliger."
           }
         }
       }

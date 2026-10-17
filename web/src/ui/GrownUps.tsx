@@ -13,6 +13,7 @@ import {
   isLastEnabledSubject,
   isSubjectEnabled,
   resetProgress,
+  subjectLevelAge,
   withLanguage,
   withSubject,
   type Profile,
@@ -253,15 +254,32 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
               <div class="row-between list-line"><span>⭐ {t("editor.stars")}</span><span class="muted">{t("home.stars %lld", profile.totalStars)}</span></div>
               <div class="row-between list-line"><span>🎮 {t("editor.wallet")}</span><span class="muted">{profile.walletStars} ⭐</span></div>
               <div class="row-between list-line"><span>✓ {t("editor.rounds")}</span><span class="muted">{t("home.subject.rounds %lld", profile.rounds.length)}</span></div>
+              {language?.subjects.map((subject) => {
+                const levelAge = subjectLevelAge(profile, subject.languageCode, subject.id);
+                const ahead = levelAge - profile.age;
+                return (
+                  <div key={subject.id} class="row-between list-line" data-testid={`level-${subject.id}`}>
+                    <span><span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span> {subject.title}</span>
+                    <span class="muted">{ahead >= 0.25 ? "↑ " : ahead <= -0.25 ? "↓ " : ""}{t("editor.level %@", formatLevelAge(levelAge))}</span>
+                  </div>
+                );
+              })}
               <button class="list-row danger" onClick={async () => { if (confirm(t("editor.reset.confirm"))) await onSave(resetProgress(profile)); }}>{t("editor.reset")}</button>
               {onDelete && <button class="list-row danger" onClick={async () => { if (confirm(t("editor.delete.confirm %@", profile.name))) await onDelete(); }}>{t("editor.delete")}</button>}
             </div>
+            <p class="footnote">{t("editor.level.footer")}</p>
           </>
         )}
         <p class="footnote">🔒 {t("editor.privacy")}</p>
       </div>
     </Sheet>
   );
+}
+
+/** 8.5 → "8½", rounded to half years. */
+function formatLevelAge(age: number): string {
+  const half = Math.round(age * 2) / 2;
+  return `${Math.floor(half)}${half % 1 ? "½" : ""}`;
 }
 
 function Toggle({ checked, disabled, onChange, children }: {

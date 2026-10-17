@@ -383,3 +383,4 @@ p { line-height: 1.4; }
 .sudoku-done { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .sudoku-done h2 { margin: 0; }
 .house-room.roof:not(.right):not(.wrong) { color: #2b2540; }
+.level-up { background: color-mix(in srgb, var(--correct) 15%, transparent); border-radius: 99px; padding: 8px 14px; margin: 0; font-weight: 700; }

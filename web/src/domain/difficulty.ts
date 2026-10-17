@@ -54,9 +54,15 @@ export class Keyframes {
 export const Tuning = {
   minAge: 4,
   maxAge: 14,
+  /** How far below the real age a struggling child can go. */
   maxAdjustment: 1.5,
+  /** How far above the real age a child who gets everything right can go (web only for now). */
+  maxAdjustmentUp: 3,
   adjustmentStepUp: 0.15,
-  adjustmentStepDown: 0.2,
+  /** After this many perfect rounds in a row, each further perfect round steps up faster. */
+  perfectRoundsForBoost: 2,
+  boostStepUp: 0.5,
+  adjustmentStepDown: 0.3,
   promoteThreshold: 0.9,
   easeThreshold: 0.5,
 
@@ -148,7 +154,7 @@ export interface Difficulty {
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 export function effectiveAge(age: number, adjustment: number): number {
-  const adj = clamp(adjustment, -Tuning.maxAdjustment, Tuning.maxAdjustment);
+  const adj = clamp(adjustment, -Tuning.maxAdjustment, Tuning.maxAdjustmentUp);
   return clamp(age + adj, Tuning.minAge, Tuning.maxAge);
 }
 
@@ -204,14 +210,32 @@ export function difficultyForAge(age: number, adjustment = 0): Difficulty {
   return difficultyForEffectiveAge(effectiveAge(age, adjustment));
 }
 
-/** Gentle adaptivity after a round (PLAN.md §5.4). */
-export function nextAdjustment(current: number, correct: number, total: number): number {
-  if (total <= 0) return current;
+/** A subject's level: years above (+) or below (−) the real age, and the run of perfect rounds. */
+export interface Adaptivity {
+  adjustment: number;
+  perfectRounds: number;
+}
+
+/**
+ * Adaptivity after a round (PLAN.md §5.4): 90 %+ steps up a little; from the
+ * second perfect round in a row each perfect round steps up faster ("boosted");
+ * under 50 % steps back down and ends the run.
+ */
+export function nextAdaptivity(current: Adaptivity, correct: number, total: number): Adaptivity & { boosted: boolean } {
+  if (total <= 0) return { ...current, boosted: false };
   const score = correct / total;
-  let next = current;
-  if (score >= Tuning.promoteThreshold) next += Tuning.adjustmentStepUp;
+  const perfectRounds = score >= 1 ? current.perfectRounds + 1 : 0;
+  const boosted = perfectRounds >= Tuning.perfectRoundsForBoost && current.adjustment < Tuning.maxAdjustmentUp;
+  let next = current.adjustment;
+  if (boosted) next += Tuning.boostStepUp;
+  else if (score >= Tuning.promoteThreshold) next += Tuning.adjustmentStepUp;
   else if (score < Tuning.easeThreshold) next -= Tuning.adjustmentStepDown;
-  return clamp(next, -Tuning.maxAdjustment, Tuning.maxAdjustment);
+  return { adjustment: clamp(next, -Tuning.maxAdjustment, Tuning.maxAdjustmentUp), perfectRounds, boosted };
+}
+
+/** One round on its own, without a run of perfect rounds. */
+export function nextAdjustment(current: number, correct: number, total: number): number {
+  return nextAdaptivity({ adjustment: current, perfectRounds: 0 }, correct, total).adjustment;
 }
 
 /** Content selection (PLAN.md §5.3). */

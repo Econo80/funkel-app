@@ -88,6 +88,15 @@ for a 5-year-old and adds 2 pairs with every cleared board). In the child's
 profile under **Spielecke** you can set them to *Leicht*, *Mittel* or *Schwer*,
 which works like being two years younger or older. It doesn't change the quizzes.
 
+## Getting harder by itself
+
+Each subject adapts to the child. After **two rounds in a row with everything
+right**, every further perfect round makes that subject noticeably harder, up to
+**3 years above the child's age**. A round that goes badly makes it a bit easier
+again. You can see each subject's level under ⚙️ → the child's profile →
+**Fortschritt** (e.g. "Niveau wie mit 8½ Jahren"). Changing the age or "Fortschritt
+zurücksetzen" starts again from the real age.
+
 ## Good to know
 
 - **Each device keeps its own profiles and stars.** Nothing is sent anywhere,

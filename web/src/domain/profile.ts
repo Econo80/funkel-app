@@ -1,7 +1,7 @@
 // Profiles, streaks, progress and settings — ports of ChildProfile.swift,
 // StreakCalculator.swift, ProgressRecorder.swift and ProfileSettings.swift.
 // Pure functions over plain objects, so they're easy to store and test.
-import { Tuning, difficultyForAge, effectiveAge, nextAdjustment } from "./difficulty";
+import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity } from "./difficulty";
 import { DEFAULT_GAME_SETTINGS, emptyGarden, gameAge, type Garden, type GameDifficulty } from "./games";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
@@ -16,6 +16,9 @@ export interface SubjectProgress {
   stars: number;
   lastPlayed?: string;
   recentCorrectContentIds: string[];
+  /** This subject's level (years above/below the real age) and its run of perfect rounds. */
+  adjustment?: number;
+  perfectRounds?: number;
 }
 
 export interface RoundRecord {
@@ -151,8 +154,22 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
   );
 }
 
-export function profileDifficulty(p: Profile) {
-  return difficultyForAge(p.age, p.difficultyAdjustment);
+/**
+ * Each subject keeps its own level. Subjects without one start from the
+ * profile-wide adjustment that older versions of the app shared across subjects.
+ */
+export function subjectAdaptivity(p: Profile, languageCode: string, subjectId: string): Adaptivity {
+  const progress = p.progress[progressKey(languageCode, subjectId)];
+  return { adjustment: progress?.adjustment ?? p.difficultyAdjustment, perfectRounds: progress?.perfectRounds ?? 0 };
+}
+
+export function subjectDifficulty(p: Profile, languageCode: string, subjectId: string) {
+  return difficultyForAge(p.age, subjectAdaptivity(p, languageCode, subjectId).adjustment);
+}
+
+/** The age a subject's questions are made for, e.g. 8.5 for a 7-year-old who is 1½ years ahead. */
+export function subjectLevelAge(p: Profile, languageCode: string, subjectId: string): number {
+  return effectiveAge(p.age, subjectAdaptivity(p, languageCode, subjectId).adjustment);
 }
 
 export const progressKey = (languageCode: string, subjectId: string) => `${languageCode}/${subjectId}`;
@@ -209,6 +226,9 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     sudokuEnabled: s.sudokuEnabled,
     sudokuDifficulty: s.sudokuDifficulty,
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
+    progress: age === p.age ? p.progress : Object.fromEntries(
+      Object.entries(p.progress).map(([k, v]) => [k, { ...v, adjustment: 0, perfectRounds: 0 }]),
+    ),
   };
 }
 
@@ -263,6 +283,8 @@ export interface RoundSummary {
   starsEarned: number;
   streak: number;
   streakGrew: boolean;
+  /** A run of perfect rounds made the next round harder. */
+  levelUp: boolean;
 }
 
 export function scoreOf(s: Pick<RoundSummary, "correct" | "total">): number {
@@ -277,6 +299,7 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
   const previous: SubjectProgress = p.progress[key] ?? {
     roundsPlayed: 0, questionsAnswered: 0, correctAnswers: 0, stars: 0, recentCorrectContentIds: [],
   };
+  const level = nextAdaptivity(subjectAdaptivity(p, outcome.languageCode, outcome.subjectId), outcome.correct, outcome.total);
 
   const profile: Profile = {
     ...p,
@@ -285,7 +308,6 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
     currentStreak: streak.current,
     longestStreak: streak.longest,
     lastPlayedDay: streak.lastPlayedDay,
-    difficultyAdjustment: nextAdjustment(p.difficultyAdjustment, outcome.correct, outcome.total),
     progress: {
       ...p.progress,
       [key]: {
@@ -295,6 +317,8 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
         stars: previous.stars + stars,
         lastPlayed: now.toISOString(),
         recentCorrectContentIds: [...previous.recentCorrectContentIds, ...outcome.correctContentIds].slice(-RECENT_CONTENT_LIMIT),
+        adjustment: level.adjustment,
+        perfectRounds: level.perfectRounds,
       },
     },
     rounds: [
@@ -313,7 +337,7 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
 
   return {
     profile,
-    summary: { correct: outcome.correct, total: outcome.total, starsEarned: stars, streak: streak.current, streakGrew: streak.current > p.currentStreak },
+    summary: { correct: outcome.correct, total: outcome.total, starsEarned: stars, streak: streak.current, streakGrew: streak.current > p.currentStreak, levelUp: level.boosted },
   };
 }
 

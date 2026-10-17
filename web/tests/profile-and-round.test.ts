@@ -8,6 +8,9 @@ import {
   isLastEnabledSubject,
   recordRound,
   resetProgress,
+  subjectAdaptivity,
+  subjectDifficulty,
+  subjectLevelAge,
   updatedStreak,
   withLanguage,
   withSubject,
@@ -42,7 +45,8 @@ describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () =>
     const outcome = { subjectId: "maths", languageCode: "de", correct: 10, total: 10, correctContentIds: ["a"], effectiveAge: 7 };
     const first = recordRound(base(), outcome, day(1));
     expect(first.summary).toMatchObject({ starsEarned: 10, streak: 1, streakGrew: true });
-    expect(first.profile.difficultyAdjustment).toBeCloseTo(0.15);
+    expect(first.profile.progress["de/maths"].adjustment).toBeCloseTo(0.15);
+    expect(first.summary.levelUp).toBe(false);
     const second = recordRound(first.profile, outcome, day(2));
     expect(second.summary.streak).toBe(2);
     const progress = second.profile.progress["de/maths"];
@@ -72,6 +76,25 @@ describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () =>
     expect(same).toMatchObject({ name: "Emilio", gentleTimerEnabled: true, difficultyAdjustment: 0.9 });
     const younger = applySettings(same, { ...same, age: 7 });
     expect(younger).toMatchObject({ age: 7, difficultyAdjustment: 0, gentleTimerEnabled: false });
+  });
+
+  it("keeps a level per subject, boosted by perfect rounds", () => {
+    const perfect = (subjectId: string) => ({ subjectId, languageCode: "de", correct: 10, total: 10, correctContentIds: [], effectiveAge: 7 });
+    let p = { ...createProfile({ ...defaultSettings(), name: "Lena", age: 5 }, day(1)), difficultyAdjustment: 0.3 };
+    // Subjects without their own level start from the old shared one.
+    expect(subjectAdaptivity(p, "de", "maths").adjustment).toBe(0.3);
+
+    let summary;
+    for (let i = 0; i < 3; i++) ({ profile: p, summary } = recordRound(p, perfect("maths"), day(1)));
+    expect(summary!.levelUp).toBe(true);
+    expect(subjectAdaptivity(p, "de", "maths")).toEqual({ adjustment: 0.3 + 0.15 + 0.5 + 0.5, perfectRounds: 3 });
+    expect(subjectLevelAge(p, "de", "maths")).toBeCloseTo(6.45);
+    expect(subjectDifficulty(p, "de", "maths").effectiveAge).toBeCloseTo(6.45);
+    expect(subjectAdaptivity(p, "de", "vocabulary").adjustment).toBe(0.3);
+
+    // A new age starts every subject from the real age again.
+    const older = applySettings(p, { ...p, age: 6 });
+    expect(subjectAdaptivity(older, "de", "maths")).toEqual({ adjustment: 0, perfectRounds: 0 });
   });
 
   it("gates with a two-digit × one-digit sum", () => {

@@ -5,6 +5,7 @@ import {
   difficultyForEffectiveAge,
   effectiveAge,
   isEligible,
+  nextAdaptivity,
   nextAdjustment,
 } from "../src/domain/difficulty";
 import { AGES } from "./helpers";
@@ -20,7 +21,8 @@ describe("difficulty scaling (mirrors DifficultyScaleTests.swift)", () => {
   it("clamps effective age", () => {
     expect(effectiveAge(4, -1.5)).toBe(4);
     expect(effectiveAge(14, 1.5)).toBe(14);
-    expect(effectiveAge(7, 5)).toBe(8.5);
+    expect(effectiveAge(7, 5)).toBe(10);
+    expect(effectiveAge(7, -5)).toBe(5.5);
   });
 
   it("gives the youngest only counting", () => {
@@ -72,9 +74,35 @@ describe("difficulty scaling (mirrors DifficultyScaleTests.swift)", () => {
   it("adapts gently and is capped", () => {
     expect(nextAdjustment(0, 10, 10)).toBeCloseTo(0.15);
     expect(nextAdjustment(0, 7, 10)).toBe(0);
-    expect(nextAdjustment(0, 2, 10)).toBeCloseTo(-0.2);
-    expect(nextAdjustment(1.45, 10, 10)).toBe(1.5);
+    expect(nextAdjustment(0, 2, 10)).toBeCloseTo(-0.3);
+    expect(nextAdjustment(2.95, 10, 10)).toBe(3);
+    expect(nextAdjustment(-1.4, 0, 10)).toBe(-1.5);
     expect(nextAdjustment(0.3, 0, 0)).toBe(0.3);
+  });
+
+  it("steps up faster after two perfect rounds in a row, and eases back", () => {
+    let a = { adjustment: 0, perfectRounds: 0 };
+    const steps: number[] = [];
+    for (let round = 0; round < 8; round++) {
+      const next = nextAdaptivity(a, 10, 10);
+      expect(next.boosted).toBe(round >= 1 && a.adjustment < 3);
+      a = next;
+      steps.push(a.adjustment);
+    }
+    expect(steps[0]).toBeCloseTo(0.15);
+    expect(steps[1]).toBeCloseTo(0.65);
+    expect(steps[2]).toBeCloseTo(1.15);
+    expect(a.adjustment).toBe(3);
+    expect(difficultyForAge(5, a.adjustment).effectiveAge).toBe(8);
+
+    // 9 of 10 ends the run: a small step, and two more perfect rounds before the next boost.
+    a = nextAdaptivity({ adjustment: 1, perfectRounds: 3 }, 9, 10);
+    expect(a).toMatchObject({ perfectRounds: 0, boosted: false });
+    expect(a.adjustment).toBeCloseTo(1.15);
+    expect(nextAdaptivity(a, 10, 10).boosted).toBe(false);
+
+    // A hard round steps back down.
+    expect(nextAdaptivity({ adjustment: 2, perfectRounds: 4 }, 4, 10)).toMatchObject({ adjustment: 1.7, perfectRounds: 0, boosted: false });
   });
 
   it("uses an eligibility window", () => {

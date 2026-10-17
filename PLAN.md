@@ -192,6 +192,13 @@ After each round: score ≥ 90 % → `difficultyAdjustment += 0.15`; score < 50 
 adjustment to 0. This lets two 7-year-olds diverge naturally without a parent
 touching anything.
 
+**Web app (2026-10-17), not yet in the iOS app:** the adjustment is kept **per
+subject** (`SubjectProgress.adjustment`, seeded from the old profile-wide value).
+From the second perfect round in a row, each further perfect round adds **+0.5**
+instead of +0.15; a round under 50 % subtracts 0.3 and ends the run. Range is
+−1.5 … **+3** years. The grown-up area shows each subject's level ("Niveau wie
+mit 8½ Jahren"), and the summary says when a round made the next one harder.
+
 ---
 
 ## 6. Localisation
@@ -318,3 +325,4 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-17** — Ballon-Pop: 5–6 year olds pop one colour (switching every 30 s) instead of everything; balloons are faster from 5.
 - **2026-10-17** — **Zahlenhaus** (web only for now): a new maths operation `numberHouse` (number decomposition as in Swiss/German first grade). Roof up to 6 with 2 floors at 5, up to 10 with 3 floors at 6, up to 20 with 4 floors at 7, up to 100 at 8; from 7 some houses hide the roof. Weight fades out after 9. Checked as one question; wrong rooms show the right number. Not yet in `DifficultyTuning.swift`.
 - **2026-10-17** — **Sudoku** (web only): a home-screen card, not a quiz subject and not a paid game: solving one earns stars (3–10 by level, −1 per hint and per 3 mistakes, min 1). Levels: picture 4×4 (4–5), number 4×4 (6–7), 6×6 (8–9), 9×9 (10+), all with a unique solution. Wrong entries wobble and aren't placed. Grown-ups can hide it and shift its difficulty ±2 years.
+- **2026-10-17** — Faster, per-subject adaptivity (see §5.4): children who get everything right climb up to 3 years above their age without a parent changing the age; levels shown in the grown-up area. Web only for now.
