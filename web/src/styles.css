@@ -311,46 +311,6 @@ p { line-height: 1.4; }
 .catcher.dizzy { animation: wobble 0.5s infinite; }
 .catcher.sparkle { filter: drop-shadow(0 0 12px #ffd76a); }
 
-.shop { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x proximity; }
-.shop-item { flex: none; width: 82px; min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; scroll-snap-align: start; border: 3px solid transparent; }
-.shop-item.selected { border-color: var(--sun); }
-.shop-item:disabled { opacity: 0.4; }
-.shop-emoji { font-size: 2.2rem; }
-.shop-price { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
-/* The farm is wider than a screen: it scrolls inside this window. */
-.garden-scroll {
-  max-height: 62vh; overflow: auto; border-radius: var(--radius-card); box-shadow: var(--shadow);
-  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: #6cc25c;
-}
-.garden-grid {
-  display: grid; gap: 0; padding: 10px; width: max-content; grid-auto-rows: var(--cell);
-  background: linear-gradient(#9be08a, #6cc25c);
-}
-/* Drawing roads: the finger draws instead of scrolling. */
-.garden-grid.drawing { touch-action: none; }
-.plot {
-  position: relative; border: none; padding: 0; margin: 3px; border-radius: 12px; background: rgba(120, 72, 30, 0.35);
-  font-size: calc(var(--cell) * 0.58); display: flex; align-items: center; justify-content: center; min-width: 0;
-}
-.plot.way { margin: 0; border-radius: 0; background: transparent; }
-.path-art { width: 100%; height: 100%; display: block; }
-.garden-zoom { margin-top: 4px; }
-.garden-zoom .muted { font-size: 0.9rem; }
-.shop-emoji .path-art { width: 2.4rem; height: 2.4rem; }
-.plot.planted { background: rgba(120, 72, 30, 0.2); }
-.plot.big { font-size: calc(var(--cell) * 1.2); }
-.plot.building { background: repeating-linear-gradient(45deg, rgba(255, 196, 0, 0.35) 0 10px, rgba(120, 72, 30, 0.25) 10px 20px); }
-.plot-picture { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.farm-art { width: 90%; height: 90%; }
-.plot-produce { position: absolute; top: -6px; right: -4px; font-size: 1.3rem; animation: produce-bob 1.2s ease-in-out infinite; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25)); }
-@keyframes produce-bob { 50% { transform: translateY(-4px); } }
-.shop-emoji .farm-art { width: 2.4rem; height: 2.4rem; }
-.shop-name { font-size: 0.75rem; font-weight: 700; text-align: center; line-height: 1.1; }
-.shop-item.locked .shop-emoji { opacity: 0.55; }
-.garden-tabs button { font-size: 0.95rem; }
-.farm-shop, .land-button { border: none; font-family: inherit; font-size: 1.15rem; font-weight: 800; padding: 16px; color: var(--ink); }
-.farm-shop { background: color-mix(in srgb, var(--sun) 35%, var(--card)); }
-.land-button:disabled { opacity: 0.5; }
 
 .play-card { background: linear-gradient(135deg, #ff7a59, #e2558f); }
 
@@ -435,5 +395,194 @@ p { line-height: 1.4; }
 .balloon-minus { position: absolute; top: 10px; color: var(--danger); font-weight: 900; font-size: 1.6rem; animation: minus-float 0.7s forwards; text-shadow: 0 1px 0 #fff; }
 @keyframes minus-float { to { transform: translateY(-36px); opacity: 0; } }
 .game-hint.penalty { margin-top: -8px; font-size: 0.9rem; font-weight: 600; color: var(--muted); }
-.plot.planted.way { background: transparent; }
-@media (max-width: 480px) { .garden-tabs button { font-size: 0.78rem; padding: 8px 2px; } }
+
+/* ───────────── Pip's farm (full screen) ───────────── */
+.farm { position: fixed; inset: 0; overflow: hidden; z-index: 1; background: #3d8a43; color: #2b2540; }
+/* Around the meadow: a little forest, so the farm feels like a place. */
+.farm-world {
+  position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M16 4 L28 30 H4 Z' fill='%232f7a3a'/%3E%3Crect x='14' y='30' width='4' height='6' fill='%236b4423'/%3E%3Cpath d='M48 34 L60 60 H36 Z' fill='%23367f40'/%3E%3Crect x='46' y='60' width='4' height='4' fill='%236b4423'/%3E%3C/svg%3E") #3d8a43;
+}
+.farm-ground {
+  position: relative; display: grid; grid-auto-rows: var(--cell); width: max-content;
+  margin: 96px 64px 150px; padding: 24px; border-radius: 36px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg fill='none' stroke='%235fae48' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 20 l-3 -7 M12 20 l0 -8 M12 20 l3 -7'/%3E%3Cpath d='M60 44 l-3 -7 M60 44 l0 -8 M60 44 l3 -7'/%3E%3Cpath d='M30 78 l-3 -6 M30 78 l0 -7 M30 78 l3 -6'/%3E%3Cpath d='M84 86 l-2 -6 M84 86 l0 -7 M84 86 l2 -6'/%3E%3C/g%3E%3Ccircle cx='76' cy='16' r='2.5' fill='%23fff8d6'/%3E%3Ccircle cx='40' cy='54' r='2' fill='%23ffd43b'/%3E%3Ccircle cx='8' cy='62' r='2' fill='%23fff8d6'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 30% 20%, #a3e283, transparent 60%),
+    linear-gradient(#8fd970, #73c457);
+  box-shadow: 0 0 0 8px #6cb653, 0 0 0 14px rgba(0, 0, 0, 0.12), 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+.farm-ground.drawing { touch-action: none; }
+
+.farm-tile { position: relative; border: none; padding: 0; margin: 0; background: transparent; font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.farm-ground.placing .farm-tile:not(.filled) { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); border-radius: 10px; }
+.farm-ground.placing .farm-tile:not(.filled):hover { background: rgba(255, 255, 255, 0.25); }
+.farm-tile.way { cursor: default; }
+.path-art { width: 100%; height: 100%; display: block; }
+
+/* Objects stand on the meadow with a soft shadow; buildings are taller than their squares. */
+.obj { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10%; pointer-events: none; }
+.obj::before { content: ""; position: absolute; bottom: 7%; left: 20%; right: 20%; height: 16%; border-radius: 50%; background: rgba(20, 60, 10, 0.28); filter: blur(1.5px); }
+.obj-picture { position: relative; font-size: calc(var(--cell) * 0.64); line-height: 1; display: flex; align-items: flex-end; justify-content: center; filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.15)); }
+.farm-tile.art .obj { padding-bottom: 4%; }
+.farm-tile.art .obj::before { left: 6%; right: 6%; bottom: 3%; height: 18%; }
+.farm-tile.art .obj-picture { width: 100%; height: 118%; }
+.farm-tile .farm-art { width: 100%; height: 100%; }
+
+/* Fields: tilled soil under crops; ready crops glow. */
+.farm-tile.crop::before {
+  content: ""; position: absolute; inset: 7%; border-radius: 22%;
+  background: repeating-linear-gradient(0deg, #8b5a2b 0 7px, #74471f 7px 10px);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 3px 0 rgba(0, 0, 0, 0.15);
+}
+.farm-tile.crop .obj::before { display: none; }
+.farm-tile.ready.crop::after { content: ""; position: absolute; inset: 4%; border-radius: 24%; box-shadow: 0 0 0 3px rgba(255, 236, 120, 0.9), 0 0 18px rgba(255, 220, 80, 0.85); animation: glow 1.6s ease-in-out infinite; }
+.farm-tile.building::before { content: ""; position: absolute; inset: 6%; border-radius: 16%; background: repeating-linear-gradient(45deg, #d9b47a 0 10px, #c9a36a 10px 20px); opacity: 0.8; }
+.hammer { position: absolute; top: 6%; right: 8%; font-size: calc(var(--cell) * 0.34); transform-origin: 80% 80%; animation: hammer 0.5s ease-in-out infinite alternate; z-index: 2; }
+
+/* Life: crops and trees sway, animals wander and turn, windmills turn. */
+.farm-tile.crop .obj-picture, .farm-tile.plant .obj-picture { transform-origin: 50% 100%; animation: sway 3.4s ease-in-out infinite; animation-delay: var(--delay); }
+.farm-tile.animal .obj { animation: wander 8s ease-in-out infinite; animation-delay: var(--delay); }
+.farm-tile.animal .obj-picture { animation: bob 0.9s ease-in-out infinite alternate; animation-delay: var(--delay); }
+.windmill-blades { transform-box: view-box; transform-origin: 50px 72px; animation: spin 7s linear infinite; }
+
+/* Something to collect: a bubble with what it is. */
+.bubble {
+  position: absolute; top: -12%; right: -8%; width: calc(var(--cell) * 0.52); height: calc(var(--cell) * 0.52); border-radius: 50%;
+  background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22); display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cell) * 0.3); animation: bubble-bob 1.4s ease-in-out infinite; z-index: 3;
+}
+.farm-tile.pop-in { animation: pop-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.farm-tile.moving { outline: 3px dashed #fff; outline-offset: -3px; border-radius: 12px; animation: wiggle 0.35s ease-in-out infinite alternate; }
+
+.popup {
+  position: absolute; transform: translate(-50%, 0); pointer-events: none; z-index: 500; white-space: nowrap;
+  font-weight: 900; font-size: 1.25rem; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 0 8px rgba(0, 0, 0, 0.25);
+  animation: float-up 1.3s ease-out forwards;
+}
+.popup.xp { color: #ffe066; font-size: 1rem; }
+.popup.sparkle { font-size: 2rem; }
+
+/* Time of day */
+.farm-light { position: absolute; inset: 0; pointer-events: none; transition: background 2s; z-index: 5; }
+.time-morning .farm-light { background: rgba(255, 190, 120, 0.12); }
+.time-evening .farm-light { background: linear-gradient(rgba(255, 120, 60, 0.2), rgba(120, 40, 120, 0.12)); }
+.time-night .farm-light { background: rgba(20, 30, 90, 0.4); }
+
+/* HUD */
+.farm-hud { position: absolute; top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px; display: flex; align-items: center; gap: 10px; z-index: 10; }
+.farm-level { display: flex; align-items: center; flex: 0 1 230px; background: rgba(255, 255, 255, 0.94); border-radius: 99px; padding: 4px 14px 4px 4px; box-shadow: var(--shadow); }
+.level-badge {
+  width: 46px; height: 46px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #ffe680, #f5a623); color: #5a3a00; font-weight: 900; font-size: 1.35rem; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+}
+.xp-bar { flex: 1; height: 14px; margin-left: 8px; border-radius: 99px; background: #e6e2d8; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12); }
+.xp-fill { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #7ddc5f, #2bb673); transition: width 0.7s cubic-bezier(0.3, 1.3, 0.5, 1); }
+.hud-right { margin-left: auto; display: flex; gap: 8px; }
+.hud-pill { border: none; border-radius: 99px; padding: 10px 14px; background: rgba(255, 255, 255, 0.94); box-shadow: var(--shadow); font: inherit; font-weight: 800; font-size: 1.1rem; color: #2b2540; white-space: nowrap; }
+
+.farm-banner {
+  position: absolute; top: calc(max(12px, env(safe-area-inset-top)) + 64px); left: 50%; transform: translateX(-50%); z-index: 10;
+  display: flex; align-items: center; gap: 12px; max-width: calc(100% - 24px); padding: 10px 10px 10px 18px; border-radius: 99px;
+  background: rgba(43, 37, 64, 0.9); color: #fff; font-weight: 700; box-shadow: var(--shadow); animation: drop-in 0.3s ease-out;
+}
+.banner-close { flex: none; border: none; border-radius: 99px; padding: 8px 14px; background: #fff; color: #2b2540; font: inherit; font-weight: 800; }
+
+.farm-zoom { position: absolute; right: 12px; bottom: 116px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+.round-tool { width: 48px; height: 48px; border: none; border-radius: 50%; background: rgba(255, 255, 255, 0.94); box-shadow: var(--shadow); font: inherit; font-size: 1.4rem; font-weight: 800; color: #2b2540; flex: none; }
+
+.farm-bar {
+  position: absolute; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 10;
+  display: flex; gap: 8px; padding: 8px; max-width: calc(100% - 16px); overflow-x: auto;
+  background: rgba(255, 255, 255, 0.95); border-radius: 26px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.bar-button { position: relative; flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 66px; padding: 8px 10px; border: none; border-radius: 18px; background: #f4efe4; font: inherit; font-size: 0.78rem; font-weight: 800; color: #2b2540; }
+.bar-button > span[aria-hidden] { font-size: 1.6rem; line-height: 1; }
+.bar-button.shop { background: linear-gradient(#ffd25e, #f5a623); }
+.bar-button.collect { background: linear-gradient(#a6e98a, #5cc24a); animation: nudge 1.8s ease-in-out infinite; }
+.bar-button.active { background: #2b2540; color: #fff; }
+.badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: #e2455b; color: #fff; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff; }
+
+/* Shop and order drawers */
+.farm-sheet-backdrop { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: rgba(0, 0, 0, 0.35); animation: fade-in 0.2s; }
+.farm-sheet {
+  width: min(760px, 100%); max-height: 78vh; overflow: auto; padding: 8px 18px max(18px, env(safe-area-inset-bottom));
+  background: #fff8ee; color: #2b2540; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25); animation: slide-up 0.3s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+.farm-sheet-bar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 6px 0; background: #fff8ee; }
+.farm-sheet-bar h2 { margin: 0; }
+.shop-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; }
+.shop-tabs button { flex: none; border: none; border-radius: 99px; padding: 10px 14px; background: #efe7d6; color: #2b2540; font: inherit; font-weight: 800; }
+.shop-tabs .selected { background: #2b2540; color: #fff; }
+.shop-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; padding: 4px 0 8px; }
+.shop-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 8px 10px; border: none; border-radius: 22px; background: #fff; color: #2b2540; font: inherit; box-shadow: 0 4px 0 #e6dccb, 0 6px 16px rgba(0, 0, 0, 0.08); }
+.shop-card:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #e6dccb; }
+.shop-card:disabled { opacity: 0.55; }
+.shop-card.locked:disabled { opacity: 1; }
+.shop-card.locked .card-picture { filter: grayscale(1) opacity(0.45); }
+.card-picture { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; border-radius: 18px; background: radial-gradient(circle at 50% 60%, #e9f7df, #d3eec4); }
+.card-picture svg { width: 56px; height: 56px; }
+.card-name { font-weight: 800; font-size: 0.9rem; text-align: center; line-height: 1.15; }
+.card-price { font-weight: 800; font-size: 0.9rem; padding: 3px 10px; border-radius: 99px; background: #fff1c7; }
+.card-price.free { background: #d7f5cf; }
+.card-lock { font-weight: 800; font-size: 0.8rem; color: #7a7487; }
+.card-note { font-size: 0.72rem; color: #7a7487; text-align: center; }
+.sheet-heading { margin: 16px 0 8px; font-size: 1.05rem; }
+.goods-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.goods-chip { padding: 8px 12px; border-radius: 99px; background: #fff; font-weight: 800; box-shadow: 0 2px 0 #e6dccb; }
+.goods-chip.empty { opacity: 0.45; }
+.order-list { display: flex; flex-direction: column; gap: 10px; }
+.order-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 20px; background: #fff; box-shadow: 0 3px 0 #e6dccb; }
+.order-card.done { opacity: 0.6; }
+.order-wants { display: flex; gap: 12px; font-size: 1.35rem; font-weight: 900; }
+.order-wants .need { color: #b0a8b9; }
+.order-reward { padding: 4px 10px; border-radius: 99px; background: #fff1c7; color: #6b5a00; font-weight: 800; font-size: 0.9rem; }
+.order-deliver { margin-left: auto; border: none; border-radius: 99px; padding: 10px 18px; background: linear-gradient(#a6e98a, #43b03a); color: #fff; font: inherit; font-weight: 900; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2); }
+.order-deliver:disabled { background: #ddd6c8; text-shadow: none; }
+.order-done { margin-left: auto; font-size: 1.6rem; font-weight: 900; color: #2bb673; }
+
+.level-up-card { color: #2b2540; }
+.level-up-badge {
+  width: 96px; height: 96px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #fff1a0, #f5a623); color: #5a3a00; font-size: 3rem; font-weight: 900;
+  box-shadow: 0 0 0 8px rgba(245, 166, 35, 0.25), 0 10px 30px rgba(245, 166, 35, 0.5); animation: pop-in 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.unlock-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.unlock-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; font-size: 0.85rem; }
+
+@keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes wander {
+  0%, 100% { transform: translateX(-12%) scaleX(-1); }
+  45% { transform: translateX(12%) scaleX(-1); }
+  50%, 95% { transform: translateX(12%) scaleX(1); }
+  95% { transform: translateX(-12%) scaleX(1); }
+}
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-6%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bubble-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes hammer { from { transform: rotate(-30deg); } to { transform: rotate(20deg); } }
+@keyframes wiggle { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+@keyframes pop-in { 0% { transform: scale(0.2); } 100% { transform: scale(1); } }
+@keyframes float-up {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.6); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -64px) scale(1); }
+}
+@keyframes drop-in { from { opacity: 0; transform: translate(-50%, -12px); } }
+@keyframes slide-up { from { transform: translateY(100%); } }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes nudge { 0%, 80%, 100% { transform: translateY(0); } 88% { transform: translateY(-4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .farm-tile .obj, .farm-tile .obj-picture, .windmill-blades, .bubble, .bar-button.collect, .farm-tile.ready.crop::after, .hammer { animation: none !important; }
+}
+@media (max-width: 480px) {
+  .farm-ground { margin: 84px 32px 140px; }
+  .farm-level { flex-basis: 150px; }
+  .hud-pill { padding: 8px 10px; font-size: 1rem; }
+  .bar-button { min-width: 58px; padding: 6px 8px; }
+}
+.farm-tile.animal .obj-picture { font-size: calc(var(--cell) * 0.72); }
+.farm-tile[data-item="tree"] .obj-picture, .farm-tile[data-item="appletree"] .obj-picture { font-size: calc(var(--cell) * 1); }
+.farm-tile[data-item="tree"] .obj::before, .farm-tile[data-item="appletree"] .obj::before { left: 12%; right: 12%; }

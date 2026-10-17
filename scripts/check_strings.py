@@ -44,7 +44,7 @@ def main() -> int:
             used.setdefault(key, path.relative_to(ROOT))
 
     # Keys built at runtime, e.g. LocalizedStringKey("color." + key).
-    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab.", "garden.collect."))}
+    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab."))}
 
     missing = sorted(set(used) - catalog)
     unused = sorted(catalog - set(used) - dynamic)

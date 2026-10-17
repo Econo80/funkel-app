@@ -54,6 +54,35 @@ export function FarmArt({ id }: { id: string }) {
           <ellipse cx="178" cy="24" rx="4" ry="9" fill="#8A5A3C" />
         </svg>
       );
+    case "beehive":
+      return (
+        <svg viewBox="0 0 100 100" class="farm-art" aria-hidden="true">
+          <rect x="44" y="78" width="12" height="16" fill="#8A5A3C" />
+          <path d="M22 80 Q20 40 50 22 Q80 40 78 80 Z" fill="#F2B640" />
+          {[36, 48, 60, 72].map((y) => <path key={y} d={`M${24 + (80 - y) * 0.1} ${y} Q50 ${y + 6} ${76 - (80 - y) * 0.1} ${y}`} stroke="#C98A1E" stroke-width="3" fill="none" />)}
+          <path d="M42 80 A8 8 0 0 1 58 80 Z" fill="#5A3A22" />
+          <circle cx="76" cy="30" r="4" fill="#FFD43B" /><path d="M72 27 L68 23 M80 27 L84 23" stroke="#5A3A22" stroke-width="2" />
+        </svg>
+      );
+    case "windmill":
+      return (
+        <svg viewBox="0 0 100 200" class="farm-art tall" aria-hidden="true">
+          <path d="M34 196 L42 80 H58 L66 196 Z" fill="#F3E3C3" />
+          <path d="M34 196 L42 80 H58 L66 196 Z" fill="none" stroke="#C9AE80" stroke-width="2" />
+          <path d="M38 84 L50 64 L62 84 Z" fill="#B5542F" />
+          <rect x="44" y="160" width="12" height="36" rx="6" fill="#8A5A3C" />
+          <rect x="45" y="110" width="10" height="12" fill="#7EC8F0" stroke="#fff" stroke-width="2" />
+          <g class="windmill-blades">
+            {[0, 90, 180, 270].map((a) => (
+              <g key={a} transform={`rotate(${a} 50 72)`}>
+                <rect x="47" y="22" width="6" height="50" fill="#8A5A3C" />
+                <rect x="53" y="24" width="14" height="40" fill="#FFF8EA" stroke="#C9AE80" stroke-width="2" />
+              </g>
+            ))}
+            <circle cx="50" cy="72" r="6" fill="#5A3A22" />
+          </g>
+        </svg>
+      );
     case "fence":
       return (
         <svg viewBox="0 0 100 100" class="farm-art" aria-hidden="true">

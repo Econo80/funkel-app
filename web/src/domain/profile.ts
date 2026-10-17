@@ -3,7 +3,7 @@
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity } from "./difficulty";
 import { DEFAULT_GAME_SETTINGS, gameAge, type GameDifficulty } from "./games";
-import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, widenGarden, type Garden, type Produce } from "./garden";
+import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, emptyGoods, startingFarmXp, widenGarden, type FarmOrder, type Garden, type Produce } from "./garden";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -73,8 +73,12 @@ export interface Profile extends ProfileSettings {
   garden: Garden;
   /** Columns the garden was saved with (missing: the old 6-column garden). */
   gardenColumns?: number;
-  /** Eggs and milk collected on the farm, not yet sold. */
+  /** Eggs, milk, crops … collected on the farm, not yet sold or delivered. */
   farmGoods: Record<Produce, number>;
+  /** Farm XP: stars spent on the farm, collecting and orders. */
+  farmXp: number;
+  /** Today's orders on the order board. */
+  farmOrders?: { day: string; orders: FarmOrder[] };
   currentStreak: number;
   longestStreak: number;
   /** Local calendar day, "YYYY-MM-DD". */
@@ -111,6 +115,7 @@ export function defaultSettings(): ProfileSettings {
  */
 export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Profile {
   const base = defaultSettings();
+  const garden = normalizeGarden(p.garden && p.gardenColumns !== GARDEN_COLUMNS ? widenGarden(p.garden) : p.garden);
   return {
     ...base,
     createdAt: new Date(0).toISOString(),
@@ -125,9 +130,11 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesToday: p.gamesToday ?? 0,
     bonusGames: p.bonusGames ?? 0,
     gameDifficulty: p.gameDifficulty ?? base.gameDifficulty,
-    garden: normalizeGarden(p.garden && p.gardenColumns !== GARDEN_COLUMNS ? widenGarden(p.garden) : p.garden),
+    garden,
     gardenColumns: GARDEN_COLUMNS,
-    farmGoods: { egg: 0, milk: 0, ...p.farmGoods },
+    farmGoods: { ...emptyGoods(), ...p.farmGoods },
+    // Farms built before levels existed start with the XP of what was spent on them.
+    farmXp: p.farmXp ?? startingFarmXp(garden),
     gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
     gameCost: p.gameCost ?? base.gameCost,
     gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
@@ -161,7 +168,8 @@ export function createProfile(settings: ProfileSettings, now = new Date()): Prof
       bonusGames: 0,
       garden: emptyGarden(),
       gardenColumns: GARDEN_COLUMNS,
-      farmGoods: { egg: 0, milk: 0 },
+      farmGoods: emptyGoods(),
+      farmXp: 0,
       currentStreak: 0,
       longestStreak: 0,
       progress: {},
@@ -396,7 +404,7 @@ export function recordSudoku(p: Profile, stars: number, now = new Date()): Profi
 export function resetProgress(p: Profile): Profile {
   return {
     ...p,
-    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: { egg: 0, milk: 0 },
+    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: emptyGoods(), farmXp: 0, farmOrders: undefined,
     currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [],
   };
 }

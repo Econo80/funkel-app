@@ -8,6 +8,14 @@ import {
   clearPlot,
   collectProduce,
   connections,
+  emptyGoods,
+  farmLevel,
+  fulfilOrder,
+  moveItem,
+  readyCells,
+  startingFarmXp,
+  unlockedAt,
+  withTodaysOrders,
   daysUntilNextStage,
   gardenRows,
   homeSpace,
@@ -23,7 +31,8 @@ import { createProfile, defaultSettings, normalizeProfile, type Profile } from "
 import { seededRng } from "../src/domain/random";
 
 const day = (d: number) => new Date(2026, 9, d, 10);
-const rich = (stars = 500): Profile => ({ ...createProfile({ ...defaultSettings(), name: "Lena", age: 6 }, day(1)), walletStars: stars });
+// A farm far enough along that every item is unlocked.
+const rich = (stars = 500): Profile => ({ ...createProfile({ ...defaultSettings(), name: "Lena", age: 6 }, day(1)), walletStars: stars, farmXp: 5000 });
 const place = (p: Profile, cell: number, id: string, d = 1) => placeInGarden(p, cell, id, day(d), seededRng(cell));
 
 describe("farm buildings", () => {
@@ -95,7 +104,7 @@ describe("farm animals", () => {
   });
 
   it("sells eggs and milk in fives for spendable stars only", () => {
-    const p = { ...rich(10), totalStars: 50, farmGoods: { egg: 7, milk: 4 } };
+    const p = { ...rich(10), totalStars: 50, farmGoods: { ...emptyGoods(), egg: 7, milk: 4 } };
     const sold = sellGoods(p);
     expect(sold).toMatchObject({ walletStars: 12, totalStars: 50, farmGoods: { egg: 0, milk: 1 } });
     expect(sellGoods(sold)).toBe(sold);
@@ -120,7 +129,7 @@ describe("more land", () => {
   it("moves old 6-column gardens into the wide farm, keeping land already bought", () => {
     const old = normalizeProfile({ id: "x", garden: [{ itemId: "flower", plantedDay: "2026-10-01" }] as Profile["garden"] });
     expect(old.garden).toHaveLength(GARDEN_SIZE);
-    expect(old.farmGoods).toEqual({ egg: 0, milk: 0 });
+    expect(old.farmGoods).toEqual(emptyGoods());
 
     // 6 columns × 6 rows = one land purchase; a barn at row 1, column 4.
     const legacy: Profile["garden"] = Array.from({ length: 36 }, () => null);
@@ -157,5 +166,99 @@ describe("roads, paths and fences", () => {
     expect(connections(p.garden, 3)).toEqual({ n: false, e: false, s: false, w: false });
     const edge = place(place(rich(0), GARDEN_COLUMNS - 1, "path"), GARDEN_COLUMNS, "path");
     expect(connections(edge.garden, GARDEN_COLUMNS - 1).e).toBe(false);
+  });
+});
+
+describe("farm levels", () => {
+  const fresh = () => ({ ...createProfile({ ...defaultSettings(), name: "Emil", age: 9 }, day(1)), walletStars: 300 });
+
+  it("grow with XP and unlock items step by step", () => {
+    expect(farmLevel(0)).toEqual({ level: 1, xpInLevel: 0, xpForNext: 10 });
+    expect(farmLevel(35).level).toBe(3);
+    expect(farmLevel(460).level).toBe(10);
+    expect(farmLevel(560).level).toBe(11);
+    expect(unlockedAt(4).map((i) => i.id)).toContain("barn");
+    expect(placementProblem(fresh(), 0, "barn", day(1))).toBe("level");
+    expect(placementProblem(fresh(), 0, "wheat", day(1))).toBeUndefined();
+  });
+
+  it("earn one XP per star spent, and some for collecting", () => {
+    let p = place(fresh(), 0, "tree");
+    expect(p.farmXp).toBe(12);
+    expect(farmLevel(p.farmXp).level).toBe(2);
+    p = place(p, 1, "wheat");
+    p = collectProduce(p, 1, day(2));
+    expect(p.farmXp).toBe(12 + 3 + 3);
+  });
+
+  it("credit farms built before levels existed", () => {
+    let g = rich().garden;
+    g = [...g];
+    g[0] = { itemId: "barn", plantedDay: "2026-10-01" };
+    g[5] = { itemId: "cow", plantedDay: "2026-10-01" };
+    expect(startingFarmXp(g)).toBe(65);
+    const old = normalizeProfile({ id: "z", garden: g, gardenColumns: GARDEN_COLUMNS });
+    expect(old.farmXp).toBe(65);
+    expect(farmLevel(old.farmXp).level).toBeGreaterThanOrEqual(4); // keeps barn-level items
+  });
+});
+
+describe("harvest", () => {
+  it("collects grown crops, which then grow again", () => {
+    let p = place(rich(), 0, "wheat");
+    expect(readyProduce(p.garden[0]!, day(1))).toBeUndefined();
+    expect(readyProduce(p.garden[0]!, day(2))).toBe("wheat");
+    p = collectProduce(p, 0, day(2));
+    expect(p.farmGoods.wheat).toBe(1);
+    expect(plotPicture(p.garden[0]!, day(2))).toBe("🌱");
+    expect(readyProduce(p.garden[0]!, day(3))).toBe("wheat");
+  });
+
+  it("lists everything ready to collect", () => {
+    let p = place(place(rich(), 0, "wheat"), 1, "beehive");
+    p = place(p, 2, "appletree");
+    expect(readyCells(p.garden, day(1))).toEqual([]);
+    expect(readyCells(p.garden, day(2))).toEqual([0, 1]);
+    expect(readyCells(p.garden, day(5))).toEqual([0, 1, 2]);
+  });
+});
+
+describe("orders", () => {
+  it("ask for goods the farm can make and pay better than the farm shop", () => {
+    expect(withTodaysOrders(rich(), day(1)).farmOrders?.orders).toEqual([]);
+    let p = withTodaysOrders(place(place(rich(), 0, "coop"), 1, "chick", 2), day(2));
+    const orders = p.farmOrders!.orders;
+    expect(orders).toHaveLength(3);
+    for (const o of orders) {
+      expect(Object.keys(o.wants)).toEqual(["egg"]);
+      expect(o.stars).toBeGreaterThanOrEqual(1 + Math.floor(o.wants.egg! / 3));
+    }
+    // The same orders all day long.
+    expect(withTodaysOrders(p, day(2))).toBe(p);
+    expect(withTodaysOrders(p, day(3)).farmOrders!.day).not.toBe(p.farmOrders!.day);
+
+    const order = orders[0];
+    expect(fulfilOrder(p, order.id)).toBe(p); // not enough eggs yet
+    p = { ...p, farmGoods: { ...emptyGoods(), egg: 10 } };
+    const before = p.walletStars;
+    const done = fulfilOrder(p, order.id);
+    expect(done.walletStars).toBe(before + order.stars);
+    expect(done.farmGoods.egg).toBe(10 - order.wants.egg!);
+    expect(done.farmOrders!.orders[0].done).toBe(true);
+    expect(fulfilOrder(done, order.id)).toBe(done);
+  });
+});
+
+describe("moving", () => {
+  it("moves an item, big ones too, keeping its age", () => {
+    let p = place(rich(), 0, "barn");
+    p = moveItem(p, GARDEN_COLUMNS + 1, 5);
+    expect(p.garden[0]).toBeNull();
+    expect(p.garden[5]?.itemId).toBe("barn");
+    expect(p.garden[5]?.plantedDay).toBe("2026-10-01");
+    // It can overlap where it was, but not other things.
+    p = place(p, 8, "stone");
+    expect(moveItem(p, 5, 7)).toBe(p);
+    expect(moveItem(p, 5, 4).garden[4]?.itemId).toBe("barn");
   });
 });

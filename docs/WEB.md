@@ -71,20 +71,23 @@ card on the home screen) they can spend stars:
   balloons; at 4 all of them, at 5–6 only one colour, which changes every 30
   seconds, from 7 only even numbers, from 9 only the multiplications that
   make a target number, e.g. 24) and **Sternenfänger** (move Pip to catch stars and dodge clouds).
-- **Pips Garten**, which grows into a little farm. No timer.
-  - Plants (flowers, wheat, vegetables, trees) grow over the next days and weeks.
-  - Buildings take 1–3 days to build: Hundehütte, Hühnerstall, Teich, Scheune
-    and Bauernhaus (the big ones use 2×2 squares).
-  - Farm animals need their home first: dog → Hundehütte, chicks → Hühnerstall
-    (they grow into hens), ducks → Teich, cow, pig, sheep, goat and horse →
-    Scheune, cat → a house. Each home has room for a few animals.
-  - Hens lay an egg and cows give milk every day: tap them to collect. 5 eggs or
-    milk sell for 1 ⭐ at the farm shop, so learning stays the main way to earn stars.
-  - **Roads, footpaths and fences are free** (tab "Wege"): choose one and drag a
-    finger across the squares to draw; they join up into corners and crossings.
-  - The farm is 16 squares wide, wider than the screen: swipe inside it to look
-    around, and use − / + to zoom.
-  - When the garden is full, buy more land (25, 40, then 60 ⭐ for four more rows each).
+- **Pips Garten**: a little farm game that fills the screen. No timer.
+  - **Look around:** swipe to move over the meadow, − / + to zoom. The light
+    follows the time of day.
+  - **🛒 Laden:** plants, animals, buildings, roads/paths/fences (free) and
+    decorations. Spending stars on the farm earns **XP** (top left); new **farm
+    levels** unlock more items, celebrated with a pop-up.
+  - **Growing and building take days:** crops and trees grow, buildings show a
+    building site for 1–3 days. Farm animals need their home first (dog →
+    Hundehütte, chicks → Hühnerstall, ducks → Teich, farm animals → Scheune).
+  - **Every day:** wheat and vegetables can be harvested (then they grow again);
+    hens, cows, bees and apple trees give eggs, milk, honey and apples. A bubble
+    shows what's ready; tap it, or **🧺 Einsammeln** for everything at once.
+  - **📋 Aufträge:** three orders a day ask for goods, e.g. "4 🥚 + 3 🥛", and pay
+    stars and XP. Leftovers sell at the farm shop (5 → 1 ⭐). Learning stays the
+    main way to earn stars.
+  - **✋ Verschieben** moves things; **🧹 Wegräumen** removes them; more land is
+    in the shop under "Bauen".
 
 The lifetime star count never goes down; only the "stars to spend" are used.
 Grown-ups can change the price per game, the number of games per day, or turn
