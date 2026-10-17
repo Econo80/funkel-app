@@ -8,7 +8,7 @@ import {
   type MathsDifficulty,
   type MathsOperation,
 } from "../domain/difficulty";
-import { makeQuestion, type AnswerOption, type Question, type QuestionFormat } from "../domain/question";
+import { makeQuestion, type AnswerOption, type NumberHouse, type Question, type QuestionFormat } from "../domain/question";
 import { randomElement, randomInt, shuffled, weightedPick, type Rng } from "../domain/random";
 import type { QuestionProvider } from "./provider";
 
@@ -139,6 +139,27 @@ export function distractors(rng: Rng, p: MathsProblem, count: number, allowsNega
   return result;
 }
 
+/**
+ * A Zahlenhaus for this age: from roofs up to 6 with two floors (age 5) to roofs
+ * up to 100 with four floors. Each floor hides one room; from 7 some houses hide
+ * the roof instead and give one floor in full. Young children get the floors in
+ * order (1 + 5, 2 + 4, …) so the pattern is easy to see.
+ */
+export function makeNumberHouse(rng: Rng, d: MathsDifficulty): NumberHouse {
+  const floorsWanted = Math.max(2, d.houseFloors);
+  const roofMin = Math.max(3, floorsWanted + 1, Math.ceil(d.houseRoofMax / 2));
+  const roof = randomInt(rng, roofMin, Math.max(roofMin, d.houseRoofMax));
+  const withZero = d.houseRoofMax >= 10 && rng() < 0.2; // 0 + 7 is a decomposition too
+  const lefts = shuffled(rng, Array.from({ length: roof + 1 }, (_, i) => i).filter((i) => withZero || (i > 0 && i < roof)))
+    .slice(0, Math.min(floorsWanted, roof - 1));
+  if (d.houseRoofMax <= 10) lefts.sort((a, b) => a - b);
+  const floors = lefts.map((l) => [l, roof - l] as [number, number]);
+
+  const hidesRoof = d.houseHidesRoof && rng() < 0.3;
+  const hidden = floors.flatMap((_, i) => (hidesRoof && i === 0 ? [] : [`f${i}${rng() < 0.5 ? "l" : "r"}`]));
+  return { roof, floors, hidden: hidesRoof ? ["roof", ...hidden] : hidden };
+}
+
 export class MathsQuestionGenerator implements QuestionProvider {
   constructor(readonly subjectId: string, readonly content: MathsContent, readonly phrasing: Phrasing) {}
 
@@ -229,6 +250,19 @@ export class MathsQuestionGenerator implements QuestionProvider {
             spoken: `${prompt} ${spoken}`,
           }),
           key: written,
+        };
+      }
+      case "numberHouse": {
+        const house = makeNumberHouse(rng, m);
+        const roofHidden = house.hidden.includes("roof");
+        const prompt = this.phrasing.text(roofHidden ? "maths.numberHouse.roof" : "maths.numberHouse");
+        return {
+          question: makeQuestion({
+            subjectId, prompt,
+            format: { kind: "numberHouse", house },
+            spoken: roofHidden ? prompt : `${prompt} ${this.phrasing.text("maths.numberHouse.spokenRoof", { roof: house.roof })}`,
+          }),
+          key: `house-${house.roof}`,
         };
       }
       case "wordProblem": {

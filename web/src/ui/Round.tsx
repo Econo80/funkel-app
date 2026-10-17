@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/ho
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
 import { profileDifficulty, recordRound, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
-import { correctAnswerText, spokenText, type AnswerOption, type Question } from "../domain/question";
+import { correctAnswerText, houseCellValue, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
 import { systemRng } from "../domain/random";
 import * as R from "../domain/round";
 import { playSound, speak, stopSpeaking, vibrate } from "../services/feedback";
@@ -161,6 +161,7 @@ function Round({ state, setState, color, profile, speechLocale, library, languag
           <ChoiceGrid state={state} options={question.format.options} correctIndex={question.format.correctIndex} color={color} onChoose={(i) => update((s) => R.choose(s, i))} />
         )}
         {question.format.kind === "numberEntry" && <NumberPad state={state} color={color} update={update} />}
+        {question.format.kind === "numberHouse" && <NumberHouseView state={state} house={question.format.house} color={color} update={update} />}
         {question.format.kind === "buildSequence" && <SequenceBuilder state={state} tiles={question.format.tiles} answerLength={question.format.answer.length} color={color} update={update} />}
       </div>
 
@@ -342,6 +343,63 @@ function SequenceBuilder({ state, tiles, answerLength, color, update }: {
         })}
       </div>
       <BigButton color={color} disabled={!R.canSubmitSequence(state)} onClick={() => update(R.submitSequence)} testId="sequence-check">✓ {t("round.check")}</BigButton>
+    </div>
+  );
+}
+
+// MARK: Zahlenhaus
+
+function NumberHouseView({ state, house, color, update }: {
+  state: R.RoundState; house: NumberHouse; color: string; update: (fn: (s: R.RoundState) => R.RoundState) => void;
+}) {
+  const answering = state.phase === "answering";
+  const checked = state.phase === "correct" || state.phase === "wrong";
+  const wrong = checked ? R.wrongHouseCells(state) : [];
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (/^\d$/.test(e.key)) update((s) => R.houseDigit(s, Number(e.key)));
+      else if (e.key === "Backspace") update(R.houseDelete);
+      else if (e.key === "Enter") update(R.submitHouse);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const room = (cell: string, extra = "") => {
+    const value = houseCellValue(house, cell);
+    if (!house.hidden.includes(cell)) return <span class={`house-room given${extra}`}>{value}</span>;
+    const typed = state.houseInputs[cell] ?? "";
+    const isWrong = wrong.includes(cell);
+    const status = isWrong ? " wrong" : checked ? " right" : state.houseCell === cell ? " active" : "";
+    return (
+      <button class={`house-room blank${status}${extra}`} style={{ "--accent": color } as never} disabled={!answering}
+        aria-label={typed ? typed : t("numberHouse.empty")} onClick={() => update((s) => R.selectHouseCell(s, cell))} data-testid={`house-${cell}`}
+        data-answer={import.meta.env.DEV ? value : undefined}>
+        {isWrong ? <><s aria-hidden="true">{typed}</s> {value}</> : typed || "?"}
+      </button>
+    );
+  };
+
+  return (
+    <div class="number-house">
+      <div class="house" aria-label={t("numberHouse.label")}>
+        <div class="house-roof" style={{ background: color }}>{room("roof", " roof")}</div>
+        <div class="house-floors">
+          {house.floors.map((_, i) => (
+            <div class="house-floor" key={i}>{room(`f${i}l`)}{room(`f${i}r`)}</div>
+          ))}
+        </div>
+      </div>
+      <div class="house-keys">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => (
+          <button key={d} class="card key pressable" disabled={!answering} onClick={() => update((s) => R.houseDigit(s, d))} data-testid={`key-${d}`}>{d}</button>
+        ))}
+      </div>
+      <div class="row gap">
+        <button class="card key pressable house-delete" disabled={!answering} aria-label={t("round.delete")} onClick={() => update(R.houseDelete)}>⌫</button>
+        <BigButton color={color} disabled={!R.canSubmitHouse(state)} onClick={() => update(R.submitHouse)} testId="house-check">✓ {t("round.check")}</BigButton>
+      </div>
     </div>
   );
 }

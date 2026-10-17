@@ -505,6 +505,42 @@
         }
       }
     },
+    "editor.sudoku.difficulty": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwierigkeit der Sudokus"
+          }
+        }
+      }
+    },
+    "editor.sudoku.enabled": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sudoku auf dem Startbildschirm"
+          }
+        }
+      }
+    },
+    "editor.sudoku.footer": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sudokus passen sich dem Alter an: Bilder-Sudokus (4×4) für die Jüngsten, Zahlen ab 6, 6×6 ab 8 und klassische 9×9 ab 10. Ein gelöstes Sudoku bringt Sterne, mit Tipps etwas weniger."
+          }
+        }
+      }
+    },
     "editor.timer": {
       "comment": "Toggle: optional soft timer for older children.",
       "extractionState": "manual",
@@ -1369,6 +1405,30 @@
         }
       }
     },
+    "numberHouse.empty": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeres Zimmer"
+          }
+        }
+      }
+    },
+    "numberHouse.label": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahlenhaus"
+          }
+        }
+      }
+    },
     "play.back": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -1785,6 +1845,114 @@
           "stringUnit": {
             "state": "translated",
             "value": "Antippen, um es zurückzulegen."
+          }
+        }
+      }
+    },
+    "sudoku.again": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch ein Sudoku"
+          }
+        }
+      }
+    },
+    "sudoku.cell.empty": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeres Feld"
+          }
+        }
+      }
+    },
+    "sudoku.count %lld": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld gelöst"
+          }
+        }
+      }
+    },
+    "sudoku.hint": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipp"
+          }
+        }
+      }
+    },
+    "sudoku.rule.numbers": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Zahl nur einmal in jeder Reihe, jeder Spalte und jedem dicken Kästchen."
+          }
+        }
+      }
+    },
+    "sudoku.rule.pictures": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jedes Bild nur einmal in jeder Reihe, jeder Spalte und jedem dicken Kästchen."
+          }
+        }
+      }
+    },
+    "sudoku.solved": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschafft!"
+          }
+        }
+      }
+    },
+    "sudoku.start": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rätsel lösen!"
+          }
+        }
+      }
+    },
+    "sudoku.title": {
+      "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sudoku"
           }
         }
       }

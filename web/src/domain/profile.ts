@@ -2,7 +2,7 @@
 // StreakCalculator.swift, ProgressRecorder.swift and ProfileSettings.swift.
 // Pure functions over plain objects, so they're easy to store and test.
 import { Tuning, difficultyForAge, effectiveAge, nextAdjustment } from "./difficulty";
-import { DEFAULT_GAME_SETTINGS, emptyGarden, type Garden, type GameDifficulty } from "./games";
+import { DEFAULT_GAME_SETTINGS, emptyGarden, gameAge, type Garden, type GameDifficulty } from "./games";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -47,6 +47,9 @@ export interface ProfileSettings {
   gamesPerDay: number;
   /** Shifts the games' difficulty by two years either way (independent of the quizzes). */
   gameDifficulty: GameDifficulty;
+  /** Sudoku card on the home screen, with its own difficulty shift. */
+  sudokuEnabled: boolean;
+  sudokuDifficulty: GameDifficulty;
 }
 
 export interface Profile extends ProfileSettings {
@@ -88,6 +91,8 @@ export function defaultSettings(): ProfileSettings {
     hapticsEnabled: true,
     gentleTimerEnabled: false,
     ...DEFAULT_GAME_SETTINGS,
+    sudokuEnabled: true,
+    sudokuDifficulty: "normal",
   };
 }
 
@@ -116,6 +121,8 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesEnabled: p.gamesEnabled ?? base.gamesEnabled,
     gameCost: p.gameCost ?? base.gameCost,
     gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
+    sudokuEnabled: p.sudokuEnabled ?? base.sudokuEnabled,
+    sudokuDifficulty: p.sudokuDifficulty ?? base.sudokuDifficulty,
   } as Profile;
 }
 
@@ -199,6 +206,8 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     gameCost: clamp(Math.round(s.gameCost), 1, 100),
     gamesPerDay: clamp(Math.round(s.gamesPerDay), 0, 20),
     gameDifficulty: s.gameDifficulty,
+    sudokuEnabled: s.sudokuEnabled,
+    sudokuDifficulty: s.sudokuDifficulty,
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
   };
 }
@@ -305,6 +314,40 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
   return {
     profile,
     summary: { correct: outcome.correct, total: outcome.total, starsEarned: stars, streak: streak.current, streakGrew: streak.current > p.currentStreak },
+  };
+}
+
+// MARK: Sudoku
+
+export const SUDOKU_PROGRESS_KEY = progressKey("puzzle", "sudoku");
+
+/** The age Sudokus are made for: the child's age, shifted by the grown-up setting. */
+export const sudokuAge = (p: Pick<Profile, "age" | "sudokuDifficulty">) => gameAge({ age: p.age, gameDifficulty: p.sudokuDifficulty });
+
+export const sudokusSolved = (p: Profile) => p.progress[SUDOKU_PROGRESS_KEY]?.roundsPlayed ?? 0;
+
+/** A solved Sudoku: stars into the total and the wallet, and it counts for the streak. */
+export function recordSudoku(p: Profile, stars: number, now = new Date()): Profile {
+  const streak = updatedStreak(p.currentStreak, p.longestStreak, p.lastPlayedDay, now);
+  const previous = p.progress[SUDOKU_PROGRESS_KEY];
+  return {
+    ...p,
+    totalStars: p.totalStars + stars,
+    walletStars: p.walletStars + stars,
+    currentStreak: streak.current,
+    longestStreak: streak.longest,
+    lastPlayedDay: streak.lastPlayedDay,
+    progress: {
+      ...p.progress,
+      [SUDOKU_PROGRESS_KEY]: {
+        roundsPlayed: (previous?.roundsPlayed ?? 0) + 1,
+        questionsAnswered: 0,
+        correctAnswers: 0,
+        stars: (previous?.stars ?? 0) + stars,
+        lastPlayed: now.toISOString(),
+        recentCorrectContentIds: [],
+      },
+    },
   };
 }
 

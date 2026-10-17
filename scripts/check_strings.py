@@ -18,7 +18,7 @@ import sys
 # 260-character limit in deeply nested folders.
 ROOT = pathlib.Path(os.path.relpath(pathlib.Path(__file__).absolute().parent.parent))
 CATALOG = ROOT / "Funkel/Resources/Localizable.xcstrings"
-PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden"
+PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden|sudoku|numberHouse"
 LITERAL = re.compile(r'"((?:' + PREFIXES + r')\.[^"]*)"')
 INTERPOLATION = re.compile(r"\\\(([^)]*\)?)\)")
 # Interpolated values that are strings; everything else is assumed to be an Int.

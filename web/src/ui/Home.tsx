@@ -1,14 +1,15 @@
 import type { ContentLanguage, SubjectDescriptor } from "../content/types";
-import { displayedStreak, isSubjectEnabled, progressKey, type Profile } from "../domain/profile";
+import { displayedStreak, isSubjectEnabled, progressKey, sudokusSolved, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
 import { CircleButton, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
 /** The child's home: greeting, streak and stars, one big card per subject. */
-export function Home({ profile, language, onStart, onPlay, onSwitchProfile, onGrownUps }: {
+export function Home({ profile, language, onStart, onPlay, onSudoku, onSwitchProfile, onGrownUps }: {
   profile: Profile;
   language: ContentLanguage;
   onStart: (s: SubjectDescriptor) => void;
   onPlay: () => void;
+  onSudoku: () => void;
   onSwitchProfile: () => void;
   onGrownUps: () => void;
 }) {
@@ -55,6 +56,15 @@ export function Home({ profile, language, onStart, onPlay, onSwitchProfile, onGr
               </button>
             );
           })}
+          {profile.sudokuEnabled && (
+            <button class="card subject-card pressable" style={{ background: "#14A3A3" }} onClick={onSudoku} data-testid="sudoku">
+              <span class="subject-icon" aria-hidden="true">🧩</span>
+              <span class="subject-text">
+                <span class="subject-title">{t("sudoku.title")}</span>
+                <span class="subject-sub">{sudokusSolved(profile) > 0 ? t("sudoku.count %lld", sudokusSolved(profile)) : t("sudoku.start")}</span>
+              </span>
+            </button>
+          )}
           {profile.gamesEnabled && (
             <button class="card subject-card play-card pressable" onClick={onPlay} data-testid="play-corner">
               <span class="subject-icon" aria-hidden="true">🎮</span>

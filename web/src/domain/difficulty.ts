@@ -4,11 +4,13 @@
 
 export type MathsOperation =
   | "counting" | "numberRecognition" | "addition" | "subtraction"
-  | "multiplication" | "division" | "wordProblem" | "missingNumber";
+  | "multiplication" | "division" | "wordProblem" | "missingNumber"
+  // Web only for now: the Swiss "Zahlenhaus" (number house), splitting a number into two parts.
+  | "numberHouse";
 
 export const MATHS_OPERATIONS: readonly MathsOperation[] = [
   "counting", "numberRecognition", "addition", "subtraction",
-  "multiplication", "division", "wordProblem", "missingNumber",
+  "multiplication", "division", "wordProblem", "missingNumber", "numberHouse",
 ];
 
 export type VocabularyQuestionType = "pictureToWord" | "wordToPicture" | "meaning" | "spelling" | "opposite" | "synonym";
@@ -73,6 +75,7 @@ export const Tuning = {
     division: new Keyframes([[7, 0], [8, 1], [9, 2], [10, 3], [14, 3]]),
     wordProblem: new Keyframes([[6, 0], [7, 1], [8, 1.5], [9, 2], [10, 2], [12, 2.5], [14, 3]]),
     missingNumber: new Keyframes([[6, 0], [7, 1], [8, 1.5], [9, 1.5], [10, 2], [14, 2]]),
+    numberHouse: new Keyframes([[4.9, 0], [5, 1.5], [6, 2], [7, 1.5], [8, 1], [9, 0.5], [9.5, 0]]),
   } satisfies Record<MathsOperation, Keyframes>,
 
   countingMax: new Keyframes([[4, 5], [5, 10], [6, 12]]),
@@ -83,6 +86,11 @@ export const Tuning = {
   easyTables: [2, 5, 10],
   negativeResultsFromAge: 12,
   wordProblemNumberCap: 100,
+  /** Zahlenhaus: the biggest roof number and how many floors (Zahlenraum 6 → 10 → 20 → 100). */
+  houseRoofMax: new Keyframes([[5, 6], [6, 10], [7, 20], [8, 100]]),
+  houseFloors: new Keyframes([[5, 2], [6, 3], [7, 4]]),
+  /** From this age some houses hide the roof number instead. */
+  houseHiddenRoofFromAge: 7,
 
   vocabularyTypeWeights: {
     pictureToWord: new Keyframes([[4, 4], [7, 2], [9, 0.5], [10, 0]]),
@@ -114,6 +122,9 @@ export interface MathsDifficulty {
   allowsNegativeResults: boolean;
   usesNumberPad: boolean;
   wordProblemNumberMax: number;
+  houseRoofMax: number;
+  houseFloors: number;
+  houseHidesRoof: boolean;
 }
 
 export interface VocabularyDifficulty {
@@ -177,6 +188,9 @@ export function difficultyForEffectiveAge(a: number): Difficulty {
       allowsNegativeResults: a >= T.negativeResultsFromAge,
       usesNumberPad: a >= T.numberPadFromAge,
       wordProblemNumberMax: Math.min(T.addSubResultMax.intValue(a), T.wordProblemNumberCap),
+      houseRoofMax: T.houseRoofMax.intValue(a),
+      houseFloors: T.houseFloors.intValue(a),
+      houseHidesRoof: a >= T.houseHiddenRoofFromAge,
     },
     vocabulary: {
       questionTypeWeights: normalised(T.vocabularyTypeWeights, VOCABULARY_TYPES, a),

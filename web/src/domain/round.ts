@@ -1,6 +1,6 @@
 // One round as a pure state machine — port of RoundViewModel.swift.
 // Every function returns a new state; invalid actions return the same state.
-import type { Question } from "./question";
+import { houseCellValue, type Question } from "./question";
 
 export type Phase = "answering" | "correct" | "wrong" | "finished";
 
@@ -12,6 +12,9 @@ export interface RoundState {
   numberInput: string;
   /** Indices into the current question's tiles, in placement order. */
   placedTiles: number[];
+  /** Zahlenhaus: what the child typed per hidden cell, and the cell being filled. */
+  houseInputs: Record<string, string>;
+  houseCell?: string;
   results: boolean[];
   correctContentIds: string[];
   allowsNegative: boolean;
@@ -24,6 +27,8 @@ export function startRound(questions: Question[], allowsNegative: boolean): Roun
     phase: questions.length === 0 ? "finished" : "answering",
     numberInput: "",
     placedTiles: [],
+    houseInputs: {},
+    houseCell: firstHouseCell(questions[0]),
     results: [],
     correctContentIds: [],
     allowsNegative,
@@ -116,10 +121,66 @@ export function submitSequence(s: RoundState): RoundState {
   return record(s, built.length === fmt.answer.length && built.every((t, i) => t === fmt.answer[i]));
 }
 
+// MARK: Zahlenhaus
+
+function firstHouseCell(q: Question | undefined): string | undefined {
+  return q?.format.kind === "numberHouse" ? q.format.house.hidden[0] : undefined;
+}
+
+export function selectHouseCell(s: RoundState, cell: string): RoundState {
+  const q = currentQuestion(s);
+  if (s.phase !== "answering" || q?.format.kind !== "numberHouse" || !q.format.house.hidden.includes(cell)) return s;
+  return { ...s, houseCell: cell };
+}
+
+/** Types a digit into the selected room; a full room moves on to the next empty one. */
+export function houseDigit(s: RoundState, digit: number): RoundState {
+  const q = currentQuestion(s);
+  if (s.phase !== "answering" || q?.format.kind !== "numberHouse" || !s.houseCell || digit < 0 || digit > 9) return s;
+  const house = q.format.house;
+  const maxLength = String(house.roof).length;
+  const current = s.houseInputs[s.houseCell] ?? "";
+  const value = current.length >= maxLength || current === "0" ? String(digit) : current + digit;
+  const houseInputs = { ...s.houseInputs, [s.houseCell]: value };
+  let houseCell = s.houseCell;
+  if (value.length >= maxLength) {
+    const order = house.hidden;
+    const start = order.indexOf(s.houseCell);
+    houseCell = [...order.slice(start + 1), ...order.slice(0, start)].find((c) => !houseInputs[c]) ?? s.houseCell;
+  }
+  return { ...s, houseInputs, houseCell };
+}
+
+export function houseDelete(s: RoundState): RoundState {
+  if (s.phase !== "answering" || !s.houseCell || !s.houseInputs[s.houseCell]) return s;
+  return { ...s, houseInputs: { ...s.houseInputs, [s.houseCell]: s.houseInputs[s.houseCell].slice(0, -1) } };
+}
+
+export function canSubmitHouse(s: RoundState): boolean {
+  const q = currentQuestion(s);
+  return s.phase === "answering" && q?.format.kind === "numberHouse" && q.format.house.hidden.every((c) => /^\d+$/.test(s.houseInputs[c] ?? ""));
+}
+
+/** Rooms the child filled in wrongly (after checking). */
+export function wrongHouseCells(s: RoundState): string[] {
+  const q = currentQuestion(s);
+  if (q?.format.kind !== "numberHouse") return [];
+  const house = q.format.house;
+  return house.hidden.filter((c) => Number(s.houseInputs[c]) !== houseCellValue(house, c));
+}
+
+export function submitHouse(s: RoundState): RoundState {
+  if (!canSubmitHouse(s)) return s;
+  return record(s, wrongHouseCells(s).length === 0);
+}
+
 // MARK: Advancing
 
 export function next(s: RoundState): RoundState {
   if (s.phase !== "correct" && s.phase !== "wrong") return s;
   if (isLast(s)) return { ...s, phase: "finished" };
-  return { ...s, index: s.index + 1, selectedOptionIndex: undefined, numberInput: "", placedTiles: [], phase: "answering" };
+  return {
+    ...s, index: s.index + 1, selectedOptionIndex: undefined, numberInput: "", placedTiles: [],
+    houseInputs: {}, houseCell: firstHouseCell(s.questions[s.index + 1]), phase: "answering",
+  };
 }

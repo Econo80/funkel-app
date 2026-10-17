@@ -49,6 +49,19 @@ Tap **Profil anlegen**, solve the grown-up maths question, enter the child's
 first name and age, and tap **Speichern**. Add more children through the
 gear button (⚙️) on the start screen.
 
+## Zahlenhaus and Sudoku
+
+**Zahlenhäuser** are part of **Mathe** for ages 5 to 9: the number on the roof,
+and floors whose two rooms add up to it (as in first grade). They start at roof
+numbers up to 6 with two floors and grow to roofs up to 20 (age 7) and 100
+(age 8). Some houses for older children hide the roof number instead.
+
+**Sudoku** has its own card on the home screen. It follows the age: picture
+Sudokus (4×4) for 4–5, numbers 4×4 for 6–7, 6×6 for 8–9 and the classic 9×9
+from 10. A wrong entry just wobbles; 💡 fills in one field. A solved Sudoku
+earns stars (fewer with tips). Grown-ups can hide it or make it easier or harder
+in the child's profile under **Sudoku**.
+
 ## The play corner (Spielecke)
 
 Children earn one star per correct answer. In the **Spielecke** (the colourful

@@ -15,7 +15,21 @@ export interface AnswerOption {
 export type QuestionFormat =
   | { kind: "multipleChoice"; options: AnswerOption[]; correctIndex: number }
   | { kind: "numberEntry"; answer: number }
-  | { kind: "buildSequence"; tiles: string[]; answer: string[] };
+  | { kind: "buildSequence"; tiles: string[]; answer: string[] }
+  | { kind: "numberHouse"; house: NumberHouse };
+
+/**
+ * A Zahlenhaus: the roof number, and floors whose two rooms always add up to it.
+ * `hidden` lists the cells the child fills in: "roof", or "f<floor>l" / "f<floor>r".
+ */
+export interface NumberHouse {
+  roof: number;
+  floors: [number, number][];
+  hidden: string[];
+}
+
+export const houseCellValue = (h: NumberHouse, cell: string): number =>
+  cell === "roof" ? h.roof : h.floors[Number(cell.slice(1, -1))][cell.endsWith("l") ? 0 : 1];
 
 export interface Question {
   id: string;
@@ -55,6 +69,10 @@ export function correctAnswerText(format: QuestionFormat): string {
     case "buildSequence": {
       const joiner = format.tiles.every((t) => [...t].length === 1) ? "" : " ";
       return format.answer.join(joiner);
+    }
+    case "numberHouse": {
+      const { roof, floors } = format.house;
+      return `${roof} = ${floors.map(([l, r]) => `${l} + ${r}`).join(", ")}`;
     }
   }
 }

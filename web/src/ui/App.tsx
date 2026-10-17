@@ -9,6 +9,7 @@ import { Home } from "./Home";
 import { ProfilePicker } from "./ProfilePicker";
 import { PlayCorner } from "./play/PlayCorner";
 import { RoundScreen } from "./Round";
+import { SudokuScreen } from "./Sudoku";
 
 type Overlay = { kind: "grownUps" } | { kind: "newProfile" } | undefined;
 
@@ -19,6 +20,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
   const [activeId, setActiveId] = useState(initialActiveId);
   const [subject, setSubject] = useState<SubjectDescriptor>();
   const [playing, setPlaying] = useState(false);
+  const [puzzling, setPuzzling] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>();
 
   const active = profiles.find((p) => p.id === activeId);
@@ -27,6 +29,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
   const selectProfile = (id: string | undefined) => {
     setActiveId(id);
     setPlaying(false);
+    setPuzzling(false);
     void setMeta("activeProfileId", id ?? null);
   };
 
@@ -61,6 +64,8 @@ export function App({ library, initialProfiles, initialActiveId }: {
             onSave={upsert}
             onClose={() => setSubject(undefined)}
           />
+        ) : puzzling && active.sudokuEnabled ? (
+          <SudokuScreen profile={active} onSave={upsert} onBack={() => setPuzzling(false)} />
         ) : playing && active.gamesEnabled ? (
           <PlayCorner profile={active} onSave={upsert} onBack={() => setPlaying(false)} />
         ) : (
@@ -69,6 +74,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
             language={language}
             onStart={setSubject}
             onPlay={() => setPlaying(true)}
+            onSudoku={() => setPuzzling(true)}
             onSwitchProfile={() => selectProfile(undefined)}
             onGrownUps={() => setOverlay({ kind: "grownUps" })}
           />

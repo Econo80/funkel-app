@@ -64,7 +64,7 @@ describe("maths (mirrors MathsGeneratorTests.swift)", () => {
           expect(d.maths.usesNumberPad).toBe(false);
           expect(q.format.options).toHaveLength(d.answerOptionCount);
           expect(new Set(q.format.options.map((o) => o.text)).size).toBe(q.format.options.length);
-        } else {
+        } else if (q.format.kind !== "numberHouse") {
           expect(q.format.kind).toBe("numberEntry");
           expect(d.maths.usesNumberPad).toBe(true);
         }

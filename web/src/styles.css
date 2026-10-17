@@ -329,3 +329,57 @@ p { line-height: 1.4; }
 
 .play-bonus { padding: 14px 20px; background: linear-gradient(135deg, #fff1c7, #ffe08a); color: #2b2540; font-size: 1.1rem; }
 .grown-up-link { align-self: center; margin-top: 18px; color: var(--muted); font-size: 0.95rem; }
+
+/* Zahlenhaus */
+.number-house { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.house { width: min(300px, 100%); display: flex; flex-direction: column; align-items: stretch; }
+.house-roof {
+  height: 92px; clip-path: polygon(50% 0, 100% 100%, 0 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;
+}
+.house-floors { background: var(--card); border: 4px solid var(--ink); border-top: none; border-radius: 0 0 14px 14px; box-shadow: var(--shadow); }
+.house-floor { display: grid; grid-template-columns: 1fr 1fr; }
+.house-floor + .house-floor { border-top: 3px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+.house-floor > :first-child { border-right: 3px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+.house-room {
+  min-height: 58px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 1.8rem; font-weight: 800; color: var(--ink); background: none; border: none; font-family: inherit;
+}
+.house-room.roof { min-height: 0; width: 76px; height: 50px; border-radius: 12px; background: rgba(255, 255, 255, 0.92); }
+.house-room.blank { margin: 5px; border-radius: 12px; border: 3px dashed color-mix(in srgb, var(--ink) 30%, transparent); color: var(--accent); cursor: pointer; }
+.house-room.blank.roof { margin: 0; }
+.house-room.active { border: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+.house-room.right { border: 3px solid transparent; background: var(--correct); color: #fff; }
+.house-room.wrong { border: 3px solid transparent; background: var(--reveal); color: #2b2540; }
+.house-room.wrong s { opacity: 0.55; font-size: 1.2rem; }
+.house-keys { width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.number-house > .row { width: 100%; }
+.number-house > .row > :last-child { flex: 1; }
+.house-delete { width: 80px; }
+
+/* Sudoku */
+.sudoku-title { margin: 0; font-size: 1.6rem; }
+.sudoku-grid {
+  width: min(100%, 480px); align-self: center; display: grid; aspect-ratio: 1; border: 4px solid var(--ink);
+  border-radius: 14px; overflow: hidden; background: var(--card); box-shadow: var(--shadow);
+}
+.sudoku-cell {
+  border: none; border-right: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  background: var(--card); color: var(--ink); font-family: inherit; font-weight: 800; padding: 0;
+  display: flex; align-items: center; justify-content: center; aspect-ratio: 1; min-width: 0; cursor: pointer; touch-action: manipulation;
+}
+.size-4 .sudoku-cell { font-size: 2.4rem; }
+.size-6 .sudoku-cell { font-size: 1.9rem; }
+.size-9 .sudoku-cell { font-size: 1.35rem; }
+.sudoku-cell.box-right { border-right: 3px solid var(--ink); }
+.sudoku-cell.box-bottom { border-bottom: 3px solid var(--ink); }
+.sudoku-cell.filled { color: var(--accent); }
+.sudoku-cell.related { background: color-mix(in srgb, var(--accent) 9%, var(--card)); }
+.sudoku-cell.same { background: color-mix(in srgb, var(--accent) 22%, var(--card)); }
+.sudoku-cell.selected { background: color-mix(in srgb, var(--accent) 35%, var(--card)); box-shadow: inset 0 0 0 3px var(--accent); }
+.sudoku-cell.wobble { animation: cell-shake 0.4s; background: color-mix(in srgb, var(--reveal) 60%, var(--card)); }
+@keyframes cell-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.sudoku-keys { width: min(100%, 480px); align-self: center; display: grid; gap: 10px; }
+.sudoku-keys .key { min-width: 0; }
+.sudoku-done { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.sudoku-done h2 { margin: 0; }
+.house-room.roof:not(.right):not(.wrong) { color: #2b2540; }

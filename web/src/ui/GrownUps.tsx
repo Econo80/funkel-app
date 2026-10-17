@@ -184,6 +184,23 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
         </div>
         <p class="footnote">{t("editor.subjects.footer")}</p>
 
+        <h3 class="section-title">{t("sudoku.title")}</h3>
+        <div class="list">
+          <Toggle checked={s.sudokuEnabled} onChange={(v) => set({ sudokuEnabled: v })}><span aria-hidden="true">🧩</span> {t("editor.sudoku.enabled")}</Toggle>
+        </div>
+        {s.sudokuEnabled && (
+          <>
+            <p class="footnote">{t("editor.sudoku.difficulty")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.sudoku.difficulty")}>
+              {GAME_DIFFICULTIES.map((d) => (
+                <button key={d} role="radio" aria-checked={s.sudokuDifficulty === d} class={s.sudokuDifficulty === d ? "selected" : ""}
+                  onClick={() => set({ sudokuDifficulty: d })} data-testid={`sudoku-difficulty-${d}`}>{t(`editor.games.difficulty.${d}`)}</button>
+              ))}
+            </div>
+          </>
+        )}
+        <p class="footnote">{t("editor.sudoku.footer")}</p>
+
         <h3 class="section-title">{t("editor.roundLength")}</h3>
         <div class="list segmented" role="radiogroup" aria-label={t("editor.roundLength")}>
           {ROUND_LENGTH_CHOICES.map((n) => (
