@@ -14,6 +14,9 @@ import {
   isSubjectEnabled,
   GARDEN_MINUTES_CHOICES,
   effectiveAge,
+  GIFT_CHOICES,
+  GIFT_MAX,
+  giveStars,
   resetProgress,
   setSubjectAdjustment,
   subjectAdaptivity,
@@ -129,6 +132,8 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
   const set = (patch: Partial<ProfileSettings>) => setS((prev) => ({ ...prev, ...patch }));
   // Per-subject levels a grown-up changed here (years above/below the age), saved with "Speichern".
   const [levels, setLevels] = useState<Record<string, number>>({});
+  // Stars to give, added to the wallet on "Speichern".
+  const [gift, setGift] = useState(0);
   const levelOf = (code: string, id: string) =>
     levels[`${code}/${id}`] ?? (profile && s.age === profile.age ? subjectAdaptivity(profile, code, id).adjustment : 0);
 
@@ -140,7 +145,7 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
       const [code, id] = key.split("/");
       next = setSubjectAdjustment(next, code, id, adjustment);
     }
-    await onSave(next);
+    await onSave(giveStars(next, gift));
   };
 
   return (
@@ -295,10 +300,30 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
 
         {profile && (
           <>
+            <h3 class="section-title">🎁 {t("editor.gift")}</h3>
+            <div class="list gift">
+              <div class="row-between list-line">
+                <span>{t("editor.gift.amount")}</span>
+                <span class="level-stepper">
+                  <button class="level-step" aria-label={t("editor.gift.less")} disabled={gift <= 0} onClick={() => setGift((g) => Math.max(0, g - 5))} data-testid="gift-down">−</button>
+                  <span class="level-value gift-value" aria-live="polite" data-testid="gift-amount">{gift} ⭐</span>
+                  <button class="level-step" aria-label={t("editor.gift.more")} disabled={gift >= GIFT_MAX} onClick={() => setGift((g) => Math.min(GIFT_MAX, g + 5))} data-testid="gift-up">+</button>
+                </span>
+              </div>
+              <div class="segmented">
+                {GIFT_CHOICES.map((n) => (
+                  <button key={n} class={gift === n ? "selected" : ""} onClick={() => setGift(n)} data-testid={`gift-${n}`}>{n} ⭐</button>
+                ))}
+              </div>
+            </div>
+            <p class="footnote">{gift > 0 ? t("editor.gift.pending %lld %@", gift, profile.name) : t("editor.gift.footer")}</p>
+
             <h3 class="section-title">{t("editor.progress")}</h3>
             <div class="list">
               <div class="row-between list-line"><span>⭐ {t("editor.stars")}</span><span class="muted">{t("home.stars %lld", profile.totalStars)}</span></div>
-              <div class="row-between list-line"><span>🎮 {t("editor.wallet")}</span><span class="muted">{profile.walletStars} ⭐</span></div>
+              <div class="row-between list-line"><span>🎮 {t("editor.wallet")}</span>
+                <span class="muted" data-testid="editor-wallet">{profile.walletStars} ⭐{gift > 0 && <strong class="gift-preview"> → {profile.walletStars + gift} ⭐</strong>}</span>
+              </div>
               <div class="row-between list-line"><span>✓ {t("editor.rounds")}</span><span class="muted">{t("home.subject.rounds %lld", profile.rounds.length)}</span></div>
               <button class="list-row danger" onClick={async () => { if (confirm(t("editor.reset.confirm"))) await onSave(resetProgress(profile)); }}>{t("editor.reset")}</button>
               {onDelete && <button class="list-row danger" onClick={async () => { if (confirm(t("editor.delete.confirm %@", profile.name))) await onDelete(); }}>{t("editor.delete")}</button>}

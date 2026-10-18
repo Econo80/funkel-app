@@ -121,6 +121,13 @@ From 9 the capital letters must be right. "ss" always counts for "ß", and
 punctuation doesn't count. After a mistake, children see what they wrote next to
 the right spelling.
 
+## Giving stars
+
+In the child's profile (⚙️ → solve the question → the child) under **🎁 Sterne
+schenken**, choose any amount (− / +, or 10 / 25 / 50 / 100) and tap **Speichern**.
+The stars go to the stars to spend (play corner, garden); the learning stars stay
+as they are. The child sees "Ein Geschenk für dich!" on the home screen.
+
 ## Setting the level per subject
 
 In the child's profile (⚙️ → solve the question → the child) under **Niveau pro

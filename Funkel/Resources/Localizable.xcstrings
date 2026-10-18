@@ -289,6 +289,78 @@
         }
       }
     },
+    "editor.gift": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sterne schenken"
+          }
+        }
+      }
+    },
+    "editor.gift.amount": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viele Sterne?"
+          }
+        }
+      }
+    },
+    "editor.gift.footer": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschenkte Sterne kommen zu den Sternen zum Ausgeben (Spielecke, Pips Garten). Die gesammelten Lern-Sterne bleiben, wie sie sind."
+          }
+        }
+      }
+    },
+    "editor.gift.less": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 Sterne weniger"
+          }
+        }
+      }
+    },
+    "editor.gift.more": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 Sterne mehr"
+          }
+        }
+      }
+    },
+    "editor.gift.pending %lld %@": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beim Speichern bekommt %2$@ %1$lld Sterne geschenkt."
+          }
+        }
+      }
+    },
     "editor.haptics": {
       "comment": "Toggle: haptic feedback.",
       "extractionState": "manual",
@@ -2277,6 +2349,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Version"
+          }
+        }
+      }
+    },
+    "home.gift %lld": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Sterne zum Ausgeben"
+          }
+        }
+      }
+    },
+    "home.gift.thanks": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danke!"
+          }
+        }
+      }
+    },
+    "home.gift.title": {
+      "comment": "UI text. (Star gift; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Geschenk für dich!"
           }
         }
       }

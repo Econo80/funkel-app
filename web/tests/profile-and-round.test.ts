@@ -9,6 +9,8 @@ import {
   recordRound,
   addGardenTime,
   gardenSecondsLeft,
+  giftSeen,
+  giveStars,
   grantGardenMinutes,
   normalizeProfile,
   resetProgress,
@@ -192,5 +194,16 @@ describe("grown-up controls (web)", () => {
     expect(addGardenTime(p, 30, d(2))).toMatchObject({ gardenSeconds: 30, gardenBonusMinutes: 0 });
     expect(gardenSecondsLeft({ ...p, gardenMinutesPerDay: 0 }, d(1))).toBeUndefined();
     expect(normalizeProfile({ id: "old" }).gardenMinutesPerDay).toBe(20);
+  });
+});
+
+describe("star gifts (web)", () => {
+  it("add spendable stars only, and are thanked for once", () => {
+    const p = { ...createProfile({ ...defaultSettings(), name: "Lena", age: 5 }), totalStars: 12, walletStars: 3 };
+    const gifted = giveStars(giveStars(p, 50), 25);
+    expect(gifted).toMatchObject({ walletStars: 78, totalStars: 12, giftStars: 75 });
+    expect(giveStars(p, 0)).toBe(p);
+    expect(giveStars(p, 9999).walletStars).toBe(3 + 500);
+    expect(giftSeen(gifted)).toMatchObject({ walletStars: 78, giftStars: 0 });
   });
 });

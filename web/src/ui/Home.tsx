@@ -1,15 +1,16 @@
 import type { ContentLanguage, SubjectDescriptor } from "../content/types";
 import { displayedStreak, isSubjectEnabled, progressKey, sudokusSolved, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
-import { CircleButton, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
+import { BigButton, CircleButton, Confetti, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
 /** The child's home: greeting, streak and stars, one big card per subject. */
-export function Home({ profile, language, onStart, onPlay, onSudoku, onSwitchProfile, onGrownUps }: {
+export function Home({ profile, language, onStart, onPlay, onSudoku, onGiftSeen, onSwitchProfile, onGrownUps }: {
   profile: Profile;
   language: ContentLanguage;
   onStart: (s: SubjectDescriptor) => void;
   onPlay: () => void;
   onSudoku: () => void;
+  onGiftSeen: () => void;
   onSwitchProfile: () => void;
   onGrownUps: () => void;
 }) {
@@ -32,6 +33,18 @@ export function Home({ profile, language, onStart, onPlay, onSudoku, onSwitchPro
           <StatChip icon="🔥" value={streak} label={t("home.streak %lld", streak)} />
           <StatChip icon="⭐" value={profile.totalStars} label={t("home.stars %lld", profile.totalStars)} />
         </div>
+
+        {!!profile.giftStars && (
+          <div class="card gift-card" role="status" data-testid="gift-card">
+            <span class="gift-icon" aria-hidden="true">🎁</span>
+            <span class="gift-text">
+              <strong>{t("home.gift.title")}</strong>
+              <span>{t("home.gift %lld", profile.giftStars)}</span>
+            </span>
+            <BigButton color="#E2558F" onClick={onGiftSeen} testId="gift-thanks">{t("home.gift.thanks")}</BigButton>
+            <Confetti trigger={profile.giftStars} count={50} />
+          </div>
+        )}
 
         <div class="subject-grid">
           {subjects.map((subject) => {

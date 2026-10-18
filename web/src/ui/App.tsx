@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
-import type { Profile } from "../domain/profile";
+import { giftSeen, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
 import { deleteProfile, saveProfile, setMeta } from "../services/storage";
 import { GrownUpGate, GrownUps, ProfileEditor } from "./GrownUps";
@@ -75,6 +75,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
             onStart={setSubject}
             onPlay={() => setPlaying(true)}
             onSudoku={() => setPuzzling(true)}
+            onGiftSeen={() => void upsert(giftSeen(active))}
             onSwitchProfile={() => selectProfile(undefined)}
             onGrownUps={() => setOverlay({ kind: "grownUps" })}
           />

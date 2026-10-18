@@ -85,6 +85,8 @@ export interface Profile extends ProfileSettings {
   gardenDay?: string;
   gardenSeconds?: number;
   gardenBonusMinutes?: number;
+  /** Stars a grown-up gave that the child hasn't seen yet (thanked for on the home screen). */
+  giftStars?: number;
   currentStreak: number;
   longestStreak: number;
   /** Local calendar day, "YYYY-MM-DD". */
@@ -215,6 +217,20 @@ export function setSubjectAdjustment(p: Profile, languageCode: string, subjectId
   const value = clamp(Math.round(adjustment * 2) / 2, -Tuning.maxAdjustment, Tuning.maxAdjustmentUp);
   return { ...p, progress: { ...p.progress, [key]: { ...previous, adjustment: value, perfectRounds: 0 } } };
 }
+
+// MARK: Gifts
+
+export const GIFT_CHOICES = [10, 25, 50, 100] as const;
+export const GIFT_MAX = 500;
+
+/** A grown-up gives stars to spend (play corner, garden). Lifetime stars stay learning stars. */
+export function giveStars(p: Profile, amount: number): Profile {
+  const n = clamp(Math.round(amount), 0, GIFT_MAX);
+  if (n === 0) return p;
+  return { ...p, walletStars: p.walletStars + n, giftStars: (p.giftStars ?? 0) + n };
+}
+
+export const giftSeen = (p: Profile): Profile => ({ ...p, giftStars: 0 });
 
 // MARK: Garden time
 
