@@ -12,8 +12,11 @@ import {
   defaultSettings,
   isLastEnabledSubject,
   isSubjectEnabled,
+  GARDEN_MINUTES_CHOICES,
+  effectiveAge,
   resetProgress,
-  subjectLevelAge,
+  setSubjectAdjustment,
+  subjectAdaptivity,
   withLanguage,
   withSubject,
   type Profile,
@@ -124,10 +127,20 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
   const subjectIds = language?.subjects.map((x) => x.id) ?? [];
   const valid = s.name.trim().length > 0;
   const set = (patch: Partial<ProfileSettings>) => setS((prev) => ({ ...prev, ...patch }));
+  // Per-subject levels a grown-up changed here (years above/below the age), saved with "Speichern".
+  const [levels, setLevels] = useState<Record<string, number>>({});
+  const levelOf = (code: string, id: string) =>
+    levels[`${code}/${id}`] ?? (profile && s.age === profile.age ? subjectAdaptivity(profile, code, id).adjustment : 0);
 
   const save = async () => {
     if (!valid) return;
-    await onSave(profile ? applySettings(profile, s) : createProfile(s));
+    if (!profile) return onSave(createProfile(s));
+    let next = applySettings(profile, s);
+    for (const [key, adjustment] of Object.entries(levels)) {
+      const [code, id] = key.split("/");
+      next = setSubjectAdjustment(next, code, id, adjustment);
+    }
+    await onSave(next);
   };
 
   return (
@@ -185,6 +198,32 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
         </div>
         <p class="footnote">{t("editor.subjects.footer")}</p>
 
+        {profile && (
+          <>
+            <h3 class="section-title">{t("editor.levels")}</h3>
+            <div class="list">
+              {language?.subjects.map((subject) => {
+                const adjustment = levelOf(subject.languageCode, subject.id);
+                const levelAge = effectiveAge(s.age, adjustment);
+                const change = (step: number) => setLevels((l) => ({ ...l, [`${subject.languageCode}/${subject.id}`]: Math.round((adjustment + step) * 2) / 2 }));
+                return (
+                  <div key={subject.id} class="row-between list-line level-line" data-testid={`level-${subject.id}`}>
+                    <span><span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span> {subject.title}</span>
+                    <span class="level-stepper">
+                      <button class="level-step" aria-label={t("editor.level.easier %@", subject.title)} disabled={adjustment <= -1.5 || levelAge <= 4}
+                        onClick={() => change(-0.5)} data-testid={`level-down-${subject.id}`}>−</button>
+                      <span class="level-value">{t("editor.level %@", formatLevelAge(levelAge))}</span>
+                      <button class="level-step" aria-label={t("editor.level.harder %@", subject.title)} disabled={adjustment >= 3 || levelAge >= 14}
+                        onClick={() => change(0.5)} data-testid={`level-up-${subject.id}`}>+</button>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <p class="footnote">{t("editor.level.footer")}</p>
+          </>
+        )}
+
         <h3 class="section-title">{t("sudoku.title")}</h3>
         <div class="list">
           <Toggle checked={s.sudokuEnabled} onChange={(v) => set({ sudokuEnabled: v })}><span aria-hidden="true">🧩</span> {t("editor.sudoku.enabled")}</Toggle>
@@ -237,6 +276,13 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
                   onClick={() => set({ gameDifficulty: d })} data-testid={`difficulty-${d}`}>{t(`editor.games.difficulty.${d}`)}</button>
               ))}
             </div>
+            <p class="footnote">{t("editor.garden.minutes")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.garden.minutes")}>
+              {GARDEN_MINUTES_CHOICES.map((n) => (
+                <button key={n} role="radio" aria-checked={s.gardenMinutesPerDay === n} class={s.gardenMinutesPerDay === n ? "selected" : ""}
+                  onClick={() => set({ gardenMinutesPerDay: n })} data-testid={`garden-minutes-${n}`}>{n === 0 ? "∞" : n}</button>
+              ))}
+            </div>
             <p class="footnote">{t("editor.games.perDay")}</p>
             <div class="list segmented" role="radiogroup" aria-label={t("editor.games.perDay")}>
               {GAMES_PER_DAY_CHOICES.map((n) => (
@@ -254,20 +300,9 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
               <div class="row-between list-line"><span>⭐ {t("editor.stars")}</span><span class="muted">{t("home.stars %lld", profile.totalStars)}</span></div>
               <div class="row-between list-line"><span>🎮 {t("editor.wallet")}</span><span class="muted">{profile.walletStars} ⭐</span></div>
               <div class="row-between list-line"><span>✓ {t("editor.rounds")}</span><span class="muted">{t("home.subject.rounds %lld", profile.rounds.length)}</span></div>
-              {language?.subjects.map((subject) => {
-                const levelAge = subjectLevelAge(profile, subject.languageCode, subject.id);
-                const ahead = levelAge - profile.age;
-                return (
-                  <div key={subject.id} class="row-between list-line" data-testid={`level-${subject.id}`}>
-                    <span><span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span> {subject.title}</span>
-                    <span class="muted">{ahead >= 0.25 ? "↑ " : ahead <= -0.25 ? "↓ " : ""}{t("editor.level %@", formatLevelAge(levelAge))}</span>
-                  </div>
-                );
-              })}
               <button class="list-row danger" onClick={async () => { if (confirm(t("editor.reset.confirm"))) await onSave(resetProgress(profile)); }}>{t("editor.reset")}</button>
               {onDelete && <button class="list-row danger" onClick={async () => { if (confirm(t("editor.delete.confirm %@", profile.name))) await onDelete(); }}>{t("editor.delete")}</button>}
             </div>
-            <p class="footnote">{t("editor.level.footer")}</p>
           </>
         )}
         <p class="footnote">🔒 {t("editor.privacy")}</p>

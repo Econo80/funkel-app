@@ -7,7 +7,12 @@ import {
   displayedStreak,
   isLastEnabledSubject,
   recordRound,
+  addGardenTime,
+  gardenSecondsLeft,
+  grantGardenMinutes,
+  normalizeProfile,
   resetProgress,
+  setSubjectAdjustment,
   subjectAdaptivity,
   subjectDifficulty,
   subjectLevelAge,
@@ -152,5 +157,40 @@ describe("round state machine (mirrors RoundViewModel tests)", () => {
     s = placeTile(removeTile(s, 2), 3);
     expect(s.placedTiles).toEqual([1, 0, 2, 3]);
     expect(submitSequence(s).phase).toBe("correct");
+  });
+});
+
+describe("grown-up controls (web)", () => {
+  const d = (n: number, h = 10) => new Date(2026, 9, n, h);
+
+  it("set one subject's level without touching anything else", () => {
+    const base = { ...createProfile({ ...defaultSettings(), name: "Emil", age: 8 }, d(1)), totalStars: 40, currentStreak: 3 };
+    const played = recordRound(base, { subjectId: "maths", languageCode: "de", correct: 10, total: 10, correctContentIds: ["x"], effectiveAge: 8 }, d(1)).profile;
+    const harder = setSubjectAdjustment(played, "de", "maths", 1.5);
+    expect(subjectAdaptivity(harder, "de", "maths")).toEqual({ adjustment: 1.5, perfectRounds: 0 });
+    expect(subjectLevelAge(harder, "de", "maths")).toBe(9.5);
+    expect(harder.progress["de/maths"]).toMatchObject({ roundsPlayed: 1, correctAnswers: 10, recentCorrectContentIds: ["x"] });
+    expect(harder).toMatchObject({ totalStars: played.totalStars, currentStreak: played.currentStreak, rounds: played.rounds });
+    expect(subjectAdaptivity(harder, "de", "vocabulary").adjustment).toBe(0);
+    // Limits: −1.5 … +3 years, in half years.
+    expect(subjectAdaptivity(setSubjectAdjustment(harder, "de", "maths", 9), "de", "maths").adjustment).toBe(3);
+    expect(subjectAdaptivity(setSubjectAdjustment(harder, "de", "maths", -0.7), "de", "maths").adjustment).toBe(-0.5);
+  });
+
+  it("limits garden time per day, with extra minutes for today only", () => {
+    let p = createProfile({ ...defaultSettings(), name: "Emil", age: 8 }, d(1));
+    expect(p.gardenMinutesPerDay).toBe(20);
+    expect(gardenSecondsLeft(p, d(1))).toBe(20 * 60);
+    p = addGardenTime(p, 19 * 60, d(1));
+    expect(gardenSecondsLeft(p, d(1))).toBe(60);
+    p = addGardenTime(p, 120, d(1));
+    expect(gardenSecondsLeft(p, d(1))).toBe(0);
+    p = grantGardenMinutes(p, 10, d(1));
+    expect(gardenSecondsLeft(p, d(1))).toBe(9 * 60);
+    // A new day starts fresh, without yesterday's extra minutes.
+    expect(gardenSecondsLeft(p, d(2))).toBe(20 * 60);
+    expect(addGardenTime(p, 30, d(2))).toMatchObject({ gardenSeconds: 30, gardenBonusMinutes: 0 });
+    expect(gardenSecondsLeft({ ...p, gardenMinutesPerDay: 0 }, d(1))).toBeUndefined();
+    expect(normalizeProfile({ id: "old" }).gardenMinutesPerDay).toBe(20);
   });
 });

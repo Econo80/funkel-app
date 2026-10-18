@@ -86,6 +86,10 @@ card on the home screen) they can spend stars:
   - **📋 Aufträge:** three orders a day ask for goods, e.g. "4 🥚 + 3 🥛", and pay
     stars and XP. Leftovers sell at the farm shop (5 → 1 ⭐). Learning stays the
     main way to earn stars.
+  - **Daily time limit** (default 20 minutes, set per child under Spielecke →
+    "Zeit in Pips Garten pro Tag": 10, 15, 20, 30, 45 or ∞). A clock shows the time
+    left; at 2 minutes there's a warning, then the farm "goes to sleep" until
+    tomorrow. Grown-ups can give +5/+10/+15 minutes for today via "🔓 Mehr Hofzeit".
   - **✋ Verschieben** moves things; **🧹 Wegräumen** removes them; more land is
     in the shop under "Bauen".
 
@@ -116,6 +120,13 @@ real keyboard works too):
 From 9 the capital letters must be right. "ss" always counts for "ß", and
 punctuation doesn't count. After a mistake, children see what they wrote next to
 the right spelling.
+
+## Setting the level per subject
+
+In the child's profile (⚙️ → solve the question → the child) under **Niveau pro
+Fach**, − and + set each subject's level in half years, e.g. Mathe like a
+9½-year-old and Wörter like an 8-year-old. Tap **Speichern**. Stars, streak and
+progress stay as they are, and each subject keeps adapting from the new level.
 
 ## Getting harder by itself
 

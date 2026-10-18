@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { BONUS_CHOICES, bonusGamesLeftToday, buyTicket, checkTicket, gameAge, gamesLeftToday, grantBonusGames, type GameId } from "../../domain/games";
-import type { Profile } from "../../domain/profile";
+import { gardenSecondsLeft, type Profile } from "../../domain/profile";
 import { t } from "../../services/i18n";
 import { BigButton, CircleButton, Pip, Sheet, avatarColor } from "../components";
 import { GrownUpGate } from "../GrownUps";
@@ -29,6 +29,7 @@ export function PlayCorner({ profile, onSave, onBack }: {
   const left = gamesLeftToday(profile, now);
   const bonus = bonusGamesLeftToday(profile, now);
   const free = ticket.ok && ticket.free;
+  const gardenLeft = gardenSecondsLeft(profile, now);
 
   if (view.kind === "garden") {
     return <Garden profile={profile} onSave={onSave} onBack={() => setView({ kind: "corner" })} />;
@@ -98,7 +99,11 @@ export function PlayCorner({ profile, onSave, onBack }: {
             <span class="subject-icon" aria-hidden="true">🌻</span>
             <span class="subject-text">
               <span class="subject-title">{t("garden.title")}</span>
-              <span class="subject-sub">{t("play.wallet %lld", profile.walletStars)}</span>
+              <span class="subject-sub">
+                {gardenLeft === undefined ? t("play.wallet %lld", profile.walletStars)
+                  : gardenLeft === 0 ? t("play.gardenTomorrow")
+                  : t("play.gardenLeft %lld", Math.ceil(gardenLeft / 60))}
+              </span>
             </span>
           </button>
         </div>

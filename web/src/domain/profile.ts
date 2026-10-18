@@ -51,6 +51,8 @@ export interface ProfileSettings {
   gamesPerDay: number;
   /** Shifts the games' difficulty by two years either way (independent of the quizzes). */
   gameDifficulty: GameDifficulty;
+  /** Minutes a day in Pip's garden (0 = no limit). */
+  gardenMinutesPerDay: number;
   /** Sudoku card on the home screen, with its own difficulty shift. */
   sudokuEnabled: boolean;
   sudokuDifficulty: GameDifficulty;
@@ -79,6 +81,10 @@ export interface Profile extends ProfileSettings {
   farmXp: number;
   /** Today's orders on the order board. */
   farmOrders?: { day: string; orders: FarmOrder[] };
+  /** Time spent in the garden on `gardenDay`, and extra minutes a grown-up gave for that day. */
+  gardenDay?: string;
+  gardenSeconds?: number;
+  gardenBonusMinutes?: number;
   currentStreak: number;
   longestStreak: number;
   /** Local calendar day, "YYYY-MM-DD". */
@@ -89,6 +95,9 @@ export interface Profile extends ProfileSettings {
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+
+export const GARDEN_MINUTES_CHOICES = [10, 15, 20, 30, 45, 0] as const;
+export const DEFAULT_GARDEN_MINUTES = 20;
 
 export function defaultSettings(): ProfileSettings {
   return {
@@ -105,6 +114,7 @@ export function defaultSettings(): ProfileSettings {
     ...DEFAULT_GAME_SETTINGS,
     sudokuEnabled: true,
     sudokuDifficulty: "normal",
+    gardenMinutesPerDay: DEFAULT_GARDEN_MINUTES,
   };
 }
 
@@ -140,6 +150,7 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
     sudokuEnabled: p.sudokuEnabled ?? base.sudokuEnabled,
     sudokuDifficulty: p.sudokuDifficulty ?? base.sudokuDifficulty,
+    gardenMinutesPerDay: p.gardenMinutesPerDay ?? base.gardenMinutesPerDay,
   } as Profile;
 }
 
@@ -190,6 +201,46 @@ export function subjectAdaptivity(p: Profile, languageCode: string, subjectId: s
 
 export function subjectDifficulty(p: Profile, languageCode: string, subjectId: string) {
   return difficultyForAge(p.age, subjectAdaptivity(p, languageCode, subjectId).adjustment);
+}
+
+/**
+ * A grown-up sets a subject's level directly (years above/below the real age).
+ * Only this subject changes; stars, streaks and history stay. Adaptivity carries on from here.
+ */
+export function setSubjectAdjustment(p: Profile, languageCode: string, subjectId: string, adjustment: number): Profile {
+  const key = progressKey(languageCode, subjectId);
+  const previous: SubjectProgress = p.progress[key] ?? {
+    roundsPlayed: 0, questionsAnswered: 0, correctAnswers: 0, stars: 0, recentCorrectContentIds: [],
+  };
+  const value = clamp(Math.round(adjustment * 2) / 2, -Tuning.maxAdjustment, Tuning.maxAdjustmentUp);
+  return { ...p, progress: { ...p.progress, [key]: { ...previous, adjustment: value, perfectRounds: 0 } } };
+}
+
+// MARK: Garden time
+
+/** Seconds of garden time left today, or undefined when there's no limit. */
+export function gardenSecondsLeft(p: Profile, now: Date): number | undefined {
+  if (!p.gardenMinutesPerDay) return undefined;
+  const today = p.gardenDay === dayKey(now);
+  const allowed = (p.gardenMinutesPerDay + (today ? p.gardenBonusMinutes ?? 0 : 0)) * 60;
+  return Math.max(0, allowed - (today ? p.gardenSeconds ?? 0 : 0));
+}
+
+/** Counts time spent in the garden (a new day starts from zero). */
+export function addGardenTime(p: Profile, seconds: number, now: Date): Profile {
+  if (seconds <= 0) return p;
+  const today = dayKey(now);
+  const same = p.gardenDay === today;
+  return { ...p, gardenDay: today, gardenSeconds: (same ? p.gardenSeconds ?? 0 : 0) + seconds, gardenBonusMinutes: same ? p.gardenBonusMinutes ?? 0 : 0 };
+}
+
+export const GARDEN_BONUS_CHOICES = [5, 10, 15] as const;
+
+/** A grown-up gives extra garden minutes, for today only. */
+export function grantGardenMinutes(p: Profile, minutes: number, now: Date): Profile {
+  const today = dayKey(now);
+  const same = p.gardenDay === today;
+  return { ...p, gardenDay: today, gardenSeconds: same ? p.gardenSeconds ?? 0 : 0, gardenBonusMinutes: (same ? p.gardenBonusMinutes ?? 0 : 0) + minutes };
 }
 
 /** The age a subject's questions are made for, e.g. 8.5 for a 7-year-old who is 1½ years ahead. */
@@ -250,6 +301,7 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     gameDifficulty: s.gameDifficulty,
     sudokuEnabled: s.sudokuEnabled,
     sudokuDifficulty: s.sudokuDifficulty,
+    gardenMinutesPerDay: clamp(Math.round(s.gardenMinutesPerDay), 0, 240),
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
     progress: age === p.age ? p.progress : Object.fromEntries(
       Object.entries(p.progress).map(([k, v]) => [k, { ...v, adjustment: 0, perfectRounds: 0 }]),

@@ -38,11 +38,12 @@ import {
   type GardenCategory,
   type GardenItem,
 } from "../../domain/garden";
-import type { Profile } from "../../domain/profile";
+import { GARDEN_BONUS_CHOICES, addGardenTime, gardenSecondsLeft, grantGardenMinutes, type Profile } from "../../domain/profile";
 import { systemRng } from "../../domain/random";
 import { playSound } from "../../services/feedback";
 import { t } from "../../services/i18n";
-import { BigButton, CircleButton, Confetti } from "../components";
+import { BigButton, CircleButton, Confetti, Sheet } from "../components";
+import { GrownUpGate } from "../GrownUps";
 import { GardenPicture, PathArt } from "./FarmArt";
 
 type Tool = { kind: "place"; id: string } | { kind: "move"; from?: number } | { kind: "clear" } | undefined;
@@ -72,6 +73,12 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   const [draft, setDraft] = useState<Profile>();
   const drawing = useRef<Profile | undefined>(undefined);
   const popupId = useRef(0);
+  const [extending, setExtending] = useState(false);
+  // Garden time: counted every second while the farm is on screen, saved with every change (and every 15 s).
+  const latest = useRef(saved);
+  const pendingSeconds = useRef(0);
+  const [, setTick] = useState(0);
+  useEffect(() => { latest.current = saved; }, [saved]);
   const profile = draft ?? saved;
   const now = new Date();
   const garden = profile.garden;
@@ -84,7 +91,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   // Today's orders are made when the farm opens (and once there is something to order).
   useEffect(() => {
     const withOrders = withTodaysOrders(saved, new Date());
-    if (withOrders !== saved) void onSave(withOrders);
+    if (withOrders !== saved) void persist(withOrders);
   }, [saved.farmOrders?.day, saved.garden]);
 
   useEffect(() => {
@@ -99,13 +106,43 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     setTimeout(() => setPopups((list) => list.filter((x) => x.id !== id)), delay + 1300);
   };
 
+  /** Saves, together with the garden time counted so far. */
+  const persist = async (next: Profile) => {
+    const withTime = addGardenTime(next, pendingSeconds.current, new Date());
+    pendingSeconds.current = 0;
+    latest.current = withTime;
+    await onSave(withTime);
+  };
+
   /** Saves a change; celebrates a new farm level. */
   const commit = async (next: Profile) => {
     if (next === saved) return;
     const before = farmLevel(saved.farmXp).level, after = farmLevel(next.farmXp).level;
     if (after > before) setTimeout(() => { setLevelUp(after); sound("finish"); }, 500);
-    await onSave(next);
+    await persist(next);
   };
+
+  const secondsLeft = (() => {
+    const left = gardenSecondsLeft(latest.current, now);
+    return left === undefined ? undefined : Math.max(0, left - pendingSeconds.current);
+  })();
+  const timeUp = secondsLeft === 0;
+
+  useEffect(() => {
+    if (!saved.gardenMinutesPerDay) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      const left = gardenSecondsLeft(latest.current, new Date());
+      if (left === undefined || left - pendingSeconds.current <= 0) return;
+      pendingSeconds.current += 1;
+      setTick((n) => n + 1);
+      const remaining = left - pendingSeconds.current;
+      if (remaining === 120) setToast(t("garden.timeWarning"));
+      if (remaining <= 0) { void persist(latest.current); sound("finish"); }
+      else if (pendingSeconds.current >= 15) void persist(latest.current);
+    }, 1000);
+    return () => { clearInterval(timer); if (pendingSeconds.current) void persist(latest.current); };
+  }, [saved.gardenMinutesPerDay]);
 
   const collect = (cellIndex: number, base: Profile, delay = 0): Profile => {
     const anchor = occupancy(base.garden)[cellIndex];
@@ -203,7 +240,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   const stopDrawing = async () => {
     const result = drawing.current;
     drawing.current = undefined;
-    if (result && result !== saved) await onSave(result);
+    if (result && result !== saved) await persist(result);
     setDraft(undefined);
   };
 
@@ -233,7 +270,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     : undefined;
 
   return (
-    <main class={`farm time-${daylight(now.getHours())}`}>
+    <main class={`farm time-${timeUp ? "night" : daylight(now.getHours())}`}>
       <div class="farm-world" data-testid="garden-scroll">
         <div class={`farm-ground${tool ? " placing" : ""}${drawTool ? " drawing" : ""}`}
           style={{ "--cell": `${cell}px`, gridTemplateColumns: `repeat(${GARDEN_COLUMNS}, var(--cell))` } as never}
@@ -284,6 +321,11 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
           <span class="xp-bar"><span class="xp-fill" style={{ width: `${(100 * level.xpInLevel) / level.xpForNext}%` }} /></span>
         </div>
         <div class="hud-right">
+          {secondsLeft !== undefined && (
+            <span class={`hud-pill clock${secondsLeft <= 120 ? " low" : ""}`} role="timer" aria-label={t("garden.timeLeft %lld", Math.ceil(secondsLeft / 60))} data-testid="garden-clock">
+              ⏱ {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
+            </span>
+          )}
           <button class="hud-pill" onClick={() => setSheet("orders")} aria-label={t("garden.goodsLabel %lld", goods)} data-testid="farm-goods">🧺 {goods}</button>
           <span class="hud-pill wallet" role="img" aria-label={t("play.wallet %lld", profile.walletStars)}>⭐ <span class="stat-value">{profile.walletStars}</span></span>
         </div>
@@ -395,6 +437,41 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
             🧺 {t("garden.sell %lld", Math.floor(goods / GOODS_PER_STAR))}
           </BigButton>
         </FarmSheet>
+      )}
+
+      {timeUp && !extending && (
+        <div class="game-over" role="dialog" aria-modal="true" aria-label={t("garden.timeUp")} data-testid="garden-time-up">
+          <div class="card game-over-card farm-sleep">
+            <div class="sleep-moon" aria-hidden="true">🌙</div>
+            <h1>{t("garden.timeUp")}</h1>
+            <p class="muted">{t("garden.timeUpText")}</p>
+            <BigButton color="var(--ink)" onClick={onBack} testId="garden-time-back">{t("play.back")}</BigButton>
+            <button class="link grown-up-link" onClick={() => setExtending(true)} data-testid="garden-more-time">🔓 {t("garden.moreTime")}</button>
+          </div>
+        </div>
+      )}
+
+      {extending && (
+        <GrownUpGate onCancel={() => setExtending(false)}>
+          <Sheet label={t("garden.moreTime")}>
+            <div class="sheet-bar"><button class="link" onClick={() => setExtending(false)}>{t("editor.cancel")}</button></div>
+            <div class="column narrow center">
+              <div class="lock" aria-hidden="true">⏱</div>
+              <h1>{t("garden.moreTime")}</h1>
+              <p class="muted">{t("garden.moreTimeText %@", saved.name)}</p>
+              {GARDEN_BONUS_CHOICES.map((n) => (
+                <BigButton key={n} color="#34C77B" testId={`garden-bonus-${n}`} onClick={async () => {
+                  await persist(grantGardenMinutes(latest.current, n, new Date()));
+                  setExtending(false);
+                  setToast("");
+                }}>
+                  {t("garden.moreTime.minutes %lld", n)}
+                </BigButton>
+              ))}
+              <p class="footnote">{t("garden.moreTime.footer")}</p>
+            </div>
+          </Sheet>
+        </GrownUpGate>
       )}
 
       {levelUp !== undefined && (

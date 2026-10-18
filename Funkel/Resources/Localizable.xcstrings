@@ -277,6 +277,18 @@
         }
       }
     },
+    "editor.garden.minutes": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit in Pips Garten pro Tag (Minuten)"
+          }
+        }
+      }
+    },
     "editor.haptics": {
       "comment": "Toggle: haptic feedback.",
       "extractionState": "manual",
@@ -325,6 +337,18 @@
         }
       }
     },
+    "editor.level.easier %@": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ leichter"
+          }
+        }
+      }
+    },
     "editor.level.footer": {
       "comment": "UI text. (Per-subject level; web app for now.)",
       "extractionState": "manual",
@@ -332,7 +356,31 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jedes Fach passt sich an: Nach zwei fehlerfreien Runden in Folge wird es mit jeder weiteren fehlerfreien Runde spürbar schwieriger, bis zu 3 Jahre über dem Alter. Läuft eine Runde nicht gut, wird es wieder etwas leichter. Ein neues Alter oder «Fortschritt zurücksetzen» beginnt von vorn."
+            "value": "Mit − und + stellst du das Niveau pro Fach in halben Jahren ein. Sterne, Serie und Fortschritt bleiben, wie sie sind. Danach passt sich jedes Fach weiter von selbst an: nach zwei fehlerfreien Runden wird es schwieriger, wenn es nicht so gut läuft, leichter."
+          }
+        }
+      }
+    },
+    "editor.level.harder %@": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ schwieriger"
+          }
+        }
+      }
+    },
+    "editor.levels": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niveau pro Fach"
           }
         }
       }
@@ -1669,6 +1717,54 @@
         }
       }
     },
+    "garden.moreTime": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr Hofzeit"
+          }
+        }
+      }
+    },
+    "garden.moreTime.footer": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gilt nur für heute."
+          }
+        }
+      }
+    },
+    "garden.moreTime.minutes %lld": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld Minuten"
+          }
+        }
+      }
+    },
+    "garden.moreTimeText %@": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viele Minuten bekommt %@ heute noch?"
+          }
+        }
+      }
+    },
     "garden.move": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -1941,6 +2037,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pflanzen"
+          }
+        }
+      }
+    },
+    "garden.timeLeft %lld": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch %lld Minuten"
+          }
+        }
+      }
+    },
+    "garden.timeUp": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feierabend auf dem Hof!"
+          }
+        }
+      }
+    },
+    "garden.timeUpText": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Hofzeit für heute ist vorbei. Über Nacht wachsen die Pflanzen weiter, und morgen gibt es wieder Eier und Milch!"
+          }
+        }
+      }
+    },
+    "garden.timeWarning": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch 2 Minuten auf dem Hof!"
           }
         }
       }
@@ -2337,6 +2481,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Für heute ist die Spielecke zu. Morgen geht's weiter!"
+          }
+        }
+      }
+    },
+    "play.gardenLeft %lld": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch %lld Min. heute"
+          }
+        }
+      }
+    },
+    "play.gardenTomorrow": {
+      "comment": "UI text. (Web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für heute fertig 🌙"
           }
         }
       }

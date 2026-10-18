@@ -586,3 +586,15 @@ p { line-height: 1.4; }
 .farm-tile.animal .obj-picture { font-size: calc(var(--cell) * 0.72); }
 .farm-tile[data-item="tree"] .obj-picture, .farm-tile[data-item="appletree"] .obj-picture { font-size: calc(var(--cell) * 1); }
 .farm-tile[data-item="tree"] .obj::before, .farm-tile[data-item="appletree"] .obj::before { left: 12%; right: 12%; }
+.level-line { gap: 8px; }
+.level-stepper { display: flex; align-items: center; gap: 8px; }
+.level-step { width: 40px; height: 40px; border-radius: 50%; background: var(--background); font-size: 1.4rem; font-weight: 800; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+.level-step:disabled { opacity: 0.35; }
+.level-value { min-width: 9.5em; text-align: center; color: var(--muted); font-size: 0.95rem; }
+.hud-pill.clock { font-variant-numeric: tabular-nums; }
+.hud-pill.clock.low { background: #ffe1a6; animation: nudge 1.8s ease-in-out infinite; }
+.farm-sleep .sleep-moon { font-size: 4rem; animation: bob 1.6s ease-in-out infinite alternate; }
+/* Keep the farm's own layering (rows in front of rows) inside the farm, under light, HUD and dialogs. */
+.farm-world { z-index: 0; }
+.farm-ground { isolation: isolate; }
+.farm .game-over { z-index: 40; }
