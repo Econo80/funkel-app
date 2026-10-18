@@ -13,6 +13,198 @@
         }
       }
     },
+    "backup.footer": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei enthält alle Profile mit Sternen, Garten und Fortschritt. Speichere sie zum Beispiel in «Dateien» oder iCloud Drive. Sie bleibt bei dir: Funkel lädt nichts hoch."
+          }
+        }
+      }
+    },
+    "backup.from %@": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung vom %@"
+          }
+        }
+      }
+    },
+    "backup.last %@": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Sicherung: %@."
+          }
+        }
+      }
+    },
+    "backup.load": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung laden"
+          }
+        }
+      }
+    },
+    "backup.never": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Sicherung gespeichert."
+          }
+        }
+      }
+    },
+    "backup.problem.newerVersion": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Sicherung stammt aus einer neueren Funkel-Version. Bitte Funkel zuerst schliessen und neu öffnen."
+          }
+        }
+      }
+    },
+    "backup.problem.noProfiles": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In dieser Sicherung sind keine Profile."
+          }
+        }
+      }
+    },
+    "backup.problem.notFunkel": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Datei ist keine Funkel-Sicherung."
+          }
+        }
+      }
+    },
+    "backup.problem.notJson": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Datei ist keine Funkel-Sicherung."
+          }
+        }
+      }
+    },
+    "backup.restore": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen"
+          }
+        }
+      }
+    },
+    "backup.restoreTitle": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung wiederherstellen?"
+          }
+        }
+      }
+    },
+    "backup.restoreWarning": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Profile auf diesem Gerät werden durch die Profile aus der Sicherung ersetzt."
+          }
+        }
+      }
+    },
+    "backup.restored": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederhergestellt! Die Profile aus der Sicherung sind wieder da."
+          }
+        }
+      }
+    },
+    "backup.save": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung speichern"
+          }
+        }
+      }
+    },
+    "backup.saved": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung gespeichert."
+          }
+        }
+      }
+    },
+    "backup.title": {
+      "comment": "UI text. (Backups; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung"
+          }
+        }
+      }
+    },
     "color.berry": {
       "comment": "Avatar colour.",
       "extractionState": "manual",

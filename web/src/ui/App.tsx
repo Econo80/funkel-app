@@ -3,7 +3,7 @@ import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
 import { giftSeen, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
-import { deleteProfile, saveProfile, setMeta } from "../services/storage";
+import { deleteProfile, replaceAllProfiles, saveProfile, setMeta } from "../services/storage";
 import { GrownUpGate, GrownUps, ProfileEditor } from "./GrownUps";
 import { Home } from "./Home";
 import { ProfilePicker } from "./ProfilePicker";
@@ -45,6 +45,13 @@ export function App({ library, initialProfiles, initialActiveId }: {
     await deleteProfile(id);
     setProfiles((list) => list.filter((p) => p.id !== id));
     if (id === activeId) selectProfile(undefined);
+  };
+
+  /** Restoring a backup replaces every profile on this device. */
+  const restore = async (restored: Profile[]) => {
+    await replaceAllProfiles(restored);
+    setProfiles([...restored].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
+    if (!restored.some((p) => p.id === activeId)) selectProfile(undefined);
   };
 
   if (library.languages.length === 0) {
@@ -92,7 +99,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
       {overlay && (
         <GrownUpGate onCancel={() => setOverlay(undefined)}>
           {overlay.kind === "grownUps" ? (
-            <GrownUps library={library} profiles={profiles} onSave={upsert} onDelete={remove} onDone={() => setOverlay(undefined)} />
+            <GrownUps library={library} profiles={profiles} onSave={upsert} onDelete={remove} onRestore={restore} onDone={() => setOverlay(undefined)} />
           ) : (
             <ProfileEditor
               library={library}

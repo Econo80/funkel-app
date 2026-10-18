@@ -607,3 +607,8 @@ p { line-height: 1.4; }
 .gift-icon { font-size: 3rem; animation: bob 0.9s ease-in-out infinite alternate; }
 .gift-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 12em; font-size: 1.1rem; }
 .gift-card .big-button { flex: 0 0 auto; width: auto; padding: 0 28px; }
+
+/* Backups */
+label.list-row { cursor: pointer; }
+.backup-note { margin: 8px 4px 0; font-weight: 700; color: var(--correct); }
+.restore-list { width: 100%; text-align: left; }

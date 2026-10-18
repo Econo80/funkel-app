@@ -1,6 +1,7 @@
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
+import { backupFileName, makeBackup, readBackup, type Backup } from "../domain/backup";
 import { Tuning } from "../domain/difficulty";
 import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES, GAME_DIFFICULTIES } from "../domain/games";
 import { isGateAnswerCorrect, randomGate } from "../domain/gate";
@@ -26,6 +27,7 @@ import {
   type ProfileSettings,
 } from "../domain/profile";
 import { t } from "../services/i18n";
+import { getMeta, setMeta } from "../services/storage";
 import { AVATAR_COLORS, BigButton, Pip, Sheet, avatarColor, subjectGlyph } from "./components";
 
 /** Shows the maths gate first and the children once it's solved. */
@@ -72,15 +74,76 @@ function Gate({ onUnlock, onCancel }: { onUnlock: () => void; onCancel: () => vo
   );
 }
 
-/** Profiles, plus the privacy statement. */
-export function GrownUps({ library, profiles, onSave, onDelete, onDone }: {
+/** Profiles, backups, plus the privacy statement. */
+export function GrownUps({ library, profiles, onSave, onDelete, onRestore, onDone }: {
   library: ContentLibrary;
   profiles: Profile[];
   onSave: (p: Profile) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onRestore: (profiles: Profile[]) => Promise<void>;
   onDone: () => void;
 }) {
   const [editing, setEditing] = useState<Profile | "new">();
+  const [lastBackup, setLastBackup] = useState<string>();
+  const [backupNote, setBackupNote] = useState("");
+  const [restoring, setRestoring] = useState<Backup>();
+
+  useEffect(() => { void getMeta<string>("lastBackupAt").then(setLastBackup); }, []);
+
+  const saveBackup = async () => {
+    const name = backupFileName();
+    const file = new File([JSON.stringify(makeBackup(profiles), null, 2)], name, { type: "application/json" });
+    try {
+      // iPad/iPhone: the share sheet (Dateien, iCloud Drive, AirDrop, Mail …). Elsewhere: a download.
+      if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: name });
+      else download(file);
+    } catch (error) {
+      if ((error as Error).name === "AbortError") return;
+      download(file);
+    }
+    const now = new Date().toISOString();
+    await setMeta("lastBackupAt", now);
+    setLastBackup(now);
+    setBackupNote(t("backup.saved"));
+  };
+
+  const loadBackup = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    const result = readBackup(await file.text());
+    if ("problem" in result) setBackupNote(t(`backup.problem.${result.problem}`));
+    else { setBackupNote(""); setRestoring(result.backup); }
+  };
+
+  if (restoring) {
+    return (
+      <Sheet label={t("backup.restoreTitle")}>
+        <div class="sheet-bar"><button class="link" onClick={() => setRestoring(undefined)}>{t("editor.cancel")}</button></div>
+        <div class="column narrow center">
+          <div class="lock" aria-hidden="true">📂</div>
+          <h1>{t("backup.restoreTitle")}</h1>
+          {restoring.exportedAt && <p class="muted">{t("backup.from %@", formatDate(restoring.exportedAt))}</p>}
+          <div class="list restore-list">
+            {restoring.profiles.map((p) => (
+              <div key={p.id} class="row-between list-line">
+                <span><strong>{p.name}</strong> <span class="muted">{t("profile.age %lld", p.age)}</span></span>
+                <span class="muted">⭐ {p.totalStars} · 🎮 {p.walletStars}</span>
+              </div>
+            ))}
+          </div>
+          <p class="footnote">{t("backup.restoreWarning")}</p>
+          <BigButton color="var(--danger)" testId="backup-restore" onClick={async () => {
+            await onRestore(restoring.profiles);
+            setRestoring(undefined);
+            setBackupNote(t("backup.restored"));
+          }}>
+            {t("backup.restore")}
+          </BigButton>
+        </div>
+      </Sheet>
+    );
+  }
 
   if (editing) {
     return (
@@ -110,6 +173,17 @@ export function GrownUps({ library, profiles, onSave, onDelete, onDone }: {
           ))}
           <button class="list-row accent" onClick={() => setEditing("new")}>＋ {t("profiles.add")}</button>
         </div>
+
+        <h3 class="section-title">{t("backup.title")}</h3>
+        <div class="list">
+          <button class="list-row" onClick={saveBackup} disabled={profiles.length === 0} data-testid="backup-save">💾 {t("backup.save")}</button>
+          <label class="list-row" data-testid="backup-load">
+            📂 {t("backup.load")}
+            <input type="file" accept=".json,application/json" class="visually-hidden" onChange={(e) => loadBackup(e.currentTarget)} data-testid="backup-file" />
+          </label>
+        </div>
+        {backupNote && <p class="backup-note" role="status" data-testid="backup-note">{backupNote}</p>}
+        <p class="footnote">{lastBackup ? t("backup.last %@", formatDate(lastBackup)) : t("backup.never")} {t("backup.footer")}</p>
         <h3 class="section-title">{t("grownups.privacy.title")}</h3>
         <div class="list"><p class="list-note">{t("grownups.privacy.text")}</p></div>
       </div>
@@ -335,6 +409,17 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
     </Sheet>
   );
 }
+
+function download(file: File) {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+const formatDate = (iso: string) => new Date(iso).toLocaleString(document.documentElement.lang || undefined, { dateStyle: "medium", timeStyle: "short" });
 
 /** 8.5 → "8½", rounded to half years. */
 function formatLevelAge(age: number): string {

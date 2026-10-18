@@ -121,6 +121,21 @@ From 9 the capital letters must be right. "ss" always counts for "ß", and
 punctuation doesn't count. After a mistake, children see what they wrote next to
 the right spelling.
 
+## Backups (please do this now and then)
+
+Funkel keeps everything only on the device. If the device's browser data is
+cleared, or Funkel is opened from a Safari tab instead of the home-screen icon
+(they keep separate data on iPhone/iPad), the children's progress isn't there.
+
+- **Save:** ⚙️ → solve the question → **Sicherung → Sicherung speichern**. On an
+  iPad the share menu opens: choose **In "Dateien" sichern** (e.g. iCloud Drive) or
+  send it to yourself. The file is called `Funkel-Sicherung-<date>.json` and
+  holds all profiles with stars, garden and progress.
+- **Restore:** **Sicherung → Sicherung laden**, pick the file, check the names and
+  stars shown, and tap **Wiederherstellen**. The profiles on the device are
+  replaced by those in the file.
+- The grown-up area shows when the last backup was saved.
+
 ## Giving stars
 
 In the child's profile (⚙️ → solve the question → the child) under **🎁 Sterne

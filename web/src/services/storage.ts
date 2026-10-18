@@ -41,6 +41,20 @@ export async function saveProfile(profile: Profile): Promise<void> {
   await run(PROFILES, "readwrite", (s) => s.put(JSON.parse(JSON.stringify(profile))));
 }
 
+/** Restoring a backup: the profiles on this device are replaced by these, all or nothing. */
+export async function replaceAllProfiles(profiles: Profile[]): Promise<void> {
+  const database = await db();
+  await new Promise<void>((resolve, reject) => {
+    const tx = database.transaction(PROFILES, "readwrite");
+    const store = tx.objectStore(PROFILES);
+    store.clear();
+    for (const profile of profiles) store.put(JSON.parse(JSON.stringify(profile)));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
 export async function deleteProfile(id: string): Promise<void> {
   await run(PROFILES, "readwrite", (s) => s.delete(id));
 }

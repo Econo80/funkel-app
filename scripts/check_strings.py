@@ -18,7 +18,7 @@ import sys
 # 260-character limit in deeply nested folders.
 ROOT = pathlib.Path(os.path.relpath(pathlib.Path(__file__).absolute().parent.parent))
 CATALOG = ROOT / "Funkel/Resources/Localizable.xcstrings"
-PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden|sudoku|numberHouse|write"
+PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden|sudoku|numberHouse|write|backup"
 LITERAL = re.compile(r'"((?:' + PREFIXES + r')\.[^"]*)"')
 INTERPOLATION = re.compile(r"\\\(([^)]*\)?)\)")
 # Interpolated values that are strings; everything else is assumed to be an Int.
@@ -44,7 +44,7 @@ def main() -> int:
             used.setdefault(key, path.relative_to(ROOT))
 
     # Keys built at runtime, e.g. LocalizedStringKey("color." + key).
-    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab."))}
+    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab.", "backup.problem."))}
 
     missing = sorted(set(used) - catalog)
     unused = sorted(catalog - set(used) - dynamic)
