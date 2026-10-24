@@ -28,7 +28,7 @@ final class ContentLibrary: @unchecked Sendable {
     private let rootURL: URL?
     private var cache: [String: Any] = [:]
     private let lock = NSLock()
-    private static let log = Logger(subsystem: "com.example.funkel", category: "content")
+    private static let log = Logger(subsystem: "ch.flury.funkel", category: "content")
 
     init(rootURL: URL?, fileManager: FileManager = .default) {
         self.rootURL = rootURL
