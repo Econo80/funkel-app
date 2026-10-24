@@ -19,8 +19,8 @@ code from GitHub and builds the app for you.
 2. On your Netlify dashboard click **Add new site** (or **Add new project**)
    → **Import an existing project** → **GitHub**.
 3. If your repository isn't listed, click **Configure Netlify on GitHub**, allow
-   access to the **funkel** repository, and come back.
-4. Click **funkel**. Netlify reads the settings from `netlify.toml` in the
+   access to the **funkel-app** repository, and come back.
+4. Click **funkel-app**. Netlify reads the settings from `netlify.toml` in the
    repository, so you don't need to change anything. Click **Deploy**.
 5. Wait about a minute. When it says **Published**, Netlify shows an address
    like `https://jolly-pony-123abc.netlify.app`. Click it: that's Funkel.

@@ -13,7 +13,7 @@ in a browser, then each release is one click.
   <https://developer.apple.com/programs/enroll/>. Approval can take up to 48 hours.
   As an individual, your legal name is shown as the developer if you ever
   publish publicly. TestFlight testers see it too.
-- The GitHub repo `Econo80/funkel` (already set up) and the `gh` CLI on this
+- The GitHub repo `Econo80/funkel-app` (already set up) and the `gh` CLI on this
   machine (already signed in).
 
 ## One-time setup (about 20 minutes)
