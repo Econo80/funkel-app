@@ -1,6 +1,7 @@
 import { render } from "preact";
 import { App } from "./ui/App";
 import { ContentLibrary, fetchLoader } from "./content/library";
+import { installSpeechUnlock } from "./services/feedback";
 import { loadUiStrings } from "./services/i18n";
 import { loadProfiles, getMeta, requestPersistence } from "./services/storage";
 import "./styles.css";
@@ -8,6 +9,7 @@ import "./styles.css";
 const base = import.meta.env.BASE_URL;
 
 async function start() {
+  installSpeechUnlock();
   const root = document.getElementById("app")!;
   try {
     await loadUiStrings(base);

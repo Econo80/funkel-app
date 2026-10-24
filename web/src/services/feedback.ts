@@ -12,18 +12,55 @@ function voiceFor(locale: string): SpeechSynthesisVoice | undefined {
   );
 }
 
+let speechUnlocked = false;
+
+/**
+ * Safari on iPhone/iPad only lets a page speak once speech has been started
+ * from a tap. Questions are read automatically a moment *after* a tap (once
+ * they are loaded), so the first tap anywhere starts a silent utterance that
+ * unlocks speech for the rest of the visit.
+ */
+export function installSpeechUnlock(): void {
+  if (!("speechSynthesis" in window)) return;
+  const unlock = () => {
+    if (speechUnlocked) return;
+    speechUnlocked = true;
+    const silent = new SpeechSynthesisUtterance(" ");
+    silent.volume = 0;
+    speechSynthesis.speak(silent);
+    window.removeEventListener("pointerdown", unlock, true);
+    window.removeEventListener("keydown", unlock, true);
+  };
+  window.addEventListener("pointerdown", unlock, true);
+  window.addEventListener("keydown", unlock, true);
+  // Voices load in the background; asking once makes them ready sooner.
+  speechSynthesis.getVoices();
+}
+
+let pending: ReturnType<typeof setTimeout> | undefined;
+
 export function speak(text: string, locale: string): void {
   if (!("speechSynthesis" in window) || !text) return;
-  speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = locale;
   const voice = voiceFor(locale);
   if (voice) utterance.voice = voice;
   utterance.rate = 0.9; // a little slower, for young listeners
-  speechSynthesis.speak(utterance);
+
+  // After the app was in the background, iOS can leave speech paused.
+  if (speechSynthesis.paused) speechSynthesis.resume();
+  clearTimeout(pending);
+  if (speechSynthesis.speaking || speechSynthesis.pending) {
+    // Safari sometimes drops a new utterance spoken right after cancel(); give it a moment.
+    speechSynthesis.cancel();
+    pending = setTimeout(() => speechSynthesis.speak(utterance), 80);
+  } else {
+    speechSynthesis.speak(utterance);
+  }
 }
 
 export function stopSpeaking(): void {
+  clearTimeout(pending);
   if ("speechSynthesis" in window) speechSynthesis.cancel();
 }
 
