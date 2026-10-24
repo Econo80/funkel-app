@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-# A newer push cancels the running build, to save macOS minutes.
+# A newer push cancels the running build, to save minutes.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -40,8 +40,12 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  # The iPhone/iPad build runs on macOS, which GitHub counts at 10x the minutes.
+  # It only runs when started by hand (Actions → CI → Run workflow); the web
+  # tests and content checks above run on every push.
   build-and-test:
     name: Build, test & screenshots (iOS Simulator)
+    if: github.event_name == 'workflow_dispatch'
     needs: content
     runs-on: macos-15
     timeout-minutes: 50

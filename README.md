@@ -37,7 +37,13 @@ python3 scripts/validate_content.py
 python3 scripts/check_strings.py
 ```
 
-Every push to `main` runs both checks, plus the iOS build, unit tests and a UI test that captures screenshots of the main screens, on GitHub Actions (`.github/workflows/ci.yml`). Download the screenshots from the run's *Artifacts* section, or:
+Every push to `main` runs both checks and the web app's tests and build on GitHub Actions (`.github/workflows/ci.yml`). The iOS build, unit tests and the UI test that captures screenshots run on macOS, which uses free minutes ten times as fast, so they only run when started by hand:
+
+```bash
+gh workflow run ci.yml
+```
+
+(or *Actions → CI → Run workflow* on GitHub). Download the screenshots from that run's *Artifacts* section, or:
 
 ```bash
 gh run download --name screenshots
