@@ -77,6 +77,14 @@ Checklist in App Store Connect (Funkel → *App Store* tab):
   with an e-mail address you want to show publicly).
 - **Privacy policy URL**: <https://oflurykids.netlify.app/datenschutz.html>.
 - **App Privacy** questionnaire: *Data Not Collected*.
+- **EU trader status** (Business → Compliance, asked of every developer): for
+  a free family app without business purpose choose **"not a trader"**. Then
+  no contact details are needed. If you declare yourself a *trader*, Apple
+  **shows an address, phone number and e-mail on the App Store page** in the EU –
+  never enter a personal or work mobile number there; use a dedicated address
+  and number instead.
+- **Your developer name** (the name you enrolled with) appears as the seller on
+  the App Store page.
 - **Age rating** questionnaire: all "None" → 4+.
 - **Kids Category**: optional. It gives visibility in the Kids section but adds
   Apple's strictest review rules (no external links or purchases without a
