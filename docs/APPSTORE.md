@@ -132,12 +132,13 @@ Then **Submit for Review** (usually 1–3 days).
 ## Part 4 – Swift port roadmap
 
 Today the native app has Mathe, Wörter, Wissen, profiles, the grown-up area,
-sounds, read-aloud and Pip. Everything below exists in the web app (`web/src`)
-and gets ported in this order. Each step ships as its own TestFlight build.
+sounds, read-aloud and Pip, plus step 1 below. Everything else exists in the web
+app (`web/src`) and gets ported in this order. Each step ships as its own
+TestFlight build.
 
 | Step | Ported from the web app | Notes |
 |---|---|---|
-| 1 | Backup file (same JSON format), star gifts, per-subject levels with grown-up − / +, faster step-up | Lets families move from the web app first |
+| 1 ✅ | Backup file (same JSON format), star gifts, per-subject levels with grown-up − / +, faster step-up | Done 2026-10-30. Web-only data (farm, games, Sudoku) is kept in the backup untouched, so files move between the apps without losses |
 | 2 | Zahlenhaus questions, writing questions (picture words, copying, dictation) with on-screen keyboard | Shared `Content/` already has the sentences |
 | 3 | Sudoku (picture 4×4 … 9×9) | Pure logic, well covered by tests |
 | 4 | Play corner: wallet, tickets, daily limit, bonus games, game difficulty; Memory, Ballon-Pop, Sternenfänger | SwiftUI + `TimelineView` for the moving games |
