@@ -53,8 +53,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      # Same Xcode as TestFlight, so CI tests what we ship (App Store Connect needs the iOS 26 SDK).
+      - name: Select Xcode 26 or newer
+        run: |
+          ls -d /Applications/Xcode*.app
+          xc=$(ls -d /Applications/Xcode_2[6-9]*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)
+          [ -n "$xc" ] || xc=$(ls -d /Applications/Xcode_2[6-9]*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$xc" ]; then
+            echo "::error::No Xcode 26 or newer on this runner — App Store Connect would reject the build."
+            exit 1
+          fi
+          sudo xcode-select -s "$xc"
+          xcodebuild -version
 
       - name: Pick newest iPhone simulator
         id: sim
