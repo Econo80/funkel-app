@@ -47,7 +47,8 @@ jobs:
     name: Build, test & screenshots (iOS Simulator)
     if: github.event_name == 'workflow_dispatch'
     needs: content
-    runs-on: macos-15
+    # Set repo variable MAC_RUNNER=macos-15-intel when arm64 Macs are short; delete it to go back.
+    runs-on: ${{ vars.MAC_RUNNER || 'macos-15' }}
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v5

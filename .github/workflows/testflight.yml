@@ -13,7 +13,8 @@ concurrency:
 jobs:
   upload:
     name: Archive & upload to TestFlight
-    runs-on: macos-15
+    # Set repo variable MAC_RUNNER=macos-15-intel when arm64 Macs are short; delete it to go back.
+    runs-on: ${{ vars.MAC_RUNNER || 'macos-15' }}
     timeout-minutes: 45
     env:
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
