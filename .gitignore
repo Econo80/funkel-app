@@ -22,3 +22,10 @@ __pycache__/
 
 # Local preview config (machine-specific)
 /.claude/
+
+# Apple / signing secrets: never commit (App Store Connect API keys, certificates, profiles)
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+AuthKey_*
