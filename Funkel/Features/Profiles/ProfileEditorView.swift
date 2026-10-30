@@ -16,6 +16,10 @@ struct ProfileEditorView: View {
     @State private var hasLoaded = false
     @State private var confirmsReset = false
     @State private var confirmsDelete = false
+    /// Per-subject levels changed here (years above/below the age), keyed "lang/subject"; saved with "Speichern".
+    @State private var levels: [String: Double] = [:]
+    /// Stars to give, added to the wallet on "Speichern".
+    @State private var gift = 0
 
     private var language: ContentLanguage? {
         environment.content.resolvedLanguage(code: settings.learningLanguage)
@@ -84,6 +88,10 @@ struct ProfileEditorView: View {
                 Text("editor.subjects.footer")
             }
 
+            if let profile {
+                levelsSection(for: profile)
+            }
+
             Section("editor.roundLength") {
                 Picker("editor.roundLength", selection: $settings.roundLength) {
                     ForEach(ProfileSettings.roundLengthChoices, id: \.self) { length in
@@ -110,6 +118,7 @@ struct ProfileEditorView: View {
             }
 
             if let profile {
+                giftSection(for: profile)
                 progressSection(for: profile)
             }
 
@@ -163,6 +172,17 @@ struct ProfileEditorView: View {
                 Label("editor.stars", systemImage: "star.fill")
             }
             LabeledContent {
+                if gift > 0 {
+                    Text(verbatim: "\(profile.walletStars) → \(profile.walletStars + gift)")
+                        .foregroundStyle(Palette.correct)
+                } else {
+                    Text(verbatim: "\(profile.walletStars)")
+                }
+            } label: {
+                Label("editor.wallet", systemImage: "gamecontroller.fill")
+            }
+            .accessibilityIdentifier("editor-wallet")
+            LabeledContent {
                 Text("home.subject.rounds \(profile.rounds.count)")
             } label: {
                 Label("editor.rounds", systemImage: "checkmark.circle")
@@ -171,6 +191,128 @@ struct ProfileEditorView: View {
             Button("editor.delete", role: .destructive) { confirmsDelete = true }
                 .accessibilityIdentifier("editor-delete")
         }
+    }
+
+    /// − / + per subject, in half years. Shown relative to the age being edited.
+    private func levelsSection(for profile: ChildProfile) -> some View {
+        Section {
+            ForEach(language?.subjects ?? []) { subject in
+                let adjustment = levelAdjustment(subject, profile: profile)
+                let levelAge = DifficultyScale.effectiveAge(age: settings.age, adjustment: adjustment)
+                let levelText = Self.formatLevelAge(levelAge)
+                HStack(spacing: 12) {
+                    Label {
+                        Text(verbatim: subject.title)
+                    } icon: {
+                        Image(systemName: subject.icon)
+                            .foregroundStyle(Color(hex: subject.colorHex))
+                    }
+                    Spacer(minLength: 8)
+                    Button {
+                        setLevel(subject, adjustment - 0.5)
+                    } label: {
+                        Image(systemName: "minus.circle.fill").font(.title2)
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(adjustment <= -DifficultyTuning.maxAdjustment || levelAge <= Double(DifficultyTuning.minAge))
+                    .accessibilityLabel(Text("editor.level.easier \(subject.title)"))
+                    .accessibilityIdentifier("level-down-\(subject.id)")
+                    Text("editor.level \(levelText)")
+                        .font(.funkelCaption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(minWidth: 120)
+                    Button {
+                        setLevel(subject, adjustment + 0.5)
+                    } label: {
+                        Image(systemName: "plus.circle.fill").font(.title2)
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(adjustment >= DifficultyTuning.maxAdjustmentUp || levelAge >= Double(DifficultyTuning.maxAge))
+                    .accessibilityLabel(Text("editor.level.harder \(subject.title)"))
+                    .accessibilityIdentifier("level-up-\(subject.id)")
+                }
+                .accessibilityIdentifier("level-\(subject.id)")
+            }
+        } header: {
+            Text("editor.levels")
+        } footer: {
+            Text("editor.level.footer")
+        }
+    }
+
+    private func giftSection(for profile: ChildProfile) -> some View {
+        Section {
+            HStack {
+                Text("editor.gift.amount")
+                Spacer()
+                Button {
+                    gift = max(0, gift - 5)
+                } label: {
+                    Image(systemName: "minus.circle.fill").font(.title2)
+                }
+                .buttonStyle(.borderless)
+                .disabled(gift <= 0)
+                .accessibilityLabel(Text("editor.gift.less"))
+                .accessibilityIdentifier("gift-down")
+                Label {
+                    Text(verbatim: "\(gift)").monospacedDigit()
+                } icon: {
+                    Image(systemName: "star.fill").foregroundStyle(Palette.sun)
+                }
+                .font(.funkelHeadline)
+                .frame(minWidth: 72)
+                .accessibilityIdentifier("gift-amount")
+                Button {
+                    gift = min(ProfileMaintenance.giftMax, gift + 5)
+                } label: {
+                    Image(systemName: "plus.circle.fill").font(.title2)
+                }
+                .buttonStyle(.borderless)
+                .disabled(gift >= ProfileMaintenance.giftMax)
+                .accessibilityLabel(Text("editor.gift.more"))
+                .accessibilityIdentifier("gift-up")
+            }
+            HStack(spacing: 8) {
+                ForEach(ProfileMaintenance.giftChoices, id: \.self) { amount in
+                    Button {
+                        gift = amount
+                    } label: {
+                        Text(verbatim: "\(amount) ★")
+                            .font(.funkelCaption)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(gift == amount ? Palette.sun : .secondary)
+                    .accessibilityIdentifier("gift-\(amount)")
+                }
+            }
+        } header: {
+            Label("editor.gift", systemImage: "gift.fill")
+        } footer: {
+            if gift > 0 {
+                Text("editor.gift.pending \(gift) \(profile.name)")
+            } else {
+                Text("editor.gift.footer")
+            }
+        }
+    }
+
+    private func levelAdjustment(_ subject: SubjectDescriptor, profile: ChildProfile) -> Double {
+        if let changed = levels["\(subject.languageCode)/\(subject.id)"] { return changed }
+        // A new age starts every subject from the real age again.
+        return settings.age == profile.age ? profile.adaptivity(for: subject.id, language: subject.languageCode).adjustment : 0
+    }
+
+    private func setLevel(_ subject: SubjectDescriptor, _ adjustment: Double) {
+        levels["\(subject.languageCode)/\(subject.id)"] = ((adjustment * 2).rounded() / 2).clamped(to: DifficultyScale.adjustmentRange)
+    }
+
+    /// 8.5 → "8½", rounded to half years.
+    static func formatLevelAge(_ age: Double) -> String {
+        let half = (age * 2).rounded() / 2
+        let whole = Int(half.rounded(.down))
+        return half > Double(whole) ? "\(whole)½" : "\(whole)"
     }
 
     private var colorPicker: some View {
@@ -222,6 +364,12 @@ struct ProfileEditorView: View {
         let saved: ChildProfile
         if let profile {
             settings.apply(to: profile)
+            for (key, adjustment) in levels {
+                let parts = key.split(separator: "/", maxSplits: 1).map(String.init)
+                guard parts.count == 2 else { continue }
+                ProfileMaintenance.setSubjectAdjustment(adjustment, subjectID: parts[1], language: parts[0], of: profile, in: modelContext)
+            }
+            ProfileMaintenance.giveStars(gift, to: profile)
             saved = profile
         } else {
             saved = settings.makeProfile()

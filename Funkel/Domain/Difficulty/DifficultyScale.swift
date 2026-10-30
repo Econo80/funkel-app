@@ -1,11 +1,17 @@
 import Foundation
 
+/// A subject's level: years above (+) or below (−) the real age, and the run of perfect rounds.
+struct Adaptivity: Equatable {
+    var adjustment: Double
+    var perfectRounds: Int
+}
+
 /// The age → difficulty scaling function. Pure and deterministic.
 /// See PLAN.md §5 for the rules and `DifficultyTuning` for the numbers.
 enum DifficultyScale {
 
     static func effectiveAge(age: Int, adjustment: Double) -> Double {
-        let clampedAdjustment = adjustment.clamped(to: -DifficultyTuning.maxAdjustment...DifficultyTuning.maxAdjustment)
+        let clampedAdjustment = adjustment.clamped(to: adjustmentRange)
         let raw = Double(age) + clampedAdjustment
         return raw.clamped(to: Double(DifficultyTuning.minAge)...Double(DifficultyTuning.maxAge))
     }
@@ -45,17 +51,31 @@ enum DifficultyScale {
         )
     }
 
-    /// Gentle adaptivity after a round (PLAN.md §5.4).
-    static func nextAdjustment(current: Double, correct: Int, total: Int) -> Double {
-        guard total > 0 else { return current }
+    static let adjustmentRange = -DifficultyTuning.maxAdjustment...DifficultyTuning.maxAdjustmentUp
+
+    /// Adaptivity after a round (PLAN.md §5.4): 90 %+ steps up a little; from
+    /// the second perfect round in a row each perfect round steps up faster
+    /// ("boosted"); under 50 % steps back down and ends the run.
+    static func nextAdaptivity(_ current: Adaptivity, correct: Int, total: Int) -> (adaptivity: Adaptivity, boosted: Bool) {
+        typealias T = DifficultyTuning
+        guard total > 0 else { return (current, false) }
         let score = Double(correct) / Double(total)
-        var next = current
-        if score >= DifficultyTuning.promoteThreshold {
-            next += DifficultyTuning.adjustmentStepUp
-        } else if score < DifficultyTuning.easeThreshold {
-            next -= DifficultyTuning.adjustmentStepDown
+        let perfectRounds = score >= 1 ? current.perfectRounds + 1 : 0
+        let boosted = perfectRounds >= T.perfectRoundsForBoost && current.adjustment < T.maxAdjustmentUp
+        var next = current.adjustment
+        if boosted {
+            next += T.boostStepUp
+        } else if score >= T.promoteThreshold {
+            next += T.adjustmentStepUp
+        } else if score < T.easeThreshold {
+            next -= T.adjustmentStepDown
         }
-        return next.clamped(to: -DifficultyTuning.maxAdjustment...DifficultyTuning.maxAdjustment)
+        return (Adaptivity(adjustment: next.clamped(to: adjustmentRange), perfectRounds: perfectRounds), boosted)
+    }
+
+    /// One round on its own, without a run of perfect rounds.
+    static func nextAdjustment(current: Double, correct: Int, total: Int) -> Double {
+        nextAdaptivity(Adaptivity(adjustment: current, perfectRounds: 0), correct: correct, total: total).adaptivity.adjustment
     }
 
     private static func normalised<Key: Hashable>(_ curves: [Key: Keyframes], at age: Double) -> [Key: Double] {

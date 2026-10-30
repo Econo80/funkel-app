@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// The grown-up area: manage children's profiles, plus the privacy statement.
+/// The grown-up area: manage children's profiles, backups, plus the privacy statement.
 struct GrownUpsView: View {
     @Query(sort: \ChildProfile.createdAt) private var profiles: [ChildProfile]
     @Environment(\.dismiss) private var dismiss
@@ -30,6 +30,8 @@ struct GrownUpsView: View {
                     }
                     .accessibilityIdentifier("settings-add-profile")
                 }
+
+                BackupSection(profiles: profiles)
 
                 Section("grownups.privacy.title") {
                     Text("grownups.privacy.text")

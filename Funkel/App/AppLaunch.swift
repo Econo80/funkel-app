@@ -31,6 +31,7 @@ enum AppLaunch {
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isUITesting)
         do {
             let container = try ModelContainer(for: schema, configurations: configuration)
+            ProfileMaintenance.prepareWallets(in: container.mainContext)
             #if DEBUG
             if isUITesting {
                 UserDefaults.standard.removeObject(forKey: activeProfileKey)
@@ -53,6 +54,7 @@ enum UITestFixtures {
 
         let lena = ChildProfile(name: "Lena", age: 5, avatarColor: "berry", roundLength: 5)
         lena.totalStars = 42
+        lena.walletStars = 42
         lena.currentStreak = 3
         lena.longestStreak = 5
         lena.lastPlayedDay = yesterday
@@ -70,6 +72,7 @@ enum UITestFixtures {
         let emil = ChildProfile(name: "Emil", age: 10, avatarColor: "sky", roundLength: 5)
         emil.createdAt = lena.createdAt.addingTimeInterval(1)
         emil.totalStars = 318
+        emil.walletStars = 318
         emil.currentStreak = 12
         emil.longestStreak = 12
         emil.lastPlayedDay = yesterday

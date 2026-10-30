@@ -18,12 +18,14 @@ struct RoundSummary: Equatable {
     let starsEarned: Int
     let streak: Int
     let streakGrew: Bool
+    /// A run of perfect rounds made this subject harder.
+    var levelUp = false
 
     var score: Double { total == 0 ? 0 : Double(correct) / Double(total) }
 }
 
-/// Applies a round's outcome to a profile: stars, streak, per-subject
-/// progress, history and gentle difficulty adaptation.
+/// Applies a round's outcome to a profile: stars (lifetime and to spend),
+/// streak, per-subject progress and level, and history.
 struct ProgressRecorder {
     static let recentContentLimit = 40
 
@@ -34,6 +36,7 @@ struct ProgressRecorder {
         // One star per correct answer.
         let stars = outcome.correct
         profile.totalStars += stars
+        profile.walletStars += stars
 
         let previousStreak = profile.currentStreak
         let streak = StreakCalculator.update(
@@ -47,8 +50,8 @@ struct ProgressRecorder {
         profile.longestStreak = streak.longest
         profile.lastPlayedDay = streak.lastPlayedDay
 
-        profile.difficultyAdjustment = DifficultyScale.nextAdjustment(
-            current: profile.difficultyAdjustment,
+        let level = DifficultyScale.nextAdaptivity(
+            profile.adaptivity(for: outcome.subjectID, language: outcome.languageCode),
             correct: outcome.correct,
             total: outcome.total
         )
@@ -61,6 +64,8 @@ struct ProgressRecorder {
         progress.stars += stars
         progress.lastPlayed = now
         progress.recentCorrectContentIDs = Array((progress.recentCorrectContentIDs + outcome.correctContentIDs).suffix(Self.recentContentLimit))
+        progress.adjustment = level.adaptivity.adjustment
+        progress.perfectRounds = level.adaptivity.perfectRounds
 
         let record = RoundRecord(
             date: now,
@@ -81,7 +86,8 @@ struct ProgressRecorder {
             total: outcome.total,
             starsEarned: stars,
             streak: streak.current,
-            streakGrew: streak.current > previousStreak
+            streakGrew: streak.current > previousStreak,
+            levelUp: level.boosted
         )
     }
 

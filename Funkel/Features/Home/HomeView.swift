@@ -6,6 +6,7 @@ struct HomeView: View {
     let language: ContentLanguage
     let onSwitchProfile: () -> Void
 
+    @Environment(\.modelContext) private var modelContext
     @State private var activeSubject: SubjectDescriptor?
     @State private var showsGrownUps = false
 
@@ -23,6 +24,12 @@ struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 header
+                if profile.giftStars > 0 {
+                    GiftCard(stars: profile.giftStars) {
+                        profile.giftStars = 0
+                        try? modelContext.save()
+                    }
+                }
                 LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(subjects) { subject in
                         SubjectCard(
@@ -89,6 +96,58 @@ private extension HomeView {
         StatChip(systemImage: "star.fill", value: profile.totalStars, color: Palette.sun)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("home.stars \(profile.totalStars)"))
+    }
+}
+
+/// "Ein Geschenk für dich!" – stars a grown-up gave, shown once until the child says thanks.
+private struct GiftCard: View {
+    let stars: Int
+    let onThanks: () -> Void
+
+    @State private var celebration = 0
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) { content }
+            VStack(alignment: .leading, spacing: 14) { content }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(colors: [Color(hex: "#FFF1C7"), Color(hex: "#FFD6E8")], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: .rect(cornerRadius: 28)
+        )
+        .overlay { ConfettiBurst(trigger: celebration, count: 50).allowsHitTesting(false) }
+        .onAppear { celebration += 1 }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("gift-card")
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        Image(systemName: "gift.fill")
+            .font(.system(size: 44, weight: .bold))
+            .foregroundStyle(Color(hex: "#E2558F"))
+            .symbolEffect(.bounce, value: celebration)
+        VStack(alignment: .leading, spacing: 2) {
+            Text("home.gift.title")
+                .font(.funkelHeadline)
+            Text("home.gift \(stars)")
+                .font(.funkelBody)
+        }
+        // The card is always light, so its text stays dark in dark mode too.
+        .foregroundStyle(Color(hex: "#2B2540"))
+        Spacer(minLength: 0)
+        Button(action: onThanks) {
+            Text("home.gift.thanks")
+                .font(.funkelHeadline)
+                .padding(.horizontal, 22)
+                .padding(.vertical, 12)
+                .foregroundStyle(.white)
+                .background(Color(hex: "#E2558F"), in: .capsule)
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("gift-thanks")
     }
 }
 

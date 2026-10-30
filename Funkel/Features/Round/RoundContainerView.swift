@@ -61,7 +61,8 @@ struct RoundContainerView: View {
                 loadFailed = true
                 return
             }
-            var difficulty = profile.difficulty
+            // Each subject has its own level (PLAN.md §5.4); recomputed for "play again".
+            var difficulty = profile.difficulty(for: subject.id, language: subject.languageCode)
             if let forced = AppLaunch.forcedVocabularyType {
                 difficulty.vocabulary.questionTypeWeights = [forced: 1]
             }

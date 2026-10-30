@@ -68,6 +68,20 @@ struct SummaryView: View {
                         .padding(.vertical, 8)
                         .background(Color.orange.opacity(0.12), in: .capsule)
                     }
+
+                    if summary.levelUp {
+                        Label {
+                            Text("summary.levelUp")
+                        } icon: {
+                            Image(systemName: "arrow.up.forward.circle.fill").foregroundStyle(Palette.correct)
+                        }
+                        .font(.funkelCaption)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Palette.correct.opacity(0.15), in: .capsule)
+                        .accessibilityIdentifier("level-up")
+                    }
                 }
                 .padding(24)
                 .frame(maxWidth: .infinity)
