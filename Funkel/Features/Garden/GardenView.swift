@@ -95,6 +95,8 @@ struct GardenView: View {
                     .zIndex(50)
                 }
             }
+            // The farm never grows wider than the screen (the meadow scrolls inside).
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .foregroundStyle(FarmColors.ink)
         .background(Color(hex: "#3d8a43").ignoresSafeArea())
@@ -164,11 +166,12 @@ struct GardenView: View {
             CircleIconButton(systemImage: "arrow.left", label: "play.back") { dismiss() }
                 .accessibilityIdentifier("garden-back")
             FarmLevelPill(level: shown.level)
-                .frame(maxWidth: compact ? 150 : 230)
+                .frame(minWidth: 60, maxWidth: compact ? 150 : 230)
             Spacer(minLength: 0)
             HStack(spacing: 8) {
                 if clock.time.minutesPerDay > 0 {
                     GardenClockPill(clock: clock, compact: compact)
+                        .layoutPriority(1)
                 }
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { drawer = .orders }
@@ -214,8 +217,9 @@ struct GardenView: View {
             .padding(.leading, 18)
             .padding(.trailing, tool != nil ? 10 : 18)
             .padding(.vertical, 10)
-            .background(FarmColors.ink.opacity(0.9), in: .capsule)
-            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            .background {
+                Capsule().fill(FarmColors.ink.opacity(0.9)).shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            }
             .transition(.move(edge: .top).combined(with: .opacity))
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("garden-info")
@@ -285,8 +289,11 @@ struct GardenView: View {
             buttons
             ScrollView(.horizontal, showsIndicators: false) { buttons }
         }
-        .background(.white.opacity(0.95), in: .rect(cornerRadius: 26, style: .continuous))
-        .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
+        .background {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(.white.opacity(0.95))
+                .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
+        }
     }
 
     private var movingAnchor: Int? {
@@ -391,8 +398,9 @@ struct GardenView: View {
                         .font(.system(.body, design: .rounded).weight(.heavy))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(.white, in: .capsule)
-                        .shadow(color: Color(hex: "#e6dccb"), radius: 0, y: 2)
+                        .background {
+                            Capsule().fill(.white).shadow(color: FarmColors.cardEdge, radius: 0, y: 2)
+                        }
                         .opacity(farm.goods(kind) > 0 ? 1 : 0.45)
                 }
             }

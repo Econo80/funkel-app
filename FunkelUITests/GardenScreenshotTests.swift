@@ -47,11 +47,17 @@ final class GardenScreenshotTests: XCTestCase {
         // Row 3, column 1 of the sample farm is free (16 columns, 8 rows).
         ground.coordinate(withNormalizedOffset: CGVector(dx: 0.5 / 16, dy: 2.5 / 8)).tap()
         snap("44-garden-placed", app, settle: 0.6)
-        if app.buttons["tool-done"].exists { app.buttons["tool-done"].tap() }
+        // The flower's XP may reach a new farm level: celebrate, then carry on.
+        let great = app.buttons["level-up-ok"]
+        if great.waitForExistence(timeout: 3) {
+            snap("45-garden-level-up", app, settle: 0.8)
+            great.tap()
+        }
+        if app.buttons["tool-done"].waitForExistence(timeout: 2) { app.buttons["tool-done"].tap() }
 
         // The order board: storage, today's orders and the farm shop.
         app.buttons["farm-orders"].tap()
-        snap("45-garden-orders", app, waitFor: app.buttons["farm-sell"], settle: 1.0)
+        snap("46-garden-orders", app, waitFor: app.buttons["farm-sell"], settle: 1.0)
         app.buttons["sheet-close"].tap()
 
         app.buttons["garden-back"].tap()

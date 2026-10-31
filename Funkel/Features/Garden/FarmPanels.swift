@@ -12,15 +12,16 @@ enum FarmColors {
 
 extension View {
     /// A white capsule in the HUD.
-    func farmPill(compact: Bool) -> some View {
-        font(.system(size: compact ? 16 : 18, weight: .heavy, design: .rounded))
+    func farmPill(compact: Bool, fill: Color = .white.opacity(0.94)) -> some View {
+        font(.system(size: compact ? 15 : 18, weight: .heavy, design: .rounded))
             .foregroundStyle(FarmColors.ink)
             .lineLimit(1)
             .fixedSize()
-            .padding(.horizontal, compact ? 10 : 14)
+            .padding(.horizontal, compact ? 8 : 14)
             .padding(.vertical, compact ? 8 : 10)
-            .background(.white.opacity(0.94), in: .capsule)
-            .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+            .background {
+                Capsule().fill(fill).shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+            }
     }
 }
 
@@ -38,7 +39,7 @@ struct FarmLevelPill: View {
                     Capsule().fill(Color(hex: "#e6e2d8"))
                     Capsule()
                         .fill(LinearGradient(colors: [Color(hex: "#7ddc5f"), Color(hex: "#2bb673")], startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(14, geometry.size.width * level.progress))
+                        .frame(width: min(geometry.size.width, max(14, geometry.size.width * level.progress)))
                         .opacity(level.xpInLevel > 0 ? 1 : 0)
                 }
             }
@@ -48,8 +49,9 @@ struct FarmLevelPill: View {
         .padding(.leading, 4)
         .padding(.trailing, 14)
         .padding(.vertical, 4)
-        .background(.white.opacity(0.94), in: .capsule)
-        .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+        .background {
+            Capsule().fill(.white.opacity(0.94)).shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+        }
         .accessibilityElement()
         .accessibilityLabel(Text("garden.levelLabel \(level.level)"))
         .accessibilityIdentifier("farm-level")
@@ -82,10 +84,9 @@ struct GardenClockPill: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let left = clock.secondsLeft(now: context.date) ?? 0
             let minutes = (left + 59) / 60
-            Text(verbatim: "⏱ \(left / 60):\(String(format: "%02d", left % 60))")
+            Text(verbatim: "\(compact ? "" : "⏱ ")\(left / 60):\(String(format: "%02d", left % 60))")
                 .monospacedDigit()
-                .farmPill(compact: compact)
-                .background(left <= 120 ? Color(hex: "#ffe1a6") : .clear, in: .capsule)
+                .farmPill(compact: compact, fill: left <= 120 ? Color(hex: "#ffe1a6") : .white.opacity(0.94))
                 .accessibilityElement()
                 .accessibilityLabel(Text("garden.timeLeft \(minutes)"))
                 .accessibilityIdentifier("garden-clock")
@@ -107,8 +108,9 @@ struct RoundTool: View {
                 .font(.system(size: 20, weight: .heavy))
                 .foregroundStyle(FarmColors.ink.opacity(isEnabled ? 1 : 0.35))
                 .frame(width: 48, height: 48)
-                .background(.white.opacity(0.94), in: .circle)
-                .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+                .background {
+                    Circle().fill(.white.opacity(0.94)).shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+                }
         }
         .buttonStyle(PressableStyle())
         .accessibilityLabel(Text(label))
@@ -311,9 +313,12 @@ struct ShopCardStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
         configuration.label
-            .background(.white, in: .rect(cornerRadius: 22, style: .continuous))
-            .shadow(color: FarmColors.cardEdge, radius: 0, y: pressed ? 1 : 4)
-            .shadow(color: .black.opacity(0.08), radius: 8, y: 6)
+            .background {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(.white)
+                    .shadow(color: FarmColors.cardEdge, radius: 0, y: pressed ? 1 : 4)
+                    .shadow(color: .black.opacity(0.08), radius: 8, y: 6)
+            }
             .offset(y: pressed ? 3 : 0)
             .opacity(isEnabled || locked ? 1 : 0.55)
             .animation(.spring(response: 0.2, dampingFraction: 0.7), value: pressed)
@@ -335,8 +340,9 @@ struct OrderCard: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(.white, in: .rect(cornerRadius: 20, style: .continuous))
-        .shadow(color: FarmColors.cardEdge, radius: 0, y: 3)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.white).shadow(color: FarmColors.cardEdge, radius: 0, y: 3)
+        }
         .opacity(order.isDone ? 0.6 : 1)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("farm-order")
@@ -492,8 +498,11 @@ struct FarmDialog<Content: View>: View {
                 .foregroundStyle(FarmColors.ink)
                 .padding(28)
                 .frame(maxWidth: 440)
-                .background(.white, in: .rect(cornerRadius: Metrics.cardCorner, style: .continuous))
-                .shadow(color: .black.opacity(0.25), radius: 24, y: 12)
+                .background {
+                    RoundedRectangle(cornerRadius: Metrics.cardCorner, style: .continuous)
+                        .fill(.white)
+                        .shadow(color: .black.opacity(0.25), radius: 24, y: 12)
+                }
                 .padding(24)
                 .frame(maxWidth: .infinity, minHeight: 0)
             }
