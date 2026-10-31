@@ -3289,6 +3289,18 @@
         }
       }
     },
+    "sudoku.cell.position %lld %lld": {
+      "comment": "VoiceOver: where a Sudoku cell is (row, column).",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reihe %1$lld, Spalte %2$lld"
+          }
+        }
+      }
+    },
     "sudoku.count %lld": {
       "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
       "extractionState": "manual",

@@ -17,6 +17,8 @@ struct ProfileSettings: Equatable {
     var readAloudEnabled = true
     var hapticsEnabled = true
     var gentleTimerEnabled = false
+    var sudokuEnabled = true
+    var sudokuDifficulty = SudokuDifficulty.normal
 
     init() {}
 
@@ -31,6 +33,8 @@ struct ProfileSettings: Equatable {
         readAloudEnabled = profile.readAloudEnabled
         hapticsEnabled = profile.hapticsEnabled
         gentleTimerEnabled = profile.gentleTimerEnabled
+        sudokuEnabled = profile.sudokuEnabled
+        sudokuDifficulty = profile.sudokuDifficulty
     }
 
     var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -85,6 +89,8 @@ struct ProfileSettings: Equatable {
         profile.readAloudEnabled = readAloudEnabled
         profile.hapticsEnabled = hapticsEnabled
         profile.gentleTimerEnabled = gentleTimerEnabled && allowsGentleTimer
+        profile.sudokuEnabled = sudokuEnabled
+        profile.sudokuDifficulty = sudokuDifficulty
     }
 
     func makeProfile() -> ChildProfile {

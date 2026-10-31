@@ -17,6 +17,11 @@ struct HomeView: View {
         language.subjects.filter { profile.isSubjectEnabled($0.id) }
     }
 
+    private var sudokuSubtitle: Text {
+        let solved = profile.sudokusSolved
+        return solved > 0 ? Text("sudoku.count \(solved)") : Text("sudoku.start")
+    }
+
     private var streak: Int {
         StreakCalculator.displayedStreak(current: profile.currentStreak, lastPlayedDay: profile.lastPlayedDay, now: .now)
     }
@@ -41,10 +46,12 @@ struct HomeView: View {
                             activeSubject = subject
                         }
                     }
-                    HomeExtraCard(title: "sudoku.title", subtitle: Text("sudoku.start"), systemImage: "puzzlepiece.fill", color: Color(hex: "#14A3A3")) {
-                        activeExtra = .sudoku
+                    if profile.sudokuEnabled {
+                        HomeExtraCard(title: "sudoku.title", subtitle: sudokuSubtitle, systemImage: "puzzlepiece.fill", color: SudokuView.color) {
+                            activeExtra = .sudoku
+                        }
+                        .accessibilityIdentifier("sudoku")
                     }
-                    .accessibilityIdentifier("sudoku")
                     if profile.gamesEnabled {
                         HomeExtraCard(title: "play.title", subtitle: Text("play.wallet \(profile.walletStars)"), systemImage: "gamecontroller.fill", color: Color(hex: "#E2558F")) {
                             activeExtra = .playCorner
