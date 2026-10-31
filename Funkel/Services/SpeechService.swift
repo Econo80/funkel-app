@@ -6,7 +6,9 @@ final class SpeechService {
     private let synthesizer = AVSpeechSynthesizer()
 
     func speak(_ text: String, locale: String) {
-        synthesizer.stopSpeaking(at: .immediate)
+        // Without an active playback session iOS stays silent in silent mode.
+        AudioSession.activate()
+        if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = Self.voice(for: locale)
         // A little slower than default, for young listeners.

@@ -1,8 +1,7 @@
 import AVFoundation
 
 /// Friendly sound effects, synthesised on device: no audio files, no
-/// licensing, works offline. Uses the `.ambient` session so the silent
-/// switch is respected and other audio isn't interrupted.
+/// licensing, works offline. Shares `AudioSession` with read-aloud.
 final class SoundService {
 
     enum Effect: CaseIterable {
@@ -47,10 +46,8 @@ final class SoundService {
 
     /// Starts the engine lazily, so nothing touches audio until the first sound.
     private func startIfNeeded() -> Bool {
+        AudioSession.activate()
         if engine.isRunning { return true }
-        let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.ambient, options: [.mixWithOthers])
-        try? session.setActive(true)
         do {
             try engine.start()
             return true
