@@ -2,49 +2,74 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// What the backup buttons are doing: saving, picking a file, confirming a restore.
+/// Shared by the section (the buttons) and `backupPresentations` (the file
+/// dialogs and the confirmation), which sit on the whole list: modifiers on a
+/// list section attach to its rows, and a sheet on a row that changes while it
+/// opens is closed again at once.
+@Observable
+final class BackupFlow {
+    var document: BackupDocument?
+    var isExporting = false
+    var isImporting = false
+    var restoring: Backup.Contents?
+    /// A catalog key: what just happened ("backup.saved", "backup.problem.notJson" …).
+    var note: String?
+
+    func save(_ profiles: [ChildProfile]) {
+        guard let data = try? Backup.export(profiles) else { return }
+        document = BackupDocument(data: data)
+        note = nil
+        isExporting = true
+    }
+
+    func load(_ url: URL) {
+        let access = url.startAccessingSecurityScopedResource()
+        defer { if access { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else {
+            note = "backup.problem.notJson"
+            return
+        }
+        switch Backup.read(data) {
+        case .success(let contents):
+            note = nil
+            // Let the file picker finish closing before the confirmation opens.
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(400))
+                self.restoring = contents
+            }
+        case .failure(let problem):
+            note = "backup.problem." + problem.rawValue
+        }
+    }
+}
+
 /// "Sicherung" in the grown-up area: saves all profiles to a file in the web
 /// app's format, or restores them from one (replacing the profiles on this device).
 struct BackupSection: View {
     let profiles: [ChildProfile]
+    let flow: BackupFlow
 
-    @Environment(\.modelContext) private var modelContext
-    @AppStorage(AppLaunch.activeProfileKey) private var activeProfileID = ""
     @AppStorage("lastBackupAt") private var lastBackupAt: Double = 0
-    @State private var document: BackupDocument?
-    @State private var isExporting = false
-    @State private var isImporting = false
-    @State private var restoring: Backup.Contents?
-    /// A catalog key: what just happened ("backup.saved", "backup.problem.notJson" …).
-    @State private var note: String?
 
     var body: some View {
         Section {
             Button {
-                saveBackup()
+                flow.save(profiles)
             } label: {
                 Label("backup.save", systemImage: "square.and.arrow.down")
             }
             .disabled(profiles.isEmpty)
             .accessibilityIdentifier("backup-save")
-            .fileExporter(isPresented: $isExporting, document: document, contentType: .json, defaultFilename: Self.baseName(Backup.fileName())) { result in
-                if case .success = result {
-                    lastBackupAt = Date.now.timeIntervalSince1970
-                    note = "backup.saved"
-                }
-            }
 
             Button {
-                isImporting = true
+                flow.isImporting = true
             } label: {
                 Label("backup.load", systemImage: "folder")
             }
             .accessibilityIdentifier("backup-load")
-            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
-                guard case .success(let url) = result else { return }
-                load(url)
-            }
 
-            if let note {
+            if let note = flow.note {
                 Text(LocalizedStringKey(note))
                     .font(.funkelCaption)
                     .foregroundStyle(note.hasPrefix("backup.problem.") ? Color.orange : Palette.correct)
@@ -63,46 +88,54 @@ struct BackupSection: View {
                 Text("backup.footer")
             }
         }
-        .sheet(isPresented: Binding(get: { restoring != nil }, set: { if !$0 { restoring = nil } })) {
-            if let restoring {
-                RestoreConfirmation(contents: restoring, onRestore: { restore(restoring) }, onCancel: { self.restoring = nil })
-            }
-        }
-    }
-
-    private func saveBackup() {
-        guard let data = try? Backup.export(profiles) else { return }
-        document = BackupDocument(data: data)
-        note = nil
-        isExporting = true
-    }
-
-    private func load(_ url: URL) {
-        let access = url.startAccessingSecurityScopedResource()
-        defer { if access { url.stopAccessingSecurityScopedResource() } }
-        guard let data = try? Data(contentsOf: url) else {
-            note = "backup.problem.notJson"
-            return
-        }
-        switch Backup.read(data) {
-        case .success(let contents):
-            note = nil
-            restoring = contents
-        case .failure(let problem):
-            note = "backup.problem." + problem.rawValue
-        }
-    }
-
-    private func restore(_ contents: Backup.Contents) {
-        guard (try? Backup.restore(contents, into: modelContext)) != nil else { return }
-        activeProfileID = ""
-        restoring = nil
-        note = "backup.restored"
     }
 
     /// The file exporter adds ".json" itself.
     static func baseName(_ fileName: String) -> String {
         fileName.hasSuffix(".json") ? String(fileName.dropLast(5)) : fileName
+    }
+}
+
+extension View {
+    /// The backup's file dialogs and restore confirmation; put it on the whole list.
+    func backupPresentations(_ flow: BackupFlow) -> some View {
+        modifier(BackupPresentations(flow: flow))
+    }
+}
+
+private struct BackupPresentations: ViewModifier {
+    @Bindable var flow: BackupFlow
+
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage(AppLaunch.activeProfileKey) private var activeProfileID = ""
+    @AppStorage("lastBackupAt") private var lastBackupAt: Double = 0
+
+    func body(content: Content) -> some View {
+        content
+            .fileExporter(isPresented: $flow.isExporting, document: flow.document, contentType: .json, defaultFilename: BackupSection.baseName(Backup.fileName())) { result in
+                if case .success = result {
+                    lastBackupAt = Date.now.timeIntervalSince1970
+                    flow.note = "backup.saved"
+                }
+            }
+            .fileImporter(isPresented: $flow.isImporting, allowedContentTypes: [.json]) { result in
+                guard case .success(let url) = result else { return }
+                flow.load(url)
+            }
+            .sheet(item: $flow.restoring) { contents in
+                RestoreConfirmation(contents: contents, onRestore: { restore(contents) }, onCancel: { flow.restoring = nil })
+            }
+    }
+
+    private func restore(_ contents: Backup.Contents) {
+        do {
+            try Backup.restore(contents, into: modelContext)
+            activeProfileID = ""
+            flow.note = "backup.restored"
+        } catch {
+            flow.note = "backup.problem.notFunkel"
+        }
+        flow.restoring = nil
     }
 }
 

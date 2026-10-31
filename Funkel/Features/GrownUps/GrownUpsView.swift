@@ -6,6 +6,7 @@ struct GrownUpsView: View {
     @Query(sort: \ChildProfile.createdAt) private var profiles: [ChildProfile]
     @Environment(\.dismiss) private var dismiss
     @State private var isAddingProfile = false
+    @State private var backup = BackupFlow()
 
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–"
@@ -31,7 +32,7 @@ struct GrownUpsView: View {
                     .accessibilityIdentifier("settings-add-profile")
                 }
 
-                BackupSection(profiles: profiles)
+                BackupSection(profiles: profiles, flow: backup)
 
                 Section("grownups.privacy.title") {
                     Text("grownups.privacy.text")
@@ -40,6 +41,7 @@ struct GrownUpsView: View {
                     LabeledContent("grownups.version", value: version)
                 }
             }
+            .backupPresentations(backup)
             .navigationTitle("grownups.title")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

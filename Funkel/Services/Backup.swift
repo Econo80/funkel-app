@@ -27,7 +27,8 @@ enum Backup {
         var walletStars: Int { Backup.int(json["walletStars"]) ?? totalStars }
     }
 
-    struct Contents {
+    struct Contents: Identifiable {
+        let id = UUID()
         let exportedAt: Date?
         let profiles: [ProfileEntry]
     }
@@ -124,7 +125,13 @@ enum Backup {
         for profile in try context.fetch(FetchDescriptor<ChildProfile>()) {
             context.delete(profile)
         }
-        let profiles = contents.profiles.map { makeProfile(from: $0.json, in: context, calendar: calendar) }
+        // Save the deletions first: a backup of these same profiles carries
+        // their ids, and inserting a profile whose unique id is still waiting
+        // to be deleted makes SwiftData merge it into the old one, keeping the old data.
+        try context.save()
+        var seen = Set<String>()
+        let entries = contents.profiles.filter { seen.insert($0.id.lowercased()).inserted }
+        let profiles = entries.map { makeProfile(from: $0.json, in: context, calendar: calendar) }
         try context.save()
         return profiles
     }
