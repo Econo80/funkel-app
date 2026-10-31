@@ -125,7 +125,7 @@ struct GardenView: View {
                 now: now,
                 layout: layout,
                 showsFreeSquares: tool != nil,
-                movingAnchor: { if case .move(let from) = tool { return from } else { return nil } }(),
+                movingAnchor: movingAnchor,
                 popups: popups,
                 onTap: tap,
                 onDraw: drawItem == nil ? nil : draw,
@@ -287,6 +287,11 @@ struct GardenView: View {
         }
         .background(.white.opacity(0.95), in: .rect(cornerRadius: 26, style: .continuous))
         .shadow(color: .black.opacity(0.25), radius: 12, y: 8)
+    }
+
+    private var movingAnchor: Int? {
+        if case .move(let from) = tool { return from }
+        return nil
     }
 
     private var isMoving: Bool {

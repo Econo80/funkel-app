@@ -388,7 +388,8 @@ extension Farm {
         let big = level.level >= 5 ? 1 : 0
         let made: [FarmOrder] = kinds.isEmpty ? [] : (0..<3).map { i in
             let shuffled = rng.shuffled(kinds)
-            let count = kinds.count > 1 && rng.next() < 0.5 ? 2 : 1
+            var count = 1
+            if kinds.count > 1, rng.next() < 0.5 { count = 2 }
             var wants: [String: Int] = [:]
             for kind in shuffled.prefix(count) { wants[kind.rawValue] = rng.int(2, 3 + big) }
             let total = wants.values.reduce(0, +)
