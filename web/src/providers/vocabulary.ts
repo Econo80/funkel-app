@@ -96,7 +96,7 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
 
   /**
    * The word, its synonyms and antonyms, and theirs in turn. None may be a
-   * wrong answer, because some could also be right: "riesig" (≈ groß) is
+   * wrong answer, because some could also be right: "riesig" (≈ gross) is
    * also an opposite of "klein".
    */
   family(word: WordEntry): Set<string> {

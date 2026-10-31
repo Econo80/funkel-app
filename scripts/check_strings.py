@@ -46,6 +46,12 @@ def main() -> int:
     # Keys built at runtime, e.g. LocalizedStringKey("color." + key).
     dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab.", "backup.problem."))}
 
+    # Swiss spelling: no "ß" in any UI text (keys or translations).
+    raw = json.loads(CATALOG.read_text(encoding="utf-8"))["strings"]
+    eszett = sorted(k for k, v in raw.items() if "ß" in k or "ß" in json.dumps(v, ensure_ascii=False))
+    for key in eszett:
+        print(f"ERROR   uses 'ß' (write 'ss', Swiss spelling): {key!r}")
+
     missing = sorted(set(used) - catalog)
     unused = sorted(catalog - set(used) - dynamic)
     for key in missing:
@@ -53,7 +59,7 @@ def main() -> int:
     for key in unused:
         print(f"warning unused catalog key: {key!r}")
     print(f"\n{len(used)} key(s) used, {len(catalog)} in catalog - {len(missing)} missing, {len(unused)} unused.")
-    return 1 if missing else 0
+    return 1 if missing or eszett else 0
 
 
 if __name__ == "__main__":

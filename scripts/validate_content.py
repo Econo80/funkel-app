@@ -52,7 +52,12 @@ class Report:
 
 def load(path, report):
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        # Funkel is for Swiss children: Swiss German has no "ß", always "ss".
+        for number, line in enumerate(text.splitlines(), 1):
+            if "ß" in line or "ẞ" in line:
+                report.error(f"{path}:{number}", "uses 'ß'; write 'ss' (Swiss spelling)")
+        return json.loads(text)
     except FileNotFoundError:
         report.error(path, "file not found")
     except json.JSONDecodeError as e:

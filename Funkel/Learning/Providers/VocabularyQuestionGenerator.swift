@@ -150,7 +150,7 @@ struct VocabularyQuestionGenerator: QuestionProvider {
 
     /// The word, its synonyms and antonyms, and theirs in turn. None of these may
     /// appear as a wrong answer, because some of them could also be right:
-    /// "riesig" (≈ groß) is also an opposite of "klein".
+    /// "riesig" (≈ gross) is also an opposite of "klein".
     func family(of word: Word) -> Set<String> {
         var family = Set([word.word] + (word.synonyms ?? []) + (word.antonyms ?? []))
         let core = family

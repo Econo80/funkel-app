@@ -84,7 +84,7 @@ final class VocabularyGeneratorTests: XCTestCase {
         }
     }
 
-    /// "riesig" (≈ groß) must never be a *wrong* option for "the opposite of klein".
+    /// "riesig" (≈ gross) must never be a *wrong* option for "the opposite of klein".
     func testSynonymAndOppositeDistractorsAreNeverAlsoRight() throws {
         let g = try generator()
         let entries = words(g)
