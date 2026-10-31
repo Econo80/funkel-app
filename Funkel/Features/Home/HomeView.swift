@@ -45,10 +45,12 @@ struct HomeView: View {
                         activeExtra = .sudoku
                     }
                     .accessibilityIdentifier("sudoku")
-                    HomeExtraCard(title: "play.title", subtitle: Text("play.wallet \(profile.walletStars)"), systemImage: "gamecontroller.fill", color: Color(hex: "#E2558F")) {
-                        activeExtra = .playCorner
+                    if profile.gamesEnabled {
+                        HomeExtraCard(title: "play.title", subtitle: Text("play.wallet \(profile.walletStars)"), systemImage: "gamecontroller.fill", color: Color(hex: "#E2558F")) {
+                            activeExtra = .playCorner
+                        }
+                        .accessibilityIdentifier("play-corner")
                     }
-                    .accessibilityIdentifier("play-corner")
                 }
             }
             .padding(24)
