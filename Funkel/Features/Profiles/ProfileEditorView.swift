@@ -134,6 +134,8 @@ struct ProfileEditorView: View {
                 .accessibilityIdentifier("editor-garden-minutes")
             }
 
+            sudokuSection
+
             if let profile {
                 giftSection(for: profile)
                 progressSection(for: profile)
@@ -259,6 +261,33 @@ struct ProfileEditorView: View {
             Text("editor.levels")
         } footer: {
             Text("editor.level.footer")
+        }
+    }
+
+    private var sudokuSection: some View {
+        Section {
+            Toggle(isOn: $settings.sudokuEnabled) {
+                Label {
+                    Text("editor.sudoku.enabled")
+                } icon: {
+                    Image(systemName: "puzzlepiece.fill")
+                        .foregroundStyle(Color(hex: "#14A3A3"))
+                }
+            }
+            .accessibilityIdentifier("editor-sudoku-enabled")
+            if settings.sudokuEnabled {
+                Picker("editor.sudoku.difficulty", selection: $settings.sudokuDifficulty) {
+                    ForEach(SudokuDifficulty.allCases) { difficulty in
+                        Text(LocalizedStringKey("editor.games.difficulty." + difficulty.rawValue)).tag(difficulty)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("editor-sudoku-difficulty")
+            }
+        } header: {
+            Text("sudoku.title")
+        } footer: {
+            Text("editor.sudoku.footer")
         }
     }
 

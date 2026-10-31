@@ -54,6 +54,17 @@ final class ScreenshotTests: XCTestCase {
         snap("08-knowledge-age-5", app, waitFor: app.buttons["round-close"], settle: 1.2)
         app.buttons["round-close"].tap()
 
+        // Lena (5): picture Sudoku, solved with hints
+        open("sudoku", app)
+        snap("30-sudoku-pictures-age-5", app, waitFor: app.buttons["sudoku-hint"], settle: 1.0)
+        let sudokuAgain = app.buttons["sudoku-again"]
+        for _ in 0..<20 where !sudokuAgain.exists {
+            app.buttons["sudoku-hint"].tap()
+            pause(0.3)
+        }
+        snap("31-sudoku-solved", app, waitFor: sudokuAgain, settle: 1.5)
+        app.buttons["sudoku-done"].tap()
+
         // Emil (10): number pad
         switchTo("Emil", app)
         open("subject-maths", app)
@@ -64,6 +75,14 @@ final class ScreenshotTests: XCTestCase {
         open("subject-generalKnowledge", app)
         snap("10-knowledge-age-10", app, waitFor: app.buttons["round-close"], settle: 1.2)
         app.buttons["round-close"].tap()
+
+        // Emil (10): classic 9×9 Sudoku
+        open("sudoku", app)
+        let sudokuCell = app.buttons["sudoku-cell-40"]
+        XCTAssertTrue(sudokuCell.waitForExistence(timeout: 8))
+        sudokuCell.tap()
+        snap("32-sudoku-age-10", app, settle: 0.8)
+        app.buttons["sudoku-close"].tap()
 
         // Grown-up area: gate, overview, Emil's settings
         open("grown-ups", app)
