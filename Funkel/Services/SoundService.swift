@@ -12,6 +12,8 @@ final class SoundService {
         case gentle
         /// Little arpeggio fanfare for the end of a round.
         case finish
+        /// Short bright blip for a popped balloon, a caught star, a found pair.
+        case pop
     }
 
     struct Note {
@@ -78,6 +80,11 @@ final class SoundService {
                 Note(frequency: 659.3, start: 0.10, duration: 0.20, volume: 0.20),   // E5
                 Note(frequency: 784.0, start: 0.20, duration: 0.20, volume: 0.20),   // G5
                 Note(frequency: 1046.5, start: 0.30, duration: 0.60, volume: 0.24),  // C6
+            ]
+        case .pop:
+            return [
+                Note(frequency: 1174.7, start: 0.00, duration: 0.07, volume: 0.20),  // D6
+                Note(frequency: 1760.0, start: 0.03, duration: 0.10, volume: 0.16),  // A6
             ]
         }
     }

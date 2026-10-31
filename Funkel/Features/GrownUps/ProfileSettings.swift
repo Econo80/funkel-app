@@ -17,6 +17,11 @@ struct ProfileSettings: Equatable {
     var readAloudEnabled = true
     var hapticsEnabled = true
     var gentleTimerEnabled = false
+    // Spielecke (stored as web fields, see ChildProfile+Play.swift)
+    var gamesEnabled = true
+    var gameCost = 10
+    var gamesPerDay = 3
+    var gameDifficulty = GameDifficulty.normal
 
     init() {}
 
@@ -31,6 +36,11 @@ struct ProfileSettings: Equatable {
         readAloudEnabled = profile.readAloudEnabled
         hapticsEnabled = profile.hapticsEnabled
         gentleTimerEnabled = profile.gentleTimerEnabled
+        let play = profile.playState
+        gamesEnabled = play.gamesEnabled
+        gameCost = play.gameCost
+        gamesPerDay = play.gamesPerDay
+        gameDifficulty = play.gameDifficulty
     }
 
     var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -85,6 +95,7 @@ struct ProfileSettings: Equatable {
         profile.readAloudEnabled = readAloudEnabled
         profile.hapticsEnabled = hapticsEnabled
         profile.gentleTimerEnabled = gentleTimerEnabled && allowsGentleTimer
+        profile.setGameSettings(enabled: gamesEnabled, cost: gameCost, perDay: gamesPerDay, difficulty: gameDifficulty)
     }
 
     func makeProfile() -> ChildProfile {

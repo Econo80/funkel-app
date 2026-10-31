@@ -117,6 +117,8 @@ struct ProfileEditorView: View {
                 }
             }
 
+            gamesSection
+
             if let profile {
                 giftSection(for: profile)
                 progressSection(for: profile)
@@ -239,6 +241,56 @@ struct ProfileEditorView: View {
         } footer: {
             Text("editor.level.footer")
         }
+    }
+
+    /// Spielecke: on/off, price per game, difficulty and games per day.
+    private var gamesSection: some View {
+        Section {
+            Toggle("editor.games.enabled", isOn: $settings.gamesEnabled)
+                .accessibilityIdentifier("editor-games")
+            if settings.gamesEnabled {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("editor.games.cost")
+                    Picker("editor.games.cost", selection: $settings.gameCost) {
+                        ForEach(Self.choices(Games.costChoices, keeping: settings.gameCost), id: \.self) { cost in
+                            Text(verbatim: "\(cost) ★").tag(cost)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("editor.games.difficulty")
+                    Picker("editor.games.difficulty", selection: $settings.gameDifficulty) {
+                        ForEach(GameDifficulty.allCases) { difficulty in
+                            Text(LocalizedStringKey("editor.games.difficulty." + difficulty.rawValue)).tag(difficulty)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityIdentifier("editor-games-difficulty")
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("editor.games.perDay")
+                    Picker("editor.games.perDay", selection: $settings.gamesPerDay) {
+                        ForEach(Self.choices(Games.perDayChoices, keeping: settings.gamesPerDay), id: \.self) { count in
+                            Text(verbatim: count == 0 ? "∞" : "\(count)").tag(count)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+            }
+        } header: {
+            Label("editor.games", systemImage: "gamecontroller.fill")
+        } footer: {
+            Text("editor.games.footer")
+        }
+    }
+
+    /// The usual choices, plus a value set elsewhere (e.g. a web backup), so the picker never shows nothing selected.
+    static func choices(_ choices: [Int], keeping value: Int) -> [Int] {
+        choices.contains(value) ? choices : (choices + [value]).sorted { ($0 == 0 ? Int.max : $0) < ($1 == 0 ? Int.max : $1) }
     }
 
     private func giftSection(for profile: ChildProfile) -> some View {
