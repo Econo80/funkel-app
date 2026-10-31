@@ -109,6 +109,42 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<RoundRecord>()), 1, "the old profile's history went with it")
     }
 
+    /// The usual case on a device: the profiles came from an earlier backup,
+    /// so the new file has the same profile ids. Its data must win.
+    func testRestoringANewerBackupOfTheSameProfilesTakesItsData() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("restore-\(UUID().uuidString).store")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let container = try ModelContainer(
+            for: ChildProfile.self, SubjectProgress.self, RoundRecord.self,
+            configurations: ModelConfiguration(url: url)
+        )
+        let context = ModelContext(container)
+
+        let older = webBackup
+            .replacingOccurrences(of: "\"totalStars\": 62", with: "\"totalStars\": 10")
+            .replacingOccurrences(of: "\"farmXp\": 140", with: "\"farmXp\": 5")
+        try Backup.restore(try contents(older), into: context, calendar: calendar)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<ChildProfile>()).first { $0.name == "Lena" }?.totalStars, 10)
+
+        try Backup.restore(try contents(webBackup), into: context, calendar: calendar)
+
+        // Read back through a fresh context, like the app after the restore.
+        let fresh = ModelContext(container)
+        let profiles = try fresh.fetch(FetchDescriptor<ChildProfile>())
+        XCTAssertEqual(profiles.map(\.name).sorted(), ["Emil", "Lena"])
+        let lena = try XCTUnwrap(profiles.first { $0.name == "Lena" })
+        XCTAssertEqual(lena.id.uuidString.lowercased(), "3f2b6a1c-8d4e-4f5a-9b7c-1e2d3c4b5a69")
+        XCTAssertEqual(lena.totalStars, 62)
+        XCTAssertEqual(lena.walletStars, 123)
+        XCTAssertEqual(lena.currentStreak, 2)
+        XCTAssertEqual(lena.webField("farmXp", as: Int.self), 140)
+        XCTAssertEqual(lena.webField("garden", as: [GardenSlotProbe?].self)?.count, 3)
+        XCTAssertEqual(lena.subjectProgress(for: "maths", language: "de")?.roundsPlayed, 5)
+        XCTAssertEqual(lena.sudokusSolved, 1)
+        XCTAssertEqual(try fresh.fetchCount(FetchDescriptor<SubjectProgress>()), 2)
+        XCTAssertEqual(try fresh.fetchCount(FetchDescriptor<RoundRecord>()), 1)
+    }
+
     func testAWebBackupComesBackOutWithNothingLost() throws {
         let context = try makeContext()
         let lena = try Backup.restore(try contents(webBackup), into: context, calendar: calendar)[0]
@@ -165,4 +201,9 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(problem(#"{"app": "funkel", "version": 99, "profiles": []}"#), .newerVersion)
         XCTAssertEqual(problem(#"{"app": "funkel", "version": 1, "profiles": [{"nope": true}]}"#), .noProfiles)
     }
+}
+
+/// Just enough of a garden slot to count them.
+private struct GardenSlotProbe: Decodable {
+    let itemId: String
 }
