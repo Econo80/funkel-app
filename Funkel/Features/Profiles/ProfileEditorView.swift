@@ -20,6 +20,8 @@ struct ProfileEditorView: View {
     @State private var levels: [String: Double] = [:]
     /// Stars to give, added to the wallet on "Speichern".
     @State private var gift = 0
+    /// The play corner's settings, saved with "Speichern".
+    @State private var games = GameSettings()
 
     private var language: ContentLanguage? {
         environment.content.resolvedLanguage(code: settings.learningLanguage)
@@ -117,6 +119,8 @@ struct ProfileEditorView: View {
                 }
             }
 
+            GameSettingsSection(settings: $games)
+
             if let profile {
                 giftSection(for: profile)
                 progressSection(for: profile)
@@ -158,7 +162,10 @@ struct ProfileEditorView: View {
         .onAppear {
             guard !hasLoaded else { return }
             hasLoaded = true
-            if let profile { settings = ProfileSettings(profile: profile) }
+            if let profile {
+                settings = ProfileSettings(profile: profile)
+                games = GameSettings(profile: profile)
+            }
         }
     }
 
@@ -375,6 +382,7 @@ struct ProfileEditorView: View {
             saved = settings.makeProfile()
             modelContext.insert(saved)
         }
+        games.apply(to: saved)
         try? modelContext.save()
         onSave(saved)
         dismiss()
