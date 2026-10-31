@@ -12,27 +12,57 @@ function voiceFor(locale: string): SpeechSynthesisVoice | undefined {
   );
 }
 
+let audio: AudioContext | undefined;
 let speechUnlocked = false;
+
+/** What the last attempt to speak reported (shown by "Vorlesen testen" in the grown-up area). */
+export interface SpeechStatus { supported: boolean; voices: number; germanVoices: number; started: boolean; error?: string }
+let lastStarted = false;
+let lastError: string | undefined;
+
+export function speechStatus(): SpeechStatus {
+  if (!("speechSynthesis" in window)) return { supported: false, voices: 0, germanVoices: 0, started: false };
+  const voices = speechSynthesis.getVoices();
+  return { supported: true, voices: voices.length, germanVoices: voices.filter((v) => v.lang.toLowerCase().startsWith("de")).length, started: lastStarted, error: lastError };
+}
+
+/**
+ * iPhone/iPad: treat Funkel's sound like media playback, so it isn't silenced
+ * and the audio session doesn't get stuck in web apps on the home screen
+ * (an iOS 26 problem). Safari 16.4+; ignored elsewhere.
+ */
+function useMediaAudioSession(): void {
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  if (session && session.type !== "playback") {
+    try { session.type = "playback"; } catch { /* not allowed here */ }
+  }
+}
 
 /**
  * Safari on iPhone/iPad only lets a page speak once speech has been started
- * from a tap. Questions are read automatically a moment *after* a tap (once
- * they are loaded), so the first tap anywhere starts a silent utterance that
- * unlocks speech for the rest of the visit.
+ * from a tap, and only a finished tap counts (touchend/click, not the first
+ * touch). Questions are read automatically a moment *after* a tap (once they
+ * are loaded), so the first tap starts a silent utterance that unlocks speech,
+ * and wakes sounds, for the rest of the visit.
  */
 export function installSpeechUnlock(): void {
+  useMediaAudioSession();
   if (!("speechSynthesis" in window)) return;
+  const events = ["touchend", "click", "keydown"] as const;
   const unlock = () => {
+    useMediaAudioSession();
+    if (audio?.state === "suspended") void audio.resume();
     if (speechUnlocked) return;
     speechUnlocked = true;
     const silent = new SpeechSynthesisUtterance(" ");
     silent.volume = 0;
     speechSynthesis.speak(silent);
-    window.removeEventListener("pointerdown", unlock, true);
-    window.removeEventListener("keydown", unlock, true);
   };
-  window.addEventListener("pointerdown", unlock, true);
-  window.addEventListener("keydown", unlock, true);
+  // Kept for the whole visit: iOS can suspend audio again after the app was in the background.
+  for (const e of events) window.addEventListener(e, unlock, true);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") speechUnlocked = false;
+  });
   // Voices load in the background; asking once makes them ready sooner.
   speechSynthesis.getVoices();
 }
@@ -41,11 +71,16 @@ let pending: ReturnType<typeof setTimeout> | undefined;
 
 export function speak(text: string, locale: string): void {
   if (!("speechSynthesis" in window) || !text) return;
+  useMediaAudioSession();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = locale;
   const voice = voiceFor(locale);
   if (voice) utterance.voice = voice;
   utterance.rate = 0.9; // a little slower, for young listeners
+  lastStarted = false;
+  lastError = undefined;
+  utterance.onstart = () => { lastStarted = true; };
+  utterance.onerror = (e) => { lastError = (e as SpeechSynthesisErrorEvent).error ?? "error"; };
 
   // After the app was in the background, iOS can leave speech paused.
   if (speechSynthesis.paused) speechSynthesis.resume();
@@ -92,7 +127,6 @@ export const NOTES: Record<Effect, Note[]> = {
   ],
 };
 
-let audio: AudioContext | undefined;
 
 export function playSound(effect: Effect): void {
   const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;

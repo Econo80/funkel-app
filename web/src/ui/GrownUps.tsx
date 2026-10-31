@@ -27,6 +27,7 @@ import {
   type ProfileSettings,
 } from "../domain/profile";
 import { t } from "../services/i18n";
+import { speak, speechStatus } from "../services/feedback";
 import { getMeta, setMeta } from "../services/storage";
 import { AVATAR_COLORS, BigButton, Pip, Sheet, avatarColor, subjectGlyph } from "./components";
 
@@ -208,6 +209,22 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
   const [levels, setLevels] = useState<Record<string, number>>({});
   // Stars to give, added to the wallet on "Speichern".
   const [gift, setGift] = useState(0);
+  const [speechNote, setSpeechNote] = useState("");
+
+  // Speaks a test sentence and reports what the device says, for when read-aloud stays silent.
+  const testSpeech = () => {
+    setSpeechNote("…");
+    speak(t("editor.speechTest.sentence"), language?.speechLocale ?? "de-DE");
+    setTimeout(() => {
+      const status = speechStatus();
+      setSpeechNote(
+        !status.supported ? t("editor.speechTest.unsupported")
+        : status.started ? t("editor.speechTest.ok")
+        : status.error ? t("editor.speechTest.error %@", status.error)
+        : t("editor.speechTest.silent %lld %lld", status.voices, status.germanVoices),
+      );
+    }, 1800);
+  };
   const levelOf = (code: string, id: string) =>
     levels[`${code}/${id}`] ?? (profile && s.age === profile.age ? subjectAdaptivity(profile, code, id).adjustment : 0);
 
@@ -331,6 +348,8 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
         <div class="list">
           <Toggle checked={s.soundEnabled} onChange={(v) => set({ soundEnabled: v })}>{t("editor.sound")}</Toggle>
           <Toggle checked={s.readAloudEnabled} onChange={(v) => set({ readAloudEnabled: v })}>{t("editor.readAloud")}</Toggle>
+          <button class="list-row" onClick={testSpeech} data-testid="speech-test">🔊 {t("editor.speechTest")}</button>
+          {speechNote && <p class="list-note" role="status" data-testid="speech-note">{speechNote}</p>}
           <Toggle checked={s.hapticsEnabled} onChange={(v) => set({ hapticsEnabled: v })}>{t("editor.haptics")}</Toggle>
           {allowsGentleTimer(s.age) && <Toggle checked={s.gentleTimerEnabled} onChange={(v) => set({ gentleTimerEnabled: v })}>{t("editor.timer")}</Toggle>}
         </div>

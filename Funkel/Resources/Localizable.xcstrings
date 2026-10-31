@@ -805,6 +805,78 @@
         }
       }
     },
+    "editor.speechTest": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorlesen testen"
+          }
+        }
+      }
+    },
+    "editor.speechTest.error %@": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Vorlesen wurde vom Gerät blockiert (%@). Bitte schliesse Funkel ganz und öffne es wieder."
+          }
+        }
+      }
+    },
+    "editor.speechTest.ok": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Gerät hat angefangen zu sprechen. Hörst du nichts, ist es stumm geschaltet oder sehr leise."
+          }
+        }
+      }
+    },
+    "editor.speechTest.sentence": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hallo, ich bin Pip. Kannst du mich hören?"
+          }
+        }
+      }
+    },
+    "editor.speechTest.silent %lld %lld": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Vorlesen hat nicht begonnen. Stimmen auf dem Gerät: %1$lld, davon Deutsch: %2$lld."
+          }
+        }
+      }
+    },
+    "editor.speechTest.unsupported": {
+      "comment": "UI text. (Read-aloud check; web app for now.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Browser kann nicht vorlesen."
+          }
+        }
+      }
+    },
     "editor.stars": {
       "comment": "Label: total stars.",
       "extractionState": "manual",
