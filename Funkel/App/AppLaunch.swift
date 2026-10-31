@@ -77,6 +77,7 @@ enum UITestFixtures {
         emil.longestStreak = 12
         emil.lastPlayedDay = yesterday
         context.insert(emil)
+        GardenSample.fill(emil)
 
         try? context.save()
     }
