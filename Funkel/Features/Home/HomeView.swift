@@ -9,6 +9,7 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var activeSubject: SubjectDescriptor?
     @State private var showsGrownUps = false
+    @State private var activeExtra: HomeExtra?
 
     private let columns = [GridItem(.adaptive(minimum: 280, maximum: 420), spacing: 20)]
 
@@ -40,6 +41,14 @@ struct HomeView: View {
                             activeSubject = subject
                         }
                     }
+                    HomeExtraCard(title: "sudoku.title", subtitle: Text("sudoku.start"), systemImage: "puzzlepiece.fill", color: Color(hex: "#14A3A3")) {
+                        activeExtra = .sudoku
+                    }
+                    .accessibilityIdentifier("sudoku")
+                    HomeExtraCard(title: "play.title", subtitle: Text("play.wallet \(profile.walletStars)"), systemImage: "gamecontroller.fill", color: Color(hex: "#E2558F")) {
+                        activeExtra = .playCorner
+                    }
+                    .accessibilityIdentifier("play-corner")
                 }
             }
             .padding(24)
@@ -50,6 +59,12 @@ struct HomeView: View {
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(item: $activeSubject) { subject in
             RoundContainerView(subject: subject, profile: profile)
+        }
+        .fullScreenCover(item: $activeExtra) { extra in
+            switch extra {
+            case .sudoku: SudokuView(profile: profile)
+            case .playCorner: PlayCornerView(profile: profile)
+            }
         }
         .sheet(isPresented: $showsGrownUps) {
             GrownUpGate { GrownUpsView() }

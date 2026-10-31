@@ -3085,6 +3085,18 @@
         }
       }
     },
+    "port.comingSoon": {
+      "comment": "UI text. (iOS: shown until a web feature is ported.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommt sehr bald in die App!"
+          }
+        }
+      }
+    },
     "profile.age %lld": {
       "comment": "Child's age. Ages are 4–14, always plural.",
       "extractionState": "manual",
