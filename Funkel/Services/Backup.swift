@@ -27,7 +27,8 @@ enum Backup {
         var walletStars: Int { Backup.int(json["walletStars"]) ?? totalStars }
     }
 
-    struct Contents {
+    struct Contents: Identifiable {
+        let id = UUID()
         let exportedAt: Date?
         let profiles: [ProfileEntry]
     }
