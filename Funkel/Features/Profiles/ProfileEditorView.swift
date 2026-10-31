@@ -22,6 +22,8 @@ struct ProfileEditorView: View {
     @State private var gift = 0
     /// The play corner's settings, saved with "Speichern".
     @State private var games = GameSettings()
+    /// Minutes a day in Pips Garten (0 = no limit), saved with "Speichern".
+    @State private var gardenMinutes = GardenTime.defaultMinutes
 
     private var language: ContentLanguage? {
         environment.content.resolvedLanguage(code: settings.learningLanguage)
@@ -121,6 +123,17 @@ struct ProfileEditorView: View {
 
             GameSettingsSection(settings: $games)
 
+            Section("editor.garden.minutes") {
+                Picker("editor.garden.minutes", selection: $gardenMinutes) {
+                    ForEach(GardenTime.minutesChoices, id: \.self) { minutes in
+                        Text(verbatim: minutes == 0 ? "∞" : "\(minutes)").tag(minutes)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .accessibilityIdentifier("editor-garden-minutes")
+            }
+
             if let profile {
                 giftSection(for: profile)
                 progressSection(for: profile)
@@ -165,6 +178,7 @@ struct ProfileEditorView: View {
             if let profile {
                 settings = ProfileSettings(profile: profile)
                 games = GameSettings(profile: profile)
+                gardenMinutes = profile.gardenMinutesPerDay
             }
         }
     }
@@ -383,6 +397,7 @@ struct ProfileEditorView: View {
             modelContext.insert(saved)
         }
         games.apply(to: saved)
+        saved.gardenMinutesPerDay = gardenMinutes
         try? modelContext.save()
         onSave(saved)
         dismiss()
