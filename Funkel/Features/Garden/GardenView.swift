@@ -551,8 +551,8 @@ struct GardenView: View {
         if item.produce != nil { parts.append(String(localized: "garden.tomorrow")) }
         if let recipe = item.recipe { parts.append(String(localized: "garden.notEnough \(Produce.text(recipe.needs))")) }
         if let boosts = item.boosts {
-            let goods = boosts.map(\.emoji).joined()
-            parts.append(String(localized: "garden.use.boost \(goods)"))
+            let goodsText = boosts.map(\.emoji).joined()
+            parts.append(String(localized: "garden.use.boost \(goodsText)"))
         }
         if let orders = item.orders { parts.append(String(localized: String.LocalizationValue("garden.use." + orders.rawValue))) }
         return parts.isEmpty ? itemName : "\(itemName): " + parts.joined(separator: " · ")
