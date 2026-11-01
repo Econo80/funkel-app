@@ -30,7 +30,9 @@ enum QuestionProviderFactory {
         }
     }
 
-    static func provider(for subject: SubjectDescriptor, content: ContentLibrary) throws -> (any QuestionProvider)? {
+    /// - Parameters: country and seen: the child's country and the questions asked
+    ///   before in this subject (oldest first), for the question bank.
+    static func provider(for subject: SubjectDescriptor, content: ContentLibrary, country: Country? = nil, seen: [String] = []) throws -> (any QuestionProvider)? {
         switch subject.provider {
         case .maths:
             return MathsQuestionGenerator(
@@ -48,7 +50,9 @@ enum QuestionProviderFactory {
             return QuestionBankProvider(
                 subjectID: subject.id,
                 items: try content.questionBank(for: subject).questions,
-                phrasing: try content.phrasing(language: subject.languageCode)
+                phrasing: try content.phrasing(language: subject.languageCode),
+                country: country,
+                seen: seen
             )
         }
     }

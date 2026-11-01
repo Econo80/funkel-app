@@ -6,6 +6,7 @@ import { Tuning } from "../domain/difficulty";
 import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES, GAME_DIFFICULTIES } from "../domain/games";
 import { isGateAnswerCorrect, randomGate } from "../domain/gate";
 import {
+  COUNTRIES,
   ROUND_LENGTH_CHOICES,
   allowsGentleTimer,
   applySettings,
@@ -279,6 +280,14 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
           </select>
         </div>
         <p class="footnote">{t("editor.language.footer")}</p>
+
+        <h3 class="section-title">{t("editor.country")}</h3>
+        <div class="list segmented" role="radiogroup" aria-label={t("editor.country")} data-testid="editor-country">
+          {COUNTRIES.map((c) => (
+            <button key={c} role="radio" aria-checked={s.country === c} class={s.country === c ? "selected" : ""} onClick={() => set({ country: c })}>{t(`editor.country.${c}`)}</button>
+          ))}
+        </div>
+        <p class="footnote">{t("editor.country.footer")}</p>
 
         <h3 class="section-title">{t("editor.subjects")}</h3>
         <div class="list">

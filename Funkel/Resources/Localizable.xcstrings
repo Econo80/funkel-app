@@ -325,6 +325,66 @@
         }
       }
     },
+    "editor.country": {
+      "comment": "UI text. (Profile editor: where the child lives.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Land"
+          }
+        }
+      }
+    },
+    "editor.country.AT": {
+      "comment": "UI text. (Profile editor: where the child lives.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Österreich"
+          }
+        }
+      }
+    },
+    "editor.country.CH": {
+      "comment": "UI text. (Profile editor: where the child lives.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schweiz"
+          }
+        }
+      }
+    },
+    "editor.country.DE": {
+      "comment": "UI text. (Profile editor: where the child lives.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deutschland"
+          }
+        }
+      }
+    },
+    "editor.country.footer": {
+      "comment": "UI text. (Profile editor: where the child lives.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Allgemeinwissen fragt nach diesem Land: Hauptstadt, Notrufnummern, Berge, Feste."
+          }
+        }
+      }
+    },
     "editor.delete": {
       "comment": "Delete-profile button.",
       "extractionState": "manual",

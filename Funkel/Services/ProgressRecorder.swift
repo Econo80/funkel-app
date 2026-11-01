@@ -9,6 +9,8 @@ struct RoundOutcome: Equatable {
     let total: Int
     let correctContentIDs: [String]
     let effectiveAge: Double
+    /// Every question asked, so the next rounds bring new ones first.
+    var askedContentIDs: [String] = []
 }
 
 /// What the summary screen shows after saving.
@@ -28,6 +30,16 @@ struct RoundSummary: Equatable {
 /// streak, per-subject progress and level, and history.
 struct ProgressRecorder {
     static let recentContentLimit = 40
+    /// Questions asked per subject that are remembered (more than any bank has per age).
+    static let seenContentLimit = 600
+
+    /// Adds what was just asked to the end (most recent), once each, keeping the newest.
+    static func withSeen(_ seen: [String], asked: [String]) -> [String] {
+        var unique: [String] = []
+        for id in asked where !unique.contains(id) { unique.append(id) }
+        let now = Set(unique)
+        return Array((seen.filter { !now.contains($0) } + unique).suffix(seenContentLimit))
+    }
 
     let context: ModelContext
 
@@ -64,6 +76,7 @@ struct ProgressRecorder {
         progress.stars += stars
         progress.lastPlayed = now
         progress.recentCorrectContentIDs = Array((progress.recentCorrectContentIDs + outcome.correctContentIDs).suffix(Self.recentContentLimit))
+        progress.seenContentIDs = Self.withSeen(progress.seenContentIDs, asked: outcome.askedContentIDs)
         progress.adjustment = level.adaptivity.adjustment
         progress.perfectRounds = level.adaptivity.perfectRounds
 

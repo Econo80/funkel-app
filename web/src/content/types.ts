@@ -75,6 +75,8 @@ export interface BankItem {
   correct?: string;
   answer?: string[];
   distractors?: string[];
+  /** Only for children in these countries ("CH", "DE", "AT"); everyone if missing. */
+  countries?: string[];
 }
 
 export interface QuestionBank {

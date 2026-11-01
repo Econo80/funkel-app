@@ -8,6 +8,18 @@ import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, emptyGoods, startingFarmXp, w
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
 const RECENT_CONTENT_LIMIT = 40;
+/** Questions asked per subject that are remembered, so new ones come first (more than any bank has per age). */
+export const SEEN_CONTENT_LIMIT = 600;
+
+/** Where the child lives: general knowledge asks about this country (capital, emergency numbers …). */
+export type Country = "CH" | "DE" | "AT";
+export const COUNTRIES: readonly Country[] = ["CH", "DE", "AT"];
+
+/** From the device's language region (de-DE, de-AT); Switzerland otherwise. */
+export function defaultCountry(): Country {
+  const region = (globalThis.navigator?.language ?? "").split("-")[1]?.toUpperCase();
+  return region === "DE" || region === "AT" ? region : "CH";
+}
 const ROUND_HISTORY_LIMIT = 300;
 
 export interface SubjectProgress {
@@ -17,6 +29,8 @@ export interface SubjectProgress {
   stars: number;
   lastPlayed?: string;
   recentCorrectContentIds: string[];
+  /** Content ids asked in this subject, oldest first: unseen questions come first. */
+  seenContentIds?: string[];
   /** This subject's level (years above/below the real age) and its run of perfect rounds. */
   adjustment?: number;
   perfectRounds?: number;
@@ -37,6 +51,7 @@ export interface ProfileSettings {
   age: number;
   avatarColor: string;
   learningLanguage: string;
+  country: Country;
   /** Empty = all subjects the language offers (so new ones appear automatically). */
   enabledSubjectIds: string[];
   roundLength: number;
@@ -107,6 +122,7 @@ export function defaultSettings(): ProfileSettings {
     age: 6,
     avatarColor: "sun",
     learningLanguage: "de",
+    country: defaultCountry(),
     enabledSubjectIds: [],
     roundLength: DEFAULT_ROUND_LENGTH,
     soundEnabled: true,
@@ -153,6 +169,7 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     sudokuEnabled: p.sudokuEnabled ?? base.sudokuEnabled,
     sudokuDifficulty: p.sudokuDifficulty ?? base.sudokuDifficulty,
     gardenMinutesPerDay: p.gardenMinutesPerDay ?? base.gardenMinutesPerDay,
+    country: p.country && COUNTRIES.includes(p.country) ? p.country : base.country,
   } as Profile;
 }
 
@@ -305,6 +322,7 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     age,
     avatarColor: s.avatarColor,
     learningLanguage: s.learningLanguage,
+    country: COUNTRIES.includes(s.country) ? s.country : defaultCountry(),
     enabledSubjectIds: [...s.enabledSubjectIds].sort(),
     roundLength: clamp(s.roundLength, 5, 20),
     soundEnabled: s.soundEnabled,
@@ -367,6 +385,8 @@ export interface RoundOutcome {
   correct: number;
   total: number;
   correctContentIds: string[];
+  /** Every question asked, so the next rounds bring new ones first. */
+  askedContentIds?: string[];
   effectiveAge: number;
 }
 
@@ -382,6 +402,12 @@ export interface RoundSummary {
 
 export function scoreOf(s: Pick<RoundSummary, "correct" | "total">): number {
   return s.total === 0 ? 0 : s.correct / s.total;
+}
+
+/** Adds what was just asked to the end (most recent), once each, keeping the newest. */
+export function withSeen(seen: string[], asked: string[]): string[] {
+  const now = new Set(asked);
+  return [...seen.filter((id) => !now.has(id)), ...new Set(asked)].slice(-SEEN_CONTENT_LIMIT);
 }
 
 /** Stars, streak, per-subject progress, history and gentle adaptivity. */
@@ -410,6 +436,7 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
         stars: previous.stars + stars,
         lastPlayed: now.toISOString(),
         recentCorrectContentIds: [...previous.recentCorrectContentIds, ...outcome.correctContentIds].slice(-RECENT_CONTENT_LIMIT),
+        seenContentIds: withSeen(previous.seenContentIds ?? [], outcome.askedContentIds ?? []),
         adjustment: level.adjustment,
         perfectRounds: level.perfectRounds,
       },

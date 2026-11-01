@@ -35,8 +35,9 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
     setState(undefined);
     (async () => {
       try {
-        const provider = await providerFor(subject, library);
-        const recent = new Set(profile.progress[`${subject.languageCode}/${subject.id}`]?.recentCorrectContentIds ?? []);
+        const progress = profile.progress[`${subject.languageCode}/${subject.id}`];
+        const provider = await providerFor(subject, library, { country: profile.country, seen: progress?.seenContentIds });
+        const recent = new Set(progress?.recentCorrectContentIds ?? []);
         const questions = provider.makeQuestions(profile.roundLength, difficulty, recent, systemRng);
         if (!cancelled) setState(R.startRound(questions, difficulty.maths.allowsNegativeResults));
       } catch (error) {
@@ -58,6 +59,7 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
       correct: R.correctCount(state),
       total: state.results.length,
       correctContentIds: state.correctContentIds,
+      askedContentIds: state.questions.slice(0, state.results.length).flatMap((q) => (q.contentId ? [q.contentId] : [])),
       effectiveAge: difficulty.effectiveAge,
     });
     setSummary(s);

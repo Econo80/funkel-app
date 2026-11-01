@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 
 MIN_AGE, MAX_AGE = 4, 14
+# Countries a question can be limited to (the profile's "Land" setting).
+COUNTRIES = ("CH", "DE", "AT")
 PROVIDERS = {"maths", "wordList", "questionBank"}
 MATHS_OPERATIONS = {"addition", "subtraction", "multiplication", "division"}
 HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
@@ -185,6 +187,9 @@ def validate_question_bank(path, data, report):
             report.error(where, "missing 'prompt'")
         if "sentence" in q and "___" not in q["sentence"]:
             report.error(where, "'sentence' must contain the gap marker ___")
+        if "countries" in q and (not isinstance(q["countries"], list) or not q["countries"]
+                                 or any(c not in COUNTRIES for c in q["countries"])):
+            report.error(where, f"'countries' must be a non-empty list of {', '.join(COUNTRIES)}")
 
         fmt = q.get("format")
         if fmt == "multipleChoice":

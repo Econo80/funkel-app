@@ -103,6 +103,9 @@ struct QuestionBank: Decodable, Sendable {
         let answer: [String]?
         /// Extra wrong tiles mixed in for older children.
         let distractors: [String]?
+
+        /// Only for children in these countries ("CH", "DE", "AT"); everyone if missing.
+        var countries: [String]? = nil
     }
 
     let questions: [Item]

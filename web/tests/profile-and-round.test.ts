@@ -21,6 +21,10 @@ import {
   updatedStreak,
   withLanguage,
   withSubject,
+  withSeen,
+  SEEN_CONTENT_LIMIT,
+  COUNTRIES,
+  defaultCountry,
 } from "../src/domain/profile";
 import { makeQuestion } from "../src/domain/question";
 import { seededRng } from "../src/domain/random";
@@ -47,6 +51,22 @@ describe("streaks (mirrors StreakCalculatorTests.swift)", () => {
 
 describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () => {
   const base = () => createProfile({ ...defaultSettings(), name: "Lena", age: 7 }, day(1));
+
+  it("remembers every question asked, newest last, each once", () => {
+    const round = (asked: string[]) => ({ subjectId: "generalKnowledge", languageCode: "de", correct: 1, total: asked.length, correctContentIds: [], askedContentIds: asked, effectiveAge: 7 });
+    let p = recordRound(base(), round(["a", "b", "c"]), day(1)).profile;
+    p = recordRound(p, round(["d", "a"]), day(1)).profile;
+    expect(p.progress["de/generalKnowledge"].seenContentIds).toEqual(["b", "c", "d", "a"]);
+    expect(withSeen(Array.from({ length: SEEN_CONTENT_LIMIT }, (_, i) => `q${i}`), ["new"]).slice(-2)).toEqual([`q${SEEN_CONTENT_LIMIT - 1}`, "new"]);
+  });
+
+  it("keeps a country, Switzerland unless the device says otherwise", () => {
+    expect(COUNTRIES).toEqual(["CH", "DE", "AT"]);
+    expect(normalizeProfile({ id: "x" }).country).toBe(defaultCountry());
+    expect(normalizeProfile({ id: "x", country: "AT" }).country).toBe("AT");
+    expect(normalizeProfile({ id: "x", country: "FR" as never }).country).toBe(defaultCountry());
+    expect(applySettings(base(), { ...defaultSettings(), name: "Lena", age: 7, country: "DE" }).country).toBe("DE");
+  });
 
   it("records stars, streak, progress and history", () => {
     const outcome = { subjectId: "maths", languageCode: "de", correct: 10, total: 10, correctContentIds: ["a"], effectiveAge: 7 };

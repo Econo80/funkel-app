@@ -36,6 +36,72 @@ final class QuestionBankTests: XCTestCase {
         }
     }
 
+    // MARK: Country and history (mirror web/tests/providers.test.ts)
+
+    func testCountryQuestionsOnlyInThatCountry() throws {
+        let base = try provider()
+        func asked(_ country: Country?) -> [QuestionBank.Item] {
+            var p = base
+            p.country = country
+            var ids = Set<String>()
+            for seed in 0..<40 {
+                var rng = SeededGenerator(seed: UInt64(seed))
+                for q in p.makeQuestions(count: 20, difficulty: DifficultyScale.difficulty(forAge: 9), recentlyCorrect: [], using: &rng) {
+                    if let id = q.contentID { ids.insert(id) }
+                }
+            }
+            return base.items.filter { ids.contains($0.id) }
+        }
+        let swiss = asked(.switzerland)
+        XCTAssertTrue(swiss.allSatisfy { $0.countries == nil || $0.countries!.contains("CH") })
+        XCTAssertTrue(swiss.contains { $0.countries?.contains("CH") == true })
+        XCTAssertFalse(swiss.contains { $0.prompt.contains("Bundesländer hat Deutschland") })
+        XCTAssertTrue(asked(.germany).contains { $0.countries?.contains("DE") == true })
+        XCTAssertTrue(asked(nil).allSatisfy { $0.countries == nil })
+        for country in Country.allCases {
+            for age in [6, 9, 12] {
+                let d = DifficultyScale.difficulty(forAge: age)
+                let own = base.items.filter { $0.countries?.contains(country.rawValue) == true && d.isEligible(minAge: $0.minAge, maxAge: $0.maxAge) }
+                XCTAssertGreaterThanOrEqual(own.count, 5, "\(country) at \(age)")
+            }
+        }
+    }
+
+    func testNewQuestionsFirstThenTheOnesAskedLongestAgo() throws {
+        var p = try provider()
+        p.country = .switzerland
+        let d = DifficultyScale.difficulty(forAge: 7)
+        let pool = p.items.filter { d.isEligible(minAge: $0.minAge, maxAge: $0.maxAge) && p.isForCountry($0) }
+        XCTAssertGreaterThan(pool.count, 150)
+        var asked = Set<String>()
+        for round in 0..<(pool.count / 10) {
+            var rng = SeededGenerator(seed: UInt64(round))
+            let ids = p.makeQuestions(count: 10, difficulty: d, recentlyCorrect: [], using: &rng).compactMap(\.contentID)
+            for id in ids {
+                XCTAssertFalse(asked.contains(id), "round \(round) repeats \(id)")
+                asked.insert(id)
+            }
+            p.seen = ProgressRecorder.withSeen(p.seen, asked: ids)
+        }
+        // Once everything was asked, the last round's questions don't come straight back.
+        let all = pool.map(\.id)
+        let recent = Array(all.suffix(10))
+        p.seen = ProgressRecorder.withSeen(Array(all.dropLast(10)), asked: recent)
+        var back = 0
+        for seed in 100..<120 {
+            var rng = SeededGenerator(seed: UInt64(seed))
+            back += p.makeQuestions(count: 10, difficulty: d, recentlyCorrect: [], using: &rng).filter { recent.contains($0.contentID ?? "") }.count
+        }
+        XCTAssertLessThan(back, 5)
+    }
+
+    func testSeenKeepsEachQuestionOnceNewestLast() {
+        XCTAssertEqual(ProgressRecorder.withSeen(["a", "b", "c"], asked: ["d", "a", "d"]), ["b", "c", "d", "a"])
+        let full = (0..<ProgressRecorder.seenContentLimit).map { "q\($0)" }
+        XCTAssertEqual(ProgressRecorder.withSeen(full, asked: ["new"]).suffix(2), ["q\(ProgressRecorder.seenContentLimit - 1)", "new"])
+        XCTAssertEqual(ProgressRecorder.withSeen(full, asked: ["new"]).count, ProgressRecorder.seenContentLimit)
+    }
+
     func testMultipleChoiceKeepsTheCorrectAnswerAndTrimsToAge() throws {
         let p = try provider()
         var rng = SeededGenerator(seed: 11)

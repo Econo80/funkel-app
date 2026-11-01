@@ -157,7 +157,8 @@ final class RoundViewModel {
             correct: correctCount,
             total: results.count,
             correctContentIDs: correctContentIDs,
-            effectiveAge: difficulty.effectiveAge
+            effectiveAge: difficulty.effectiveAge,
+            askedContentIDs: questions.prefix(results.count).compactMap(\.contentID)
         )
     }
 }

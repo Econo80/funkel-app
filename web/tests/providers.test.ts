@@ -5,6 +5,7 @@ import { correctAnswerText, spokenText } from "../src/domain/question";
 import { randomElement, seededRng } from "../src/domain/random";
 import { apply, distractors, makeProblem, type Arithmetic } from "../src/providers/maths";
 import { QuestionBankProvider, isUsable } from "../src/providers/questionBank";
+import { withSeen } from "../src/domain/profile";
 import { VocabularyQuestionGenerator } from "../src/providers/vocabulary";
 import { AGES, germanProvider } from "./helpers";
 
@@ -123,6 +124,56 @@ describe("vocabulary (mirrors VocabularyGeneratorTests.swift)", () => {
 });
 
 describe("question bank (mirrors QuestionBankTests.swift)", () => {
+  it("asks country questions only in that country", async () => {
+    const provider = (await germanProvider("generalKnowledge")) as QuestionBankProvider;
+    const of = (country?: string) => {
+      const p = new QuestionBankProvider("generalKnowledge", provider.items, { country });
+      const ids = new Set<string>();
+      for (let i = 0; i < 40; i++) for (const q of p.makeQuestions(20, difficultyForAge(9), new Set(), seededRng(i))) ids.add(q.contentId!);
+      return [...ids].map((id) => provider.items.find((i) => i.id === id)!);
+    };
+    const swiss = of("CH");
+    expect(swiss.every((i) => !i.countries || i.countries.includes("CH"))).toBe(true);
+    expect(swiss.some((i) => i.countries?.includes("CH"))).toBe(true);
+    expect(swiss.some((i) => i.prompt.includes("Bundesländer hat Deutschland"))).toBe(false);
+    expect(of("DE").some((i) => i.countries?.includes("DE"))).toBe(true);
+    expect(of(undefined).every((i) => !i.countries)).toBe(true);
+    // Every country has enough of its own questions, for young and older children.
+    for (const c of ["CH", "DE", "AT"]) {
+      for (const age of [6, 9, 12]) {
+        const own = provider.items.filter((i) => i.countries?.includes(c) && isEligible(difficultyForAge(age), i.minAge, i.maxAge));
+        expect(own.length, `${c} at ${age}`).toBeGreaterThanOrEqual(5);
+      }
+    }
+  });
+
+  it("asks questions never asked before first, then the ones asked longest ago", async () => {
+    const provider = (await germanProvider("generalKnowledge")) as QuestionBankProvider;
+    const d = difficultyForAge(7);
+    const pool = provider.items.filter((i) => isEligible(d, i.minAge, i.maxAge) && (!i.countries || i.countries.includes("CH")));
+    expect(pool.length).toBeGreaterThan(150);
+    // Round after round, nothing repeats until the whole pool was asked.
+    let seen: string[] = [];
+    const asked = new Set<string>();
+    const rounds = Math.floor(pool.length / 10);
+    for (let r = 0; r < rounds; r++) {
+      const p = new QuestionBankProvider("generalKnowledge", provider.items, { country: "CH", seen });
+      const ids = p.makeQuestions(10, d, new Set(), seededRng(r)).map((q) => q.contentId!);
+      for (const id of ids) {
+        expect(asked.has(id), `round ${r} repeats ${id}`).toBe(false);
+        asked.add(id);
+      }
+      seen = withSeen(seen, ids);
+    }
+    // Once everything was asked, the last round's questions don't come straight back.
+    const all = pool.map((i) => i.id);
+    const recent = all.slice(-10);
+    const p = new QuestionBankProvider("generalKnowledge", provider.items, { country: "CH", seen: withSeen(all.slice(0, -10), recent) });
+    let back = 0;
+    for (let i = 0; i < 20; i++) back += p.makeQuestions(10, d, new Set(), seededRng(100 + i)).filter((q) => recent.includes(q.contentId!)).length;
+    expect(back).toBeLessThan(5);
+  });
+
   it("has only usable items and fills rounds at every age", async () => {
     const provider = (await germanProvider("generalKnowledge")) as QuestionBankProvider;
     expect(provider.items.length).toBeGreaterThanOrEqual(100);

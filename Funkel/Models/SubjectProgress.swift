@@ -14,6 +14,9 @@ final class SubjectProgress {
     /// Content ids answered correctly in the last few rounds, newest last.
     /// Used to down-weight repeats (PLAN.md §5.3).
     var recentCorrectContentIDs: [String]
+    /// Every content id asked in this subject, oldest first, so new questions
+    /// come first (web: `seenContentIds`).
+    var seenContentIDs: [String] = []
     /// This subject's level in years above/below the real age (nil: not set yet,
     /// so it starts from the profile-wide adjustment older versions shared).
     var adjustment: Double? = nil

@@ -75,6 +75,20 @@ struct ProfileEditorView: View {
             }
 
             Section {
+                Picker("editor.country", selection: $settings.country) {
+                    ForEach(Country.allCases) { country in
+                        Text(LocalizedStringKey(country.nameKey)).tag(country)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("editor-country")
+            } header: {
+                Text("editor.country")
+            } footer: {
+                Text("editor.country.footer")
+            }
+
+            Section {
                 ForEach(language?.subjects ?? []) { subject in
                     Toggle(isOn: subjectBinding(subject.id)) {
                         Label {

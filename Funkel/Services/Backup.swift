@@ -81,6 +81,7 @@ enum Backup {
                 "correctAnswers": subject.correctAnswers,
                 "stars": subject.stars,
                 "recentCorrectContentIds": subject.recentCorrectContentIDs,
+                "seenContentIds": subject.seenContentIDs,
                 "perfectRounds": subject.perfectRounds,
             ]
             entry["lastPlayed"] = subject.lastPlayed.map { isoString($0) }
@@ -173,6 +174,7 @@ enum Backup {
             progress.stars = int(entry["stars"]) ?? 0
             progress.lastPlayed = (entry["lastPlayed"] as? String).flatMap { Backup.date(fromISO: $0) }
             progress.recentCorrectContentIDs = entry["recentCorrectContentIds"] as? [String] ?? []
+            progress.seenContentIDs = entry["seenContentIds"] as? [String] ?? []
             progress.adjustment = double(entry["adjustment"])
             progress.perfectRounds = int(entry["perfectRounds"]) ?? 0
             context.insert(progress)

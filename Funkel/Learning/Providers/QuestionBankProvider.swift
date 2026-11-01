@@ -9,6 +9,10 @@ struct QuestionBankProvider: QuestionProvider {
     let subjectID: String
     let items: [QuestionBank.Item]
     let phrasing: Phrasing
+    /// The child's country: questions limited to other countries are left out.
+    var country: Country? = nil
+    /// Questions asked before, oldest first: new ones come first.
+    var seen: [String] = []
 
     /// Wrong tiles are mixed into sequence questions from this age.
     static let sequenceDistractorsFromAge = 8.0
@@ -22,15 +26,23 @@ struct QuestionBankProvider: QuestionProvider {
         recentlyCorrect: Set<String>,
         using rng: inout R
     ) -> [Question] {
-        var remaining = items.filter { isUsable($0) && difficulty.isEligible(minAge: $0.minAge, maxAge: $0.maxAge) }
+        var remaining = items.filter {
+            isUsable($0) && difficulty.isEligible(minAge: $0.minAge, maxAge: $0.maxAge) && isForCountry($0)
+        }
+        // Questions never asked come first; once all are used up, the ones asked longest ago.
+        var seenAt: [String: Int] = [:]
+        for (i, id) in seen.enumerated() { seenAt[id] = i }
         var categoryDamping: [String: Double] = [:]
         var questions: [Question] = []
 
         // A short bank yields a shorter round rather than repeating a question.
         while questions.count < count, !remaining.isEmpty {
-            let weighted = remaining.map { item in
+            let unseen = remaining.filter { seenAt[$0.id] == nil }
+            let pool = unseen.isEmpty ? remaining : unseen
+            let weighted = pool.map { item in
                 let base = difficulty.selectionWeight(minAge: item.minAge, recentlyCorrect: recentlyCorrect.contains(item.id))
-                return (item.id, base * (categoryDamping[item.category ?? ""] ?? 1))
+                let stale = Self.staleness(seenAt[item.id], of: seen.count)
+                return (item.id, base * (categoryDamping[item.category ?? ""] ?? 1) * stale)
             }
             guard let id = WeightedPick.pick(weighted, using: &rng),
                   let index = remaining.firstIndex(where: { $0.id == id }) else { break }
@@ -42,6 +54,18 @@ struct QuestionBankProvider: QuestionProvider {
             }
         }
         return questions
+    }
+
+    func isForCountry(_ item: QuestionBank.Item) -> Bool {
+        guard let countries = item.countries else { return true }
+        return country.map { countries.contains($0.rawValue) } ?? false
+    }
+
+    /// Among questions already asked: the longer ago, the likelier (the last few hardly ever).
+    static func staleness(_ position: Int?, of total: Int) -> Double {
+        guard let position, total > 0 else { return 1 }
+        let age = Double(total - position) / Double(total)  // just asked → near 0, asked longest ago → 1
+        return age * age
     }
 
     /// Defensive: malformed items are skipped, never crash a round.

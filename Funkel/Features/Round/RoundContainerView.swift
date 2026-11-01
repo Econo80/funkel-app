@@ -57,7 +57,10 @@ struct RoundContainerView: View {
     private func start() {
         summary = nil
         do {
-            guard let provider = try QuestionProviderFactory.provider(for: subject, content: environment.content) else {
+            let progress = profile.subjectProgress(for: subject.id, language: subject.languageCode)
+            guard let provider = try QuestionProviderFactory.provider(
+                for: subject, content: environment.content, country: profile.country, seen: progress?.seenContentIDs ?? []
+            ) else {
                 loadFailed = true
                 return
             }
@@ -66,7 +69,7 @@ struct RoundContainerView: View {
             if let forced = AppLaunch.forcedVocabularyType {
                 difficulty.vocabulary.questionTypeWeights = [forced: 1]
             }
-            let recent = profile.subjectProgress(for: subject.id, language: subject.languageCode)?.recentCorrectContentIDs ?? []
+            let recent = progress?.recentCorrectContentIDs ?? []
             let questions = provider.makeQuestions(count: profile.roundLength, difficulty: difficulty, recentlyCorrect: Set(recent))
             viewModel = RoundViewModel(subject: subject, questions: questions, difficulty: difficulty)
         } catch {

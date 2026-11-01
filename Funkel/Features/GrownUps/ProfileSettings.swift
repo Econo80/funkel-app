@@ -9,6 +9,7 @@ struct ProfileSettings: Equatable {
     var age = 6
     var avatarColor = "sun"
     var learningLanguage = ContentLibrary.fallbackLanguageCode
+    var country = Country.fromDevice()
     /// Empty means "all subjects the learning language offers" — so subjects a
     /// language gains later (e.g. Grammar) are on by default.
     var enabledSubjectIDs: Set<String> = []
@@ -27,6 +28,7 @@ struct ProfileSettings: Equatable {
         age = profile.age
         avatarColor = profile.avatarColor
         learningLanguage = profile.learningLanguage
+        country = profile.country
         enabledSubjectIDs = Set(profile.enabledSubjectIDs)
         roundLength = profile.roundLength
         soundEnabled = profile.soundEnabled
@@ -83,6 +85,7 @@ struct ProfileSettings: Equatable {
         profile.setAge(age)   // resets adaptivity when the age changes
         profile.avatarColor = avatarColor
         profile.learningLanguage = learningLanguage
+        profile.country = country
         profile.enabledSubjectIDs = enabledSubjectIDs.sorted()
         profile.roundLength = roundLength.clamped(to: ProfileDefaults.roundLengthRange)
         profile.soundEnabled = soundEnabled
