@@ -20,6 +20,7 @@ struct ProfileSettings: Equatable {
     var gentleTimerEnabled = false
     var sudokuEnabled = true
     var sudokuDifficulty = SudokuDifficulty.normal
+    var sudokuSize = 0
 
     init() {}
 
@@ -37,6 +38,7 @@ struct ProfileSettings: Equatable {
         gentleTimerEnabled = profile.gentleTimerEnabled
         sudokuEnabled = profile.sudokuEnabled
         sudokuDifficulty = profile.sudokuDifficulty
+        sudokuSize = profile.sudokuSize
     }
 
     var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -94,6 +96,7 @@ struct ProfileSettings: Equatable {
         profile.gentleTimerEnabled = gentleTimerEnabled && allowsGentleTimer
         profile.sudokuEnabled = sudokuEnabled
         profile.sudokuDifficulty = sudokuDifficulty
+        profile.sudokuSize = sudokuSize
     }
 
     func makeProfile() -> ChildProfile {

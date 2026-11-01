@@ -680,7 +680,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mit − und + stellst du das Niveau pro Fach in halben Jahren ein. Sterne, Serie und Fortschritt bleiben, wie sie sind. Danach passt sich jedes Fach weiter von selbst an: nach zwei fehlerfreien Runden wird es schwieriger, wenn es nicht so gut läuft, leichter."
+            "value": "Mit − und + stellst du das Niveau pro Fach in halben Jahren ein. Sterne, Serie und Fortschritt bleiben, wie sie sind. Danach passt sich jedes Fach weiter von selbst an: nach drei fehlerfreien Runden wird es schwieriger, wenn es nicht so gut läuft, leichter."
           }
         }
       }
@@ -1004,7 +1004,31 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sudokus passen sich dem Alter an: Bilder-Sudokus (4×4) für die Jüngsten, Zahlen ab 6, 6×6 ab 8 und klassische 9×9 ab 10. Ein gelöstes Sudoku bringt Sterne, mit Tipps etwas weniger."
+            "value": "Sudokus passen sich dem Alter an: Bilder-Sudokus (4×4) für die Jüngsten, Zahlen ab 6, 6×6 ab 8 und klassische 9×9 ab 10. Wer schneller ist, bekommt mit einer festen Grösse sein Lieblings-Sudoku. Ein gelöstes Sudoku bringt Sterne, mit Tipps etwas weniger."
+          }
+        }
+      }
+    },
+    "editor.sudoku.size": {
+      "comment": "UI text. (Sudoku.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grösse der Sudokus"
+          }
+        }
+      }
+    },
+    "editor.sudoku.size.auto": {
+      "comment": "UI text. (Sudoku.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Alter"
           }
         }
       }

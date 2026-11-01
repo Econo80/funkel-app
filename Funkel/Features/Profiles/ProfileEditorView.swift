@@ -297,6 +297,17 @@ struct ProfileEditorView: View {
                 }
                 .pickerStyle(.segmented)
                 .accessibilityIdentifier("editor-sudoku-difficulty")
+                Picker("editor.sudoku.size", selection: $settings.sudokuSize) {
+                    ForEach(SudokuLevel.sizeChoices, id: \.self) { size in
+                        if size == 0 {
+                            Text("editor.sudoku.size.auto").tag(size)
+                        } else {
+                            Text(verbatim: "\(size)×\(size)").tag(size)
+                        }
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("editor-sudoku-size")
             }
         } header: {
             Text("sudoku.title")

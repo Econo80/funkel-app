@@ -97,7 +97,7 @@ final class RoundFlowTests: XCTestCase {
         XCTAssertTrue(first.streakGrew)
         XCTAssertEqual(profile.totalStars, 10)
         XCTAssertEqual(profile.walletStars, 10, "stars to spend too")
-        XCTAssertEqual(try XCTUnwrap(profile.subjectProgress(for: "maths", language: "de")?.adjustment), 0.15, accuracy: 0.0001)
+        XCTAssertEqual(try XCTUnwrap(profile.subjectProgress(for: "maths", language: "de")?.adjustment), 0.1, accuracy: 0.0001)
         XCTAssertFalse(first.levelUp)
 
         let second = recorder.record(outcome, for: profile, at: day1.addingTimeInterval(86_400))

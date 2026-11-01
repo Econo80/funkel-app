@@ -1,7 +1,7 @@
 import { useMemo, useState } from "preact/hooks";
 import { recordSudoku, sudokuAge, type Profile } from "../domain/profile";
 import { systemRng } from "../domain/random";
-import { SUDOKU_PICTURES, makeSudoku, peers, sudokuLevelForAge, sudokuStars, type Sudoku } from "../domain/sudoku";
+import { SUDOKU_PICTURES, makeSudoku, peers, sudokuLevel, sudokuStars, type Sudoku } from "../domain/sudoku";
 import { playSound, vibrate } from "../services/feedback";
 import { t } from "../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, avatarColor } from "./components";
@@ -126,7 +126,7 @@ export function SudokuScreen({ profile, onSave, onBack }: {
 }
 
 function newPuzzle(profile: Profile): Sudoku {
-  return makeSudoku(sudokuLevelForAge(sudokuAge(profile)), systemRng);
+  return makeSudoku(sudokuLevel(sudokuAge(profile), profile.sudokuSize), systemRng);
 }
 
 function startValues(p: Sudoku): number[] {

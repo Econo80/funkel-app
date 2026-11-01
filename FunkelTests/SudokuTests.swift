@@ -20,6 +20,18 @@ final class SudokuTests: XCTestCase {
         return ModelContext(container)
     }
 
+    func testAGrownUpCanPickTheSize() {
+        XCTAssertEqual(SudokuLevel.forAge(7, size: 0), SudokuLevel.forAge(7))
+        XCTAssertEqual(SudokuLevel.forAge(9, size: 6), SudokuLevel.forAge(9))
+        let six = SudokuLevel.forAge(7, size: 6)
+        XCTAssertEqual([six.size, six.boxRows, six.boxCols, six.blanks], [6, 2, 3, 14])
+        let nine = SudokuLevel.forAge(7, size: 9)
+        XCTAssertEqual([nine.size, nine.boxRows, nine.boxCols, nine.blanks], [9, 3, 3, 30])
+        XCTAssertFalse(nine.pictures)
+        XCTAssertEqual(SudokuLevel.forAge(9, size: 9).blanks, 36)
+        XCTAssertEqual(SudokuLevel.forAge(12, size: 4).size, 4)
+    }
+
     func testGrowsFromPicture4x4ToClassic9x9WithAge() {
         XCTAssertEqual(SudokuLevel.forAge(4).size, 4)
         XCTAssertTrue(SudokuLevel.forAge(4).pictures)

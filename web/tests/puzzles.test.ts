@@ -4,7 +4,7 @@ import { createProfile, defaultSettings, normalizeProfile, recordSudoku, sudokuA
 import { correctAnswerText, houseCellValue, makeQuestion, type NumberHouse } from "../src/domain/question";
 import { seededRng } from "../src/domain/random";
 import * as R from "../src/domain/round";
-import { countSolutions, makeSudoku, peers, sudokuLevelForAge, sudokuStars } from "../src/domain/sudoku";
+import { countSolutions, makeSudoku, peers, sudokuLevel, sudokuLevelForAge, sudokuStars } from "../src/domain/sudoku";
 import { makeNumberHouse } from "../src/providers/maths";
 import { AGES, germanProvider } from "./helpers";
 
@@ -126,5 +126,24 @@ describe("Sudoku", () => {
     expect(sudokusSolved(after)).toBe(1);
     expect(sudokuAge({ age: 5, sudokuDifficulty: "hard" })).toBe(7);
     expect(normalizeProfile({ id: "x" }).sudokuEnabled).toBe(true);
+  });
+});
+
+describe("Sudoku size chosen by a grown-up", () => {
+  it("keeps the age level when it fits, otherwise uses the chosen size", () => {
+    expect(sudokuLevel(7, 0)).toEqual(sudokuLevelForAge(7));
+    expect(sudokuLevel(9, 6)).toEqual(sudokuLevelForAge(9));
+    expect(sudokuLevel(7, 6)).toMatchObject({ size: 6, boxRows: 2, boxCols: 3, blanks: 14, pictures: false });
+    expect(sudokuLevel(7, 9)).toMatchObject({ size: 9, boxRows: 3, boxCols: 3, blanks: 30, pictures: false });
+    expect(sudokuLevel(9, 9)).toMatchObject({ size: 9, blanks: 36 });
+    expect(sudokuLevel(12, 4)).toMatchObject({ size: 4, pictures: false });
+  });
+
+  it("makes a solvable 9×9 for a 7-year-old and keeps the setting on the profile", () => {
+    const puzzle = makeSudoku(sudokuLevel(7, 9), seededRng(3));
+    expect(countSolutions(puzzle.level, puzzle.solution.map((v, i) => (puzzle.given[i] ? v : 0)))).toBe(1);
+    expect(normalizeProfile({ id: "x" }).sudokuSize).toBe(0);
+    expect(normalizeProfile({ id: "x", sudokuSize: 9 }).sudokuSize).toBe(9);
+    expect(normalizeProfile({ id: "x", sudokuSize: 10 as never }).sudokuSize).toBe(0);
   });
 });

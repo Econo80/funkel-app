@@ -54,19 +54,21 @@ enum DifficultyScale {
     static let adjustmentRange = -DifficultyTuning.maxAdjustment...DifficultyTuning.maxAdjustmentUp
 
     /// Adaptivity after a round (PLAN.md §5.4): 90 %+ steps up a little; from
-    /// the second perfect round in a row each perfect round steps up faster
-    /// ("boosted"); under 50 % steps back down and ends the run.
+    /// the third perfect round in a row each perfect round steps up faster
+    /// ("boosted"); from two years ahead every step up is halved; under 50 %
+    /// steps back down and ends the run.
     static func nextAdaptivity(_ current: Adaptivity, correct: Int, total: Int) -> (adaptivity: Adaptivity, boosted: Bool) {
         typealias T = DifficultyTuning
         guard total > 0 else { return (current, false) }
         let score = Double(correct) / Double(total)
         let perfectRounds = score >= 1 ? current.perfectRounds + 1 : 0
         let boosted = perfectRounds >= T.perfectRoundsForBoost && current.adjustment < T.maxAdjustmentUp
+        let slower = current.adjustment >= T.slowerFromAdjustment ? T.slowerFactor : 1
         var next = current.adjustment
         if boosted {
-            next += T.boostStepUp
+            next += T.boostStepUp * slower
         } else if score >= T.promoteThreshold {
-            next += T.adjustmentStepUp
+            next += T.adjustmentStepUp * slower
         } else if score < T.easeThreshold {
             next -= T.adjustmentStepDown
         }

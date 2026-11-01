@@ -4,6 +4,7 @@ import type { ContentLibrary } from "../content/library";
 import { backupFileName, makeBackup, readBackup, type Backup } from "../domain/backup";
 import { Tuning } from "../domain/difficulty";
 import { GAMES_PER_DAY_CHOICES, GAME_COST_CHOICES, GAME_DIFFICULTIES } from "../domain/games";
+import { SUDOKU_SIZES } from "../domain/sudoku";
 import { isGateAnswerCorrect, randomGate } from "../domain/gate";
 import {
   COUNTRIES,
@@ -318,7 +319,7 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
                       <button class="level-step" aria-label={t("editor.level.easier %@", subject.title)} disabled={adjustment <= -1.5 || levelAge <= 4}
                         onClick={() => change(-0.5)} data-testid={`level-down-${subject.id}`}>−</button>
                       <span class="level-value">{t("editor.level %@", formatLevelAge(levelAge))}</span>
-                      <button class="level-step" aria-label={t("editor.level.harder %@", subject.title)} disabled={adjustment >= 3 || levelAge >= 14}
+                      <button class="level-step" aria-label={t("editor.level.harder %@", subject.title)} disabled={adjustment >= Tuning.maxAdjustmentUp || levelAge >= Tuning.maxAge}
                         onClick={() => change(0.5)} data-testid={`level-up-${subject.id}`}>+</button>
                     </span>
                   </div>
@@ -340,6 +341,13 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
               {GAME_DIFFICULTIES.map((d) => (
                 <button key={d} role="radio" aria-checked={s.sudokuDifficulty === d} class={s.sudokuDifficulty === d ? "selected" : ""}
                   onClick={() => set({ sudokuDifficulty: d })} data-testid={`sudoku-difficulty-${d}`}>{t(`editor.games.difficulty.${d}`)}</button>
+              ))}
+            </div>
+            <p class="footnote">{t("editor.sudoku.size")}</p>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.sudoku.size")}>
+              {SUDOKU_SIZES.map((n) => (
+                <button key={n} role="radio" aria-checked={s.sudokuSize === n} class={s.sudokuSize === n ? "selected" : ""}
+                  onClick={() => set({ sudokuSize: n })} data-testid={`sudoku-size-${n}`}>{n === 0 ? t("editor.sudoku.size.auto") : `${n}×${n}`}</button>
               ))}
             </div>
           </>

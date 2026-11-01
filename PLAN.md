@@ -192,11 +192,12 @@ After each round: score ≥ 90 % → `difficultyAdjustment += 0.15`; score < 50 
 adjustment to 0. This lets two 7-year-olds diverge naturally without a parent
 touching anything.
 
-**Web app (2026-10-17), not yet in the iOS app:** the adjustment is kept **per
-subject** (`SubjectProgress.adjustment`, seeded from the old profile-wide value).
-From the second perfect round in a row, each further perfect round adds **+0.5**
-instead of +0.15; a round under 50 % subtracts 0.3 and ends the run. Range is
-−1.5 … **+3** years. The grown-up area shows each subject's level ("Niveau wie
+**Both apps (since 2026-11-01):** the adjustment is kept **per subject**
+(`SubjectProgress.adjustment`, seeded from the old profile-wide value). A round
+at 90 %+ adds **+0.1**; from the third perfect round in a row each further
+perfect round adds **+0.25**; once a subject is 2+ years ahead every step up is
+halved. A round under 50 % subtracts 0.3 and ends the run. Range is
+−1.5 … **+5** years (a 7-year-old can reach 12 after ~33 perfect rounds). The grown-up area shows each subject's level ("Niveau wie
 mit 8½ Jahren"), and the summary says when a round made the next one harder.
 
 ---
@@ -344,3 +345,4 @@ kinds are skipped with a debug log, so newer content can't crash an older app.
 - **2026-10-31** — iOS read-aloud was silent on the iPad: the `.ambient` audio session (and the default one before the first sound) follows silent mode, which also mutes the speech synthesiser. Speech and sounds now share `AudioSession` (`.playback`, `.spokenAudio`, mixes with other audio), re-activated before each sound, so questions are heard in silent mode; grown-ups switch read-aloud and sounds off per child instead.
 - **2026-11-01** — Farm UAT (son, 8): "the animals don't do anything", so he cleared them. Now **everything on the farm does something**, Hay-Day style and the same in both apps: goats give milk, pigs bacon, sheep and rabbits wool, ducks eggs, the pond fish, trees wood, flowers bouquets, mushrooms mushrooms (daily). Helpers add +1 to a good while on the farm (each kind once): ladybug veg, butterfly flowers, snail mushrooms, bee apples and honey, cat wheat, dog wool, fountain milk, tractor wheat and veg. Buildings make goods on a tap: mill 2 wheat → bread, barn 2 milk → cheese, farmhouse apple + egg + wheat → pie. Mailbox: a 4th daily order; horse: +1 star per order. Made goods are worth more (bread and cheese 3, pie 5) in orders and the farm shop, which now sells only exact whole stars (a small subset-sum), keeping made goods for orders when it can. Shop cards show each item's use. Only stones, roads, paths and fences are just for looks.
 - **2026-11-01** — Repetition and German-only facts (UAT: the 7-year-old knew many answers already, and was asked about German states). **General knowledge grew from 125 to 545 questions** (a 7-year-old in Switzerland now has 223 instead of 56), with new categories history and space. Each profile has a **country** (Schweiz/Deutschland/Österreich, default from the device region, else Schweiz): questions with `countries` are only asked there (90 Swiss, 38 German incl. the 8 old ones, 30 Austrian). Every question asked is remembered per subject (`seenContentIds`, newest last, up to 600): the question bank asks unseen questions first and, once all are used, the ones asked longest ago (weight grows with time since asked). Same in both apps; backups carry both fields.
+- **2026-11-01** — UAT: the 7-year-old flies through 6×6 Sudokus and reached the old cap (age + 3 = 10) in some subjects. **Sudoku size can now be chosen** per child (Nach Alter / 4×4 / 6×6 / 9×9, web field `sudokuSize`, 0 = by age); a younger child on 9×9 gets more numbers given (30 blanks under 8). **Levels climb slower but higher:** +0.1 per 90 % round, boost +0.25 from the 3rd perfect round, steps halved from 2 years ahead, cap +5 years. Content for 11–12-year-olds added in every general-knowledge category and in the word list.

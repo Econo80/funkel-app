@@ -32,8 +32,8 @@ final class SudokuGame {
         selected = values.firstIndex(of: 0)
     }
 
-    convenience init<R: RandomNumberGenerator>(age: Int, using rng: inout R) {
-        self.init(Sudoku.make(.forAge(age), using: &rng))
+    convenience init<R: RandomNumberGenerator>(age: Int, size: Int = 0, using rng: inout R) {
+        self.init(Sudoku.make(.forAge(age, size: size), using: &rng))
     }
 
     /// Cells sharing a row, column or box with the selected cell.

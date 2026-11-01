@@ -13,7 +13,7 @@ final class DifficultyScaleTests: XCTestCase {
     func testEffectiveAgeIsClampedToSupportedRange() {
         XCTAssertEqual(DifficultyScale.effectiveAge(age: 4, adjustment: -1.5), 4)
         XCTAssertEqual(DifficultyScale.effectiveAge(age: 14, adjustment: 1.5), 14)
-        XCTAssertEqual(DifficultyScale.effectiveAge(age: 7, adjustment: 5), 10, "up to 3 years above the age")
+        XCTAssertEqual(DifficultyScale.effectiveAge(age: 7, adjustment: 6), 12, "up to 5 years above the age")
         XCTAssertEqual(DifficultyScale.effectiveAge(age: 7, adjustment: -5), 5.5, "down to 1½ years below")
     }
 
@@ -65,10 +65,12 @@ final class DifficultyScaleTests: XCTestCase {
     }
 
     func testAdjustmentMovesGentlyAndIsCapped() {
-        XCTAssertEqual(DifficultyScale.nextAdjustment(current: 0, correct: 10, total: 10), 0.15, accuracy: 0.0001)
+        XCTAssertEqual(DifficultyScale.nextAdjustment(current: 0, correct: 10, total: 10), 0.1, accuracy: 0.0001)
         XCTAssertEqual(DifficultyScale.nextAdjustment(current: 0, correct: 7, total: 10), 0)
         XCTAssertEqual(DifficultyScale.nextAdjustment(current: 0, correct: 2, total: 10), -0.3, accuracy: 0.0001)
-        XCTAssertEqual(DifficultyScale.nextAdjustment(current: 2.95, correct: 10, total: 10), 3)
+        // Two years ahead and more, every step up is half as big.
+        XCTAssertEqual(DifficultyScale.nextAdjustment(current: 2.5, correct: 10, total: 10), 2.55, accuracy: 0.0001)
+        XCTAssertEqual(DifficultyScale.nextAdjustment(current: 4.98, correct: 10, total: 10), 5)
         XCTAssertEqual(DifficultyScale.nextAdjustment(current: -1.4, correct: 0, total: 10), -1.5)
         XCTAssertEqual(DifficultyScale.nextAdjustment(current: 0.3, correct: 0, total: 0), 0.3)
     }

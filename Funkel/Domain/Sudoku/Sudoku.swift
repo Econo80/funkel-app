@@ -31,6 +31,23 @@ struct SudokuLevel: Equatable {
         }
     }
 
+    /// Grid sizes a grown-up can pick; 0 = by age.
+    static let sizeChoices = [0, 4, 6, 9]
+
+    /// The level for a chosen grid size: by age when it fits, otherwise the
+    /// nearest level of that size (a young child on 9×9 gets more numbers given).
+    static func forAge(_ age: Int, size: Int) -> SudokuLevel {
+        let byAge = forAge(age)
+        if size == 0 || size == byAge.size { return byAge }
+        switch size {
+        case 4: return forAge(7)
+        case 6: return forAge(age < 8 ? 8 : 9)
+        default:
+            let nine = forAge(10)
+            return SudokuLevel(size: 9, boxRows: 3, boxCols: 3, blanks: age < 8 ? 30 : 36, pictures: false, stars: nine.stars)
+        }
+    }
+
     var cellCount: Int { size * size }
 
     /// What a value looks like on the board and the keys: 🍎 or "3".

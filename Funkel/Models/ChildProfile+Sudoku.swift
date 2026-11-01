@@ -19,6 +19,12 @@ extension ChildProfile {
         set { setWebField("sudokuDifficulty", newValue.rawValue) }
     }
 
+    /// Grid size chosen by a grown-up (4, 6 or 9); 0 = by age.
+    var sudokuSize: Int {
+        get { webField("sudokuSize", as: Int.self).flatMap { SudokuLevel.sizeChoices.contains($0) ? $0 : nil } ?? 0 }
+        set { setWebField("sudokuSize", newValue) }
+    }
+
     /// The age Sudokus are made for: the child's age, shifted by the grown-up setting.
     var sudokuAge: Int { sudokuDifficulty.age(for: age) }
 

@@ -29,6 +29,22 @@ export function sudokuLevelForAge(age: number): SudokuLevel {
   return { size: 9, boxRows: 3, boxCols: 3, blanks: age < 13 ? 48 : 52, pictures: false, stars: 10 };
 }
 
+/** A grid size a grown-up picked; 0 = by age. */
+export type SudokuSize = 0 | 4 | 6 | 9;
+export const SUDOKU_SIZES: readonly SudokuSize[] = [0, 4, 6, 9];
+
+/**
+ * The level for a chosen grid size: by age when it fits, otherwise the
+ * nearest level of that size (a young child on 9×9 gets more numbers given).
+ */
+export function sudokuLevel(age: number, size: SudokuSize = 0): SudokuLevel {
+  const byAge = sudokuLevelForAge(age);
+  if (size === 0 || size === byAge.size) return byAge;
+  if (size === 4) return sudokuLevelForAge(7);
+  if (size === 6) return sudokuLevelForAge(age < 8 ? 8 : 9);
+  return { ...sudokuLevelForAge(10), blanks: age < 8 ? 30 : 36 };
+}
+
 export interface Sudoku {
   level: SudokuLevel;
   /** Values 1…size, row by row. */

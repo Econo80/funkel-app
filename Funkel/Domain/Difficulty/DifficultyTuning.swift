@@ -14,12 +14,15 @@ enum DifficultyTuning {
 
     /// How far below the real age a struggling child can go.
     static let maxAdjustment = 1.5
-    /// How far above the real age a child who gets everything right can go.
-    static let maxAdjustmentUp = 3.0
-    static let adjustmentStepUp = 0.15        // score ≥ 90 %
+    /// How far above the real age a child who gets everything right can go (a 7-year-old up to 12).
+    static let maxAdjustmentUp = 5.0
+    static let adjustmentStepUp = 0.1         // score ≥ 90 %
     /// From this many perfect rounds in a row, each further perfect round steps up faster.
-    static let perfectRoundsForBoost = 2
-    static let boostStepUp = 0.5
+    static let perfectRoundsForBoost = 3
+    static let boostStepUp = 0.25
+    /// Once this many years ahead, every step up is halved: the higher, the slower.
+    static let slowerFromAdjustment = 2.0
+    static let slowerFactor = 0.5
     static let adjustmentStepDown = 0.3       // score < 50 %
     static let promoteThreshold = 0.9
     static let easeThreshold = 0.5

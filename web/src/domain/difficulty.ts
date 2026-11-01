@@ -59,12 +59,15 @@ export const Tuning = {
   maxAge: 14,
   /** How far below the real age a struggling child can go. */
   maxAdjustment: 1.5,
-  /** How far above the real age a child who gets everything right can go (web only for now). */
-  maxAdjustmentUp: 3,
-  adjustmentStepUp: 0.15,
+  /** How far above the real age a child who gets everything right can go (a 7-year-old up to 12). */
+  maxAdjustmentUp: 5,
+  adjustmentStepUp: 0.1,
   /** After this many perfect rounds in a row, each further perfect round steps up faster. */
-  perfectRoundsForBoost: 2,
-  boostStepUp: 0.5,
+  perfectRoundsForBoost: 3,
+  boostStepUp: 0.25,
+  /** Once this many years ahead, every step up is halved: the higher, the slower. */
+  slowerFromAdjustment: 2,
+  slowerFactor: 0.5,
   adjustmentStepDown: 0.3,
   promoteThreshold: 0.9,
   easeThreshold: 0.5,
@@ -238,17 +241,19 @@ export interface Adaptivity {
 
 /**
  * Adaptivity after a round (PLAN.md §5.4): 90 %+ steps up a little; from the
- * second perfect round in a row each perfect round steps up faster ("boosted");
- * under 50 % steps back down and ends the run.
+ * third perfect round in a row each perfect round steps up faster ("boosted");
+ * from two years ahead every step up is halved; under 50 % steps back down
+ * and ends the run.
  */
 export function nextAdaptivity(current: Adaptivity, correct: number, total: number): Adaptivity & { boosted: boolean } {
   if (total <= 0) return { ...current, boosted: false };
   const score = correct / total;
   const perfectRounds = score >= 1 ? current.perfectRounds + 1 : 0;
   const boosted = perfectRounds >= Tuning.perfectRoundsForBoost && current.adjustment < Tuning.maxAdjustmentUp;
+  const slower = current.adjustment >= Tuning.slowerFromAdjustment ? Tuning.slowerFactor : 1;
   let next = current.adjustment;
-  if (boosted) next += Tuning.boostStepUp;
-  else if (score >= Tuning.promoteThreshold) next += Tuning.adjustmentStepUp;
+  if (boosted) next += Tuning.boostStepUp * slower;
+  else if (score >= Tuning.promoteThreshold) next += Tuning.adjustmentStepUp * slower;
   else if (score < Tuning.easeThreshold) next -= Tuning.adjustmentStepDown;
   return { adjustment: clamp(next, -Tuning.maxAdjustment, Tuning.maxAdjustmentUp), perfectRounds, boosted };
 }

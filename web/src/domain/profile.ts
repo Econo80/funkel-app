@@ -4,6 +4,7 @@
 import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity } from "./difficulty";
 import { DEFAULT_GAME_SETTINGS, gameAge, type GameDifficulty } from "./games";
 import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, emptyGoods, startingFarmXp, widenGarden, type FarmOrder, type Garden, type Produce } from "./garden";
+import { SUDOKU_SIZES, type SudokuSize } from "./sudoku";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -71,6 +72,8 @@ export interface ProfileSettings {
   /** Sudoku card on the home screen, with its own difficulty shift. */
   sudokuEnabled: boolean;
   sudokuDifficulty: GameDifficulty;
+  /** Grid size chosen by a grown-up (4, 6 or 9); 0 = by age. */
+  sudokuSize: SudokuSize;
 }
 
 export interface Profile extends ProfileSettings {
@@ -132,6 +135,7 @@ export function defaultSettings(): ProfileSettings {
     ...DEFAULT_GAME_SETTINGS,
     sudokuEnabled: true,
     sudokuDifficulty: "normal",
+    sudokuSize: 0,
     gardenMinutesPerDay: DEFAULT_GARDEN_MINUTES,
   };
 }
@@ -168,6 +172,7 @@ export function normalizeProfile(p: Partial<Profile> & Pick<Profile, "id">): Pro
     gamesPerDay: p.gamesPerDay ?? base.gamesPerDay,
     sudokuEnabled: p.sudokuEnabled ?? base.sudokuEnabled,
     sudokuDifficulty: p.sudokuDifficulty ?? base.sudokuDifficulty,
+    sudokuSize: SUDOKU_SIZES.includes(p.sudokuSize as SudokuSize) ? p.sudokuSize : base.sudokuSize,
     gardenMinutesPerDay: p.gardenMinutesPerDay ?? base.gardenMinutesPerDay,
     country: p.country && COUNTRIES.includes(p.country) ? p.country : base.country,
   } as Profile;
@@ -335,6 +340,7 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     gameDifficulty: s.gameDifficulty,
     sudokuEnabled: s.sudokuEnabled,
     sudokuDifficulty: s.sudokuDifficulty,
+    sudokuSize: SUDOKU_SIZES.includes(s.sudokuSize) ? s.sudokuSize : 0,
     gardenMinutesPerDay: clamp(Math.round(s.gardenMinutesPerDay), 0, 240),
     difficultyAdjustment: age === p.age ? p.difficultyAdjustment : 0,
     progress: age === p.age ? p.progress : Object.fromEntries(

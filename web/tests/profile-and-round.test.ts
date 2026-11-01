@@ -72,7 +72,7 @@ describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () =>
     const outcome = { subjectId: "maths", languageCode: "de", correct: 10, total: 10, correctContentIds: ["a"], effectiveAge: 7 };
     const first = recordRound(base(), outcome, day(1));
     expect(first.summary).toMatchObject({ starsEarned: 10, streak: 1, streakGrew: true });
-    expect(first.profile.progress["de/maths"].adjustment).toBeCloseTo(0.15);
+    expect(first.profile.progress["de/maths"].adjustment).toBeCloseTo(0.1);
     expect(first.summary.levelUp).toBe(false);
     const second = recordRound(first.profile, outcome, day(2));
     expect(second.summary.streak).toBe(2);
@@ -114,9 +114,10 @@ describe("progress and settings (mirrors RoundFlowTests + GrownUpsTests)", () =>
     let summary;
     for (let i = 0; i < 3; i++) ({ profile: p, summary } = recordRound(p, perfect("maths"), day(1)));
     expect(summary!.levelUp).toBe(true);
-    expect(subjectAdaptivity(p, "de", "maths")).toEqual({ adjustment: 0.3 + 0.15 + 0.5 + 0.5, perfectRounds: 3 });
-    expect(subjectLevelAge(p, "de", "maths")).toBeCloseTo(6.45);
-    expect(subjectDifficulty(p, "de", "maths").effectiveAge).toBeCloseTo(6.45);
+    expect(subjectAdaptivity(p, "de", "maths").adjustment).toBeCloseTo(0.3 + 0.1 + 0.1 + 0.25);
+    expect(subjectAdaptivity(p, "de", "maths").perfectRounds).toBe(3);
+    expect(subjectLevelAge(p, "de", "maths")).toBeCloseTo(5.75);
+    expect(subjectDifficulty(p, "de", "maths").effectiveAge).toBeCloseTo(5.75);
     expect(subjectAdaptivity(p, "de", "vocabulary").adjustment).toBe(0.3);
 
     // A new age starts every subject from the real age again.
@@ -194,8 +195,8 @@ describe("grown-up controls (web)", () => {
     expect(harder.progress["de/maths"]).toMatchObject({ roundsPlayed: 1, correctAnswers: 10, recentCorrectContentIds: ["x"] });
     expect(harder).toMatchObject({ totalStars: played.totalStars, currentStreak: played.currentStreak, rounds: played.rounds });
     expect(subjectAdaptivity(harder, "de", "vocabulary").adjustment).toBe(0);
-    // Limits: −1.5 … +3 years, in half years.
-    expect(subjectAdaptivity(setSubjectAdjustment(harder, "de", "maths", 9), "de", "maths").adjustment).toBe(3);
+    // Limits: −1.5 … +5 years, in half years.
+    expect(subjectAdaptivity(setSubjectAdjustment(harder, "de", "maths", 9), "de", "maths").adjustment).toBe(5);
     expect(subjectAdaptivity(setSubjectAdjustment(harder, "de", "maths", -0.7), "de", "maths").adjustment).toBe(-0.5);
   });
 

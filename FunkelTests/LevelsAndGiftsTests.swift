@@ -20,27 +20,31 @@ final class LevelsAndGiftsTests: XCTestCase {
 
     // MARK: Adaptivity
 
-    func testStepsUpFasterAfterTwoPerfectRoundsInARow() {
+    func testStepsUpFasterAfterThreePerfectRoundsAndSlowerWhenFarAhead() {
         var a = Adaptivity(adjustment: 0, perfectRounds: 0)
         var steps: [Double] = []
-        for round in 0..<8 {
+        for round in 0..<40 {
             let (next, boosted) = DifficultyScale.nextAdaptivity(a, correct: 10, total: 10)
-            XCTAssertEqual(boosted, round >= 1 && a.adjustment < 3, "round \(round)")
+            XCTAssertEqual(boosted, round >= 2 && a.adjustment < 5, "round \(round)")
             a = next
             steps.append(a.adjustment)
         }
-        XCTAssertEqual(steps[0], 0.15, accuracy: 0.0001)
-        XCTAssertEqual(steps[1], 0.65, accuracy: 0.0001)
-        XCTAssertEqual(steps[2], 1.15, accuracy: 0.0001)
-        XCTAssertEqual(a.adjustment, 3)
-        XCTAssertEqual(DifficultyScale.difficulty(forAge: 5, adjustment: a.adjustment).effectiveAge, 8)
+        XCTAssertEqual(steps[0], 0.1, accuracy: 0.0001)
+        XCTAssertEqual(steps[1], 0.2, accuracy: 0.0001)
+        XCTAssertEqual(steps[2], 0.45, accuracy: 0.0001)
+        XCTAssertEqual(steps[9], 2.2, accuracy: 0.0001)
+        XCTAssertEqual(steps[10], 2.325, accuracy: 0.0001)
+        // A 7-year-old who gets everything right reaches 12 after about 33 rounds.
+        XCTAssertEqual(steps.firstIndex { $0 >= 5 }, 32)
+        XCTAssertEqual(a.adjustment, 5)
+        XCTAssertEqual(DifficultyScale.difficulty(forAge: 7, adjustment: a.adjustment).effectiveAge, 12)
     }
 
     func testAMistakeEndsTheRunAndAHardRoundStepsDown() {
         let nine = DifficultyScale.nextAdaptivity(Adaptivity(adjustment: 1, perfectRounds: 3), correct: 9, total: 10)
         XCTAssertFalse(nine.boosted)
         XCTAssertEqual(nine.adaptivity.perfectRounds, 0)
-        XCTAssertEqual(nine.adaptivity.adjustment, 1.15, accuracy: 0.0001)
+        XCTAssertEqual(nine.adaptivity.adjustment, 1.1, accuracy: 0.0001)
         XCTAssertFalse(DifficultyScale.nextAdaptivity(nine.adaptivity, correct: 10, total: 10).boosted)
 
         let hard = DifficultyScale.nextAdaptivity(Adaptivity(adjustment: 2, perfectRounds: 4), correct: 4, total: 10)
@@ -61,10 +65,10 @@ final class LevelsAndGiftsTests: XCTestCase {
         for _ in 0..<3 { summary = recorder.record(perfect("maths"), for: profile) }
         XCTAssertEqual(summary?.levelUp, true)
         let maths = profile.adaptivity(for: "maths", language: "de")
-        XCTAssertEqual(maths.adjustment, 0.3 + 0.15 + 0.5 + 0.5, accuracy: 0.0001)
+        XCTAssertEqual(maths.adjustment, 0.3 + 0.1 + 0.1 + 0.25, accuracy: 0.0001)
         XCTAssertEqual(maths.perfectRounds, 3)
-        XCTAssertEqual(profile.levelAge(for: "maths", language: "de"), 6.45, accuracy: 0.0001)
-        XCTAssertEqual(profile.difficulty(for: "maths", language: "de").effectiveAge, 6.45, accuracy: 0.0001)
+        XCTAssertEqual(profile.levelAge(for: "maths", language: "de"), 5.75, accuracy: 0.0001)
+        XCTAssertEqual(profile.difficulty(for: "maths", language: "de").effectiveAge, 5.75, accuracy: 0.0001)
         XCTAssertEqual(profile.adaptivity(for: "vocabulary", language: "de").adjustment, 0.3)
 
         // A new age starts every subject from the real age again.
@@ -87,9 +91,9 @@ final class LevelsAndGiftsTests: XCTestCase {
         XCTAssertEqual(profile.rounds.count, rounds)
         XCTAssertEqual(profile.adaptivity(for: "vocabulary", language: "de").adjustment, 0)
 
-        // Limits: −1.5 … +3 years, in half years; a subject without progress gets an entry.
+        // Limits: −1.5 … +5 years, in half years; a subject without progress gets an entry.
         ProfileMaintenance.setSubjectAdjustment(9, subjectID: "maths", language: "de", of: profile, in: context)
-        XCTAssertEqual(profile.adaptivity(for: "maths", language: "de").adjustment, 3)
+        XCTAssertEqual(profile.adaptivity(for: "maths", language: "de").adjustment, 5)
         ProfileMaintenance.setSubjectAdjustment(-0.7, subjectID: "vocabulary", language: "de", of: profile, in: context)
         XCTAssertEqual(profile.adaptivity(for: "vocabulary", language: "de").adjustment, -0.5)
     }

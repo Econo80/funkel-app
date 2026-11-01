@@ -102,7 +102,7 @@ struct SudokuView: View {
 
     private static func newGame(for profile: ChildProfile) -> SudokuGame {
         var rng = SystemRandomNumberGenerator()
-        return SudokuGame(age: profile.sudokuAge, using: &rng)
+        return SudokuGame(age: profile.sudokuAge, size: profile.sudokuSize, using: &rng)
     }
 
     private func restart() {
