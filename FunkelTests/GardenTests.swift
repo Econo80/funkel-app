@@ -286,18 +286,103 @@ final class GardenTests: XCTestCase {
         let id = "3f2b6a1c-8d4e-4f5a-9b7c-1e2d3c4b5a69"
         let now = Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: 18, hour: 10))!
 
+        // The barn makes cheese from milk, so cheese can be ordered too.
         let big = Farm(profileID: id, garden: g, xp: 140).withTodaysOrders(now: now).orders
         XCTAssertEqual(big, FarmOrders(day: "2026-10-18", orders: [
-            FarmOrder(id: "2026-10-18-0", wants: ["egg": 2, "milk": 4], stars: 3, xp: 18),
-            FarmOrder(id: "2026-10-18-1", wants: ["egg": 3, "milk": 2], stars: 2, xp: 15),
-            FarmOrder(id: "2026-10-18-2", wants: ["milk": 3, "wheat": 2], stars: 2, xp: 15),
+            FarmOrder(id: "2026-10-18-0", wants: ["milk": 4, "egg": 4], stars: 3, xp: 24),
+            FarmOrder(id: "2026-10-18-1", wants: ["wheat": 2, "egg": 2], stars: 2, xp: 12),
+            FarmOrder(id: "2026-10-18-2", wants: ["wheat": 3], stars: 2, xp: 9),
         ]))
         let small = Farm(profileID: id, garden: g, xp: 20).withTodaysOrders(now: now).orders
         XCTAssertEqual(small, FarmOrders(day: "2026-10-18", orders: [
-            FarmOrder(id: "2026-10-18-0", wants: ["egg": 2, "milk": 3], stars: 2, xp: 15),
-            FarmOrder(id: "2026-10-18-1", wants: ["egg": 2, "milk": 2], stars: 2, xp: 12),
-            FarmOrder(id: "2026-10-18-2", wants: ["milk": 3, "wheat": 2], stars: 2, xp: 15),
+            FarmOrder(id: "2026-10-18-0", wants: ["milk": 3, "egg": 3], stars: 3, xp: 18),
+            FarmOrder(id: "2026-10-18-1", wants: ["wheat": 2, "egg": 2], stars: 2, xp: 12),
+            FarmOrder(id: "2026-10-18-2", wants: ["wheat": 2], stars: 1, xp: 6),
         ]))
+        // A mailbox brings a fourth order, a horse one more star on each.
+        var more = g
+        more[6] = GardenPlot(itemId: "mailbox", plantedDay: "2026-10-12")
+        more[40] = GardenPlot(itemId: "horse", plantedDay: "2026-10-12")
+        let bonus = Farm(profileID: id, garden: more, xp: 140).withTodaysOrders(now: now).orders
+        XCTAssertEqual(bonus, FarmOrders(day: "2026-10-18", orders: [
+            FarmOrder(id: "2026-10-18-0", wants: ["milk": 4, "egg": 4], stars: 4, xp: 24),
+            FarmOrder(id: "2026-10-18-1", wants: ["wheat": 2, "egg": 2], stars: 3, xp: 12),
+            FarmOrder(id: "2026-10-18-2", wants: ["wheat": 3], stars: 3, xp: 9),
+            FarmOrder(id: "2026-10-18-3", wants: ["wheat": 4], stars: 3, xp: 12),
+        ]))
+    }
+
+    // MARK: Everything does something
+
+    func testEveryPlantAnimalAndBuildingDoesSomething() {
+        let useless = GardenItem.all
+            .filter { [.plants, .animals, .buildings].contains($0.category) }
+            .filter { $0.produce == nil && $0.harvest == nil && $0.boosts == nil && $0.houses == nil && $0.recipe == nil && $0.orders == nil }
+        XCTAssertEqual(useless.map(\.id), [])
+    }
+
+    func testGoatsGiveMilkPigsBaconSheepWoolPondsFish() {
+        var p = place(place(rich(), 0, "barn"), 2, "goat", 3)
+        p = place(p, 3, "pig", 3)
+        p = place(p, 4, "sheep", 3)
+        p = place(p, 6, "pond", 1)
+        for cell in [2, 3, 4, 6] { p = p.collecting(cell, now: day(5)) }
+        XCTAssertEqual([p.goods(.milk), p.goods(.bacon), p.goods(.wool), p.goods(.fish)], [1, 1, 1, 1])
+    }
+
+    func testHelpersAddOneMoreOncePerKind() {
+        var p = place(rich(), 0, "wheat")
+        p = place(p, 1, "vegetable")
+        p = place(p, 2, "ladybug")
+        p = place(p, 3, "ladybug")
+        p = place(p, 4, "tractor")
+        p = p.collecting(0, now: day(5)).collecting(1, now: day(5))
+        XCTAssertEqual(p.goods(.wheat), 2)
+        XCTAssertEqual(p.goods(.veg), 3)
+    }
+
+    func testMillBarnAndFarmhouseMakeBreadCheeseAndPie() {
+        var p = place(place(place(rich(), 0, "windmill"), 2, "barn"), 4, "farmhouse")
+        p.goods[.wheat] = 3
+        p.goods[.milk] = 2
+        p.goods[.apple] = 1
+        p.goods[.egg] = 1
+        XCTAssertFalse(p.canMake(at: 0, now: day(1))) // still being built
+        XCTAssertEqual(p.making(at: 0, now: day(1)), p)
+        p = p.making(at: columns, now: day(10)) // any square of the mill
+        XCTAssertEqual(p.goods(.wheat), 1)
+        XCTAssertEqual(p.goods(.bread), 1)
+        XCTAssertFalse(p.canMake(at: 0, now: day(10))) // one wheat left
+        p = p.making(at: 2, now: day(10)).making(at: 4, now: day(10))
+        XCTAssertEqual([p.goods(.wheat), p.goods(.milk), p.goods(.apple), p.goods(.egg)], [0, 0, 0, 0])
+        XCTAssertEqual([p.goods(.cheese), p.goods(.pie)], [1, 1])
+    }
+
+    func testFarmShopCountsMadeGoodsMoreAndSellsWholeStarsOnly() {
+        var p = rich(0)
+        p.goods[.bread] = 1
+        p.goods[.pie] = 1
+        p.goods[.egg] = 3
+        XCTAssertEqual(p.sellableStars, 2) // 3 + 5 + 3 = 11
+        let sold = p.selling()
+        XCTAssertEqual(sold.walletStars, 2)
+        XCTAssertEqual([sold.goods(.egg), sold.goods(.bread), sold.goods(.pie)], [1, 0, 0])
+        // Three breads are worth 9, but no choice of them makes exactly 5.
+        var breads = rich(0)
+        breads.goods[.bread] = 3
+        XCTAssertEqual(breads.sellableStars, 0)
+        XCTAssertEqual(breads.selling(), breads)
+        breads.goods[.egg] = 2
+        let mixed = breads.selling()
+        XCTAssertEqual(mixed.walletStars, 2)
+        XCTAssertEqual([mixed.goods(.bread), mixed.goods(.egg)], [0, 1])
+    }
+
+    func testOrdersIncludeWhatTheMillMakes() {
+        var p = place(place(rich(), 0, "coop"), 1, "chick", 2)
+        p = place(place(p, 20, "windmill"), 3, "wheat")
+        XCTAssertTrue(Farm.producibleGoods(p.garden).contains(.bread))
+        XCTAssertFalse(Farm.producibleGoods(p.garden).contains(.cheese)) // no milk on this farm
     }
 
     // MARK: Moving

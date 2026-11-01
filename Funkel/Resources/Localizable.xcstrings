@@ -2185,6 +2185,18 @@
         }
       }
     },
+    "garden.notEnough %@": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür brauchst du %@ im Vorrat."
+          }
+        }
+      }
+    },
     "garden.orders": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2264,7 +2276,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld Sachen aus dem Vorrat = 1 ⭐. Aufträge bringen mehr!"
+            "value": "%lld Sachen aus dem Vorrat = 1 ⭐. 🍞 und 🧀 zählen 3, 🥧 zählt 5. Aufträge bringen mehr!"
           }
         }
       }
@@ -2457,6 +2469,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Neu freigeschaltet:"
+          }
+        }
+      }
+    },
+    "garden.use.boost %@": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ +1 beim Sammeln"
+          }
+        }
+      }
+    },
+    "garden.use.daily": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jeden Tag"
+          }
+        }
+      }
+    },
+    "garden.use.extraOrder": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+1 Auftrag pro Tag"
+          }
+        }
+      }
+    },
+    "garden.use.extraStar": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+1 ⭐ pro Auftrag"
+          }
+        }
+      }
+    },
+    "garden.use.harvest": {
+      "comment": "UI text. (Pip's garden and farm.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zum Ernten"
           }
         }
       }

@@ -5,13 +5,15 @@ import {
   GARDEN_COLUMNS,
   GARDEN_ITEMS,
   GOODS_PER_STAR,
-  PRODUCE,
   PRODUCE_EMOJI,
   XP_FOR_COLLECTING,
+  PRODUCE,
   buyLand,
   canClear,
   canFulfil,
+  canMake,
   clearPlot,
+  collectAmount,
   collectProduce,
   connections,
   daysUntilNextStage,
@@ -23,6 +25,7 @@ import {
   homeSpace,
   isUnderConstruction,
   itemSize,
+  makeGoods,
   moveItem,
   nextLandPrice,
   occupancy,
@@ -31,12 +34,16 @@ import {
   plotPicture,
   readyCells,
   readyProduce,
+  recipeAt,
   sellGoods,
+  sellableStars,
   shopPicture,
   unlockedAt,
   withTodaysOrders,
   type GardenCategory,
   type GardenItem,
+  type Produce,
+  type Recipe,
 } from "../../domain/garden";
 import { GARDEN_BONUS_CHOICES, addGardenTime, gardenSecondsLeft, grantGardenMinutes, type Profile } from "../../domain/profile";
 import { systemRng } from "../../domain/random";
@@ -54,6 +61,24 @@ const TAB_ICONS: Record<GardenCategory, string> = { plants: "🌱", animals: "�
 const CELL_SIZES = [44, 60, 80];
 /** Light over the farm, by the time of day. */
 const daylight = (hour: number) => (hour >= 20 || hour < 6 ? "night" : hour < 9 ? "morning" : hour >= 17 ? "evening" : "day");
+
+/** Who lives in each kind of home, for "🐔 ×4" on the shop card. */
+const RESIDENT: Record<string, string> = { dog: "🐕", cat: "🐈", chicken: "🐔", duck: "🦆", farm: "🐄" };
+const goodsText = (goods: Partial<Record<Produce, number>>) =>
+  PRODUCE.filter((k) => goods[k]).map((k) => `${goods[k]! > 1 ? goods[k] : ""}${PRODUCE_EMOJI[k]}`).join(" + ");
+const recipeText = (r: Recipe) => `${goodsText(r.needs)} → ${PRODUCE_EMOJI[r.makes]}`;
+
+/** What an item is good for, short, for the shop card: "🥚 jeden Tag", "🥕 +1", "2🌾 → 🍞". */
+export function itemUses(item: GardenItem): string[] {
+  const uses: string[] = [];
+  if (item.houses) uses.push(`${RESIDENT[item.houses.group]} ×${item.houses.capacity}`);
+  if (item.produce) uses.push(`${PRODUCE_EMOJI[item.produce]} ${t("garden.use.daily")}`);
+  if (item.harvest) uses.push(`${PRODUCE_EMOJI[item.harvest]} ${t("garden.use.harvest")}`);
+  if (item.boosts) uses.push(`${item.boosts.map((k) => PRODUCE_EMOJI[k]).join("")} +1`);
+  if (item.recipe) uses.push(recipeText(item.recipe));
+  if (item.orders) uses.push(t(`garden.use.${item.orders}`));
+  return uses;
+}
 
 /**
  * Pip's farm, full screen: a meadow to scroll around on, with a level and XP
@@ -149,7 +174,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     const plot = anchor === undefined ? undefined : base.garden[anchor];
     const produce = plot && readyProduce(plot, now);
     if (!produce || anchor === undefined) return base;
-    pop(anchor, `+1 ${PRODUCE_EMOJI[produce]}`, "goods", delay);
+    pop(anchor, `+${collectAmount(base.garden, produce, now)} ${PRODUCE_EMOJI[produce]}`, "goods", delay);
     pop(anchor, `+${XP_FOR_COLLECTING} XP`, "xp", delay + 150);
     return collectProduce(base, anchor, now);
   };
@@ -161,12 +186,16 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     const days = daysUntilNextStage(plot, now);
     if (isUnderConstruction(plot, now)) return `${name(item.id)}: ${t("garden.builds %lld", days ?? 1)}`;
     if (days !== undefined) return `${name(item.id)}: ${t("garden.grows %lld", days)}`;
+    const parts: string[] = [];
     if (item.houses) {
       const { capacity, used } = homeSpace(garden, item.houses.group, now);
-      return `${name(item.id)}: ${t("garden.places %lld", Math.max(0, capacity - used))}`;
+      parts.push(t("garden.places %lld", Math.max(0, capacity - used)));
     }
-    if (item.produce) return `${name(item.id)}: ${t("garden.tomorrow")}`;
-    return name(item.id);
+    if (item.produce) parts.push(t("garden.tomorrow"));
+    if (item.recipe) parts.push(t("garden.notEnough %@", goodsText(item.recipe.needs)));
+    if (item.boosts) parts.push(t("garden.use.boost %@", item.boosts.map((k) => PRODUCE_EMOJI[k]).join("")));
+    if (item.orders) parts.push(t(`garden.use.${item.orders}`));
+    return parts.length ? `${name(item.id)}: ${parts.join(" · ")}` : name(item.id);
   };
 
   const problemText = (item: GardenItem, problem: string) =>
@@ -198,6 +227,14 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     if (plot && anchor !== undefined && readyProduce(plot, now) && tool?.kind !== "clear") {
       sound("pop");
       return commit(collect(anchor, saved));
+    }
+    // The mill, barn and farmhouse make something from the storage on a tap.
+    if (anchor !== undefined && !tool && canMake(saved, anchor, now)) {
+      const recipe = recipeAt(saved.garden, anchor, now)!;
+      sound("pop");
+      pop(anchor, `+1 ${PRODUCE_EMOJI[recipe.makes]}`, "goods");
+      pop(anchor, `+${XP_FOR_COLLECTING} XP`, "xp", 150);
+      return commit(makeGoods(saved, anchor, now));
     }
     if (tool?.kind === "clear" && anchor !== undefined) {
       if (!canClear(saved, cellIndex, now)) { sound("gentle"); return setToast(t("garden.clearBlocked")); }
@@ -284,6 +321,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
             const [w, h] = item ? itemSize(item) : [1, 1];
             const picture = plot ? plotPicture(plot, now) : "";
             const produce = plot && readyProduce(plot, now);
+            const makes = !produce && plot && canMake(profile, i, now) ? recipeAt(garden, i, now)?.makes : undefined;
             const building = plot && isUnderConstruction(plot, now);
             const kind = !item ? ""
               : item.connects ? " way"
@@ -301,6 +339,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
                   : plot && <span class="obj" aria-hidden="true"><span class="obj-picture"><GardenPicture picture={picture} /></span></span>}
                 {building && <span class="hammer" aria-hidden="true">🔨</span>}
                 {produce && <span class="bubble" aria-hidden="true">{PRODUCE_EMOJI[produce]}</span>}
+                {makes && <span class="bubble make" aria-hidden="true">{PRODUCE_EMOJI[makes]}</span>}
               </button>
             );
           })}
@@ -376,14 +415,16 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
               const affordable = profile.walletStars >= item.price;
               const needsHome = !!item.needs && homeSpace(garden, item.needs, now).capacity === 0;
               const priceText = item.price === 0 ? t("garden.free") : `${item.price} ⭐`;
+              const uses = itemUses(item);
               return (
                 <button key={item.id} class={`shop-card${lockedLevel ? " locked" : ""}`} disabled={lockedLevel || !affordable}
                   onClick={() => pick(item)} data-testid={`shop-${item.id}`}
-                  aria-label={`${name(item.id)}, ${priceText}${lockedLevel ? `, ${t("garden.level %lld", item.level)}` : ""}`}>
+                  aria-label={`${name(item.id)}, ${priceText}${uses.length ? `, ${uses.join(", ")}` : ""}${lockedLevel ? `, ${t("garden.level %lld", item.level)}` : ""}`}>
                   <span class="card-picture" aria-hidden="true">
                     {item.connects ? <PathArt id={item.id} links={{ n: false, e: true, s: false, w: true }} /> : <GardenPicture picture={shopPicture(item)} />}
                   </span>
                   <span class="card-name" aria-hidden="true">{name(item.id)}</span>
+                  {uses.length > 0 && <span class="card-uses" aria-hidden="true" data-testid="shop-uses">{uses.join(" · ")}</span>}
                   {lockedLevel
                     ? <span class="card-lock" aria-hidden="true">🔒 {t("garden.level %lld", item.level)}</span>
                     : <span class={`card-price${item.price === 0 ? " free" : ""}`} aria-hidden="true">{priceText}</span>}
@@ -433,8 +474,8 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
           </div>
           <h3 class="sheet-heading">{t("garden.shopFarm")}</h3>
           <p class="muted">{t("garden.sellHint %lld", GOODS_PER_STAR)}</p>
-          <BigButton color="#E8A33A" disabled={goods < GOODS_PER_STAR} onClick={() => { void commit(sellGoods(saved)); sound("finish"); setToast(t("garden.sold")); }} testId="farm-sell">
-            🧺 {t("garden.sell %lld", Math.floor(goods / GOODS_PER_STAR))}
+          <BigButton color="#E8A33A" disabled={sellableStars(profile.farmGoods) === 0} onClick={() => { void commit(sellGoods(saved)); sound("finish"); setToast(t("garden.sold")); }} testId="farm-sell">
+            🧺 {t("garden.sell %lld", sellableStars(profile.farmGoods))}
           </BigButton>
         </FarmSheet>
       )}

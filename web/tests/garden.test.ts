@@ -5,6 +5,10 @@ import {
   GARDEN_SIZE,
   buyLand,
   canClear,
+  canMake,
+  makeGoods,
+  producibleGoods,
+  sellableStars,
   clearPlot,
   collectProduce,
   connections,
@@ -260,5 +264,74 @@ describe("moving", () => {
     p = place(p, 8, "stone");
     expect(moveItem(p, 5, 7)).toBe(p);
     expect(moveItem(p, 5, 4).garden[4]?.itemId).toBe("barn");
+  });
+});
+
+describe("everything on the farm does something", () => {
+  it("every plant, animal and building gives, helps, houses or makes something", () => {
+    const useless = GARDEN_ITEMS.filter((i) => ["plants", "animals", "buildings"].includes(i.category))
+      .filter((i) => !i.produce && !i.harvest && !i.boosts && !i.houses && !i.recipe && !i.orders);
+    expect(useless.map((i) => i.id)).toEqual([]);
+  });
+
+  it("goats give milk, pigs bacon, sheep wool, ponds fish", () => {
+    let p = place(place(rich(), 0, "barn"), 2, "goat", 3);
+    p = place(p, 3, "pig", 3);
+    p = place(p, 4, "sheep", 3);
+    p = place(p, 6, "pond", 1);
+    for (const cell of [2, 3, 4, 6]) p = collectProduce(p, cell, day(5));
+    expect(p.farmGoods).toMatchObject({ milk: 1, bacon: 1, wool: 1, fish: 1 });
+  });
+
+  it("helpers add one more of their good, once per kind", () => {
+    let p = place(rich(), 0, "wheat");
+    p = place(p, 1, "vegetable");
+    p = place(p, 2, "ladybug");
+    p = place(p, 3, "ladybug");
+    p = place(p, 4, "tractor");
+    p = collectProduce(collectProduce(p, 0, day(5)), 1, day(5));
+    expect(p.farmGoods).toMatchObject({ wheat: 2, veg: 3 });
+  });
+
+  it("the mill bakes bread from two wheat, the barn makes cheese, the farmhouse a pie", () => {
+    let p = place(place(place(rich(), 0, "windmill"), 2, "barn"), 4, "farmhouse");
+    p = { ...p, farmGoods: { ...emptyGoods(), wheat: 3, milk: 2, apple: 1, egg: 1 } };
+    expect(canMake(p, 0, day(1))).toBe(false); // still being built
+    expect(makeGoods(p, 0, day(1))).toBe(p);
+    p = makeGoods(p, 16, day(10)); // any cell of the mill
+    expect(p.farmGoods).toMatchObject({ wheat: 1, bread: 1 });
+    expect(canMake(p, 0, day(10))).toBe(false); // one wheat left
+    p = makeGoods(makeGoods(p, 2, day(10)), 4, day(10));
+    expect(p.farmGoods).toMatchObject({ wheat: 0, milk: 0, apple: 0, egg: 0, cheese: 1, pie: 1 });
+  });
+
+  it("the farm shop counts made goods as more, and only sells whole stars", () => {
+    const p = { ...rich(0), farmGoods: { ...emptyGoods(), bread: 1, pie: 1, egg: 3 } };
+    expect(sellableStars(p.farmGoods)).toBe(2); // 3 + 5 + 3 = 11
+    const sold = sellGoods(p);
+    expect(sold.walletStars).toBe(2);
+    expect(sold.farmGoods).toMatchObject({ egg: 1, bread: 0, pie: 0 }); // 10 sold, one egg (1) stays
+    // Three breads are worth 9, but no choice of them makes exactly 5: the shop takes none.
+    expect(sellableStars({ bread: 3 })).toBe(0);
+    const breads = { ...rich(0), farmGoods: { ...emptyGoods(), bread: 3 } };
+    expect(sellGoods(breads)).toBe(breads);
+    // With two eggs, three breads and one egg make 10: two stars, one egg stays.
+    const mixed = sellGoods({ ...breads, farmGoods: { ...emptyGoods(), bread: 3, egg: 2 } });
+    expect(mixed.walletStars).toBe(2);
+    expect(mixed.farmGoods).toMatchObject({ bread: 0, egg: 1 });
+  });
+
+  it("a mailbox brings a fourth order, a horse one more star each, the mill orders bread", () => {
+    let p = place(place(place(rich(), 0, "coop"), 1, "chick", 2), 20, "windmill");
+    p = place(p, 3, "wheat");
+    const plain = withTodaysOrders(p, day(5)).farmOrders!.orders;
+    expect(plain).toHaveLength(3);
+    p = place(place(place(p, 4, "mailbox"), 40, "barn"), 42, "horse", 3); // once the barn is built
+    expect(p.garden[42]?.itemId).toBe("horse");
+    const better = withTodaysOrders(p, day(5)).farmOrders!.orders;
+    expect(better).toHaveLength(4);
+    expect(producibleGoods(p.garden)).toContain("bread");
+    expect(producibleGoods(p.garden)).not.toContain("cheese"); // no milk on this farm
+    for (const o of better) expect(o.stars).toBeGreaterThanOrEqual(2);
   });
 });

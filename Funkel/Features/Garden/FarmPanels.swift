@@ -268,6 +268,8 @@ struct ShopCardLabel<Picture: View>: View {
     var free = false
     var lock: String?
     var note: String?
+    /// What it is good for: "🥚 jeden Tag", "🥕 +1", "2🌾 → 🍞".
+    var uses: String?
 
     var body: some View {
         VStack(spacing: 5) {
@@ -279,6 +281,15 @@ struct ShopCardLabel<Picture: View>: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
+            if let uses {
+                Text(verbatim: uses)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(hex: "#4c6b3c"))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color(hex: "#eef8e6"), in: .rect(cornerRadius: 10))
+            }
             if let lock {
                 Text(verbatim: "🔒 \(lock)")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))

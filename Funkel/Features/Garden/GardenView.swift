@@ -377,12 +377,13 @@ struct GardenView: View {
                 price: locked ? nil : price,
                 free: item.price == 0,
                 lock: locked ? String(localized: "garden.level \(item.level)") : nil,
-                note: !locked && needsHome ? "🏠 " + Self.name(GardenItem.home(for: item.needs!)) : nil
+                note: !locked && needsHome ? "🏠 " + Self.name(GardenItem.home(for: item.needs!)) : nil,
+                uses: item.uses.isEmpty ? nil : item.uses.joined(separator: " · ")
             )
         }
         .buttonStyle(ShopCardStyle(locked: locked))
         .disabled(locked || !affordable)
-        .accessibilityLabel(Text(verbatim: [Self.name(item), price, locked ? String(localized: "garden.level \(item.level)") : nil].compactMap { $0 }.joined(separator: ", ")))
+        .accessibilityLabel(Text(verbatim: ([Self.name(item), price] + item.uses + [locked ? String(localized: "garden.level \(item.level)") : nil]).compactMap { $0 }.joined(separator: ", ")))
         .accessibilityIdentifier("shop-\(item.id)")
     }
 
@@ -417,13 +418,14 @@ struct GardenView: View {
             }
             DrawerHeading("garden.shopFarm")
             Text("garden.sellHint \(Farm.goodsPerStar)").font(.funkelBody).foregroundStyle(FarmColors.muted)
-            BigButton(title: "garden.sell \(farm.goodsCount / Farm.goodsPerStar)", systemImage: "basket.fill", color: Color(hex: "#E8A33A")) {
+            let sellable = farm.sellableStars
+            BigButton(title: "garden.sell \(sellable)", systemImage: "basket.fill", color: Color(hex: "#E8A33A")) {
                 commit(farm.selling())
                 sound(.finish)
                 show(String(localized: "garden.sold"))
             }
-            .disabled(farm.goodsCount < Farm.goodsPerStar)
-            .opacity(farm.goodsCount < Farm.goodsPerStar ? 0.5 : 1)
+            .disabled(sellable == 0)
+            .opacity(sellable == 0 ? 0.5 : 1)
             .accessibilityIdentifier("farm-sell")
         }
     }
@@ -457,6 +459,13 @@ struct GardenView: View {
         if let anchor, let plot, Farm.readyProduce(plot, now: now) != nil, tool != .clear {
             haptic()
             return commit(collect(anchor, from: farm, now: now))
+        }
+        // The mill, barn and farmhouse make something from the storage on a tap.
+        if tool == nil, let anchor, farm.canMake(at: anchor, now: now), let recipe = farm.recipe(at: anchor, now: now) {
+            haptic()
+            popup(anchor, "+1 \(recipe.makes.emoji)", .goods)
+            popup(anchor, "+\(Farm.xpForCollecting) XP", .xp, delay: 0.15)
+            return commit(farm.making(at: anchor, now: now))
         }
         if tool == .clear, let anchor {
             guard farm.canClear(cell, now: now) else {
@@ -500,7 +509,7 @@ struct GardenView: View {
     private func collect(_ cell: Int, from base: Farm, now: Date, delay: Double = 0) -> Farm {
         let covered = Farm.occupancy(base.garden)
         guard let anchor = covered[cell], let plot = base.garden[anchor], let produce = Farm.readyProduce(plot, now: now) else { return base }
-        popup(anchor, "+1 \(produce.emoji)", .goods, delay: delay)
+        popup(anchor, "+\(base.collectAmount(produce, now: now)) \(produce.emoji)", .goods, delay: delay)
         popup(anchor, "+\(Farm.xpForCollecting) XP", .xp, delay: delay + 0.15)
         return base.collecting(anchor, now: now)
     }
@@ -534,12 +543,16 @@ struct GardenView: View {
             return "\(itemName): " + String(localized: "garden.builds \(days ?? 1)")
         }
         if let days { return "\(itemName): " + String(localized: "garden.grows \(days)") }
+        var parts: [String] = []
         if let houses = item.houses {
             let space = farm.homeSpace(houses.group, now: now)
-            return "\(itemName): " + String(localized: "garden.places \(max(0, space.capacity - space.used))")
+            parts.append(String(localized: "garden.places \(max(0, space.capacity - space.used))"))
         }
-        if item.produce != nil { return "\(itemName): " + String(localized: "garden.tomorrow") }
-        return itemName
+        if item.produce != nil { parts.append(String(localized: "garden.tomorrow")) }
+        if let recipe = item.recipe { parts.append(String(localized: "garden.notEnough \(Produce.text(recipe.needs))")) }
+        if let boosts = item.boosts { parts.append(String(localized: "garden.use.boost \(boosts.map(\.emoji).joined())")) }
+        if let orders = item.orders { parts.append(String(localized: String.LocalizationValue("garden.use." + orders.rawValue))) }
+        return parts.isEmpty ? itemName : "\(itemName): " + parts.joined(separator: " · ")
     }
 
     private func problemText(_ problem: PlacementProblem, item: GardenItem) -> String {

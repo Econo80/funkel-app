@@ -452,6 +452,8 @@ p { line-height: 1.4; }
   background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22); display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--cell) * 0.3); animation: bubble-bob 1.4s ease-in-out infinite; z-index: 3;
 }
+/* A building that can make something now: same bubble, with a little ring. */
+.bubble.make { box-shadow: 0 0 0 3px #f2b84b, 0 3px 8px rgba(0, 0, 0, 0.22); }
 .farm-tile.pop-in { animation: pop-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
 .farm-tile.moving { outline: 3px dashed #fff; outline-offset: -3px; border-radius: 12px; animation: wiggle 0.35s ease-in-out infinite alternate; }
 
@@ -527,6 +529,7 @@ p { line-height: 1.4; }
 .card-price.free { background: #d7f5cf; }
 .card-lock { font-weight: 800; font-size: 0.8rem; color: #7a7487; }
 .card-note { font-size: 0.72rem; color: #7a7487; text-align: center; }
+.card-uses { font-size: 0.75rem; font-weight: 700; color: #4c6b3c; text-align: center; line-height: 1.25; padding: 2px 8px; border-radius: 10px; background: #eef8e6; }
 .sheet-heading { margin: 16px 0 8px; font-size: 1.05rem; }
 .goods-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .goods-chip { padding: 8px 12px; border-radius: 99px; background: #fff; font-weight: 800; box-shadow: 0 2px 0 #e6dccb; }

@@ -1,7 +1,10 @@
 // Pip's garden, which grows into a little farm over days and weeks:
 // plants grow and can be harvested, buildings take days to build, animals need
-// a home, hens, cows and bees give something once a day, orders ask for goods,
-// and spending stars on the farm earns XP towards farm levels that unlock more.
+// a home, and everything does something: animals, trees and flowers give
+// something once a day, little helpers (and the tractor) make a harvest bigger,
+// the mill, barn and farmhouse turn goods into bread, cheese and pie, and the
+// mailbox and horse make orders better. Orders ask for goods, and spending stars
+// on the farm earns XP towards farm levels that unlock more.
 // Everything is paid from the wallet; lifetime stars never change here.
 import { dayKey, type Profile } from "./profile";
 import { randomElement, randomInt, seededRng, shuffled, type Rng } from "./random";
@@ -9,10 +12,24 @@ import { randomElement, randomInt, seededRng, shuffled, type Rng } from "./rando
 export type GardenCategory = "plants" | "animals" | "buildings" | "paths" | "decor";
 export const GARDEN_CATEGORIES: readonly GardenCategory[] = ["plants", "animals", "buildings", "paths", "decor"];
 
-export type Produce = "egg" | "milk" | "wheat" | "veg" | "apple" | "honey";
-export const PRODUCE: readonly Produce[] = ["egg", "milk", "wheat", "veg", "apple", "honey"];
-export const PRODUCE_EMOJI: Record<Produce, string> = { egg: "🥚", milk: "🥛", wheat: "🌾", veg: "🥕", apple: "🍎", honey: "🍯" };
-export const emptyGoods = (): Record<Produce, number> => ({ egg: 0, milk: 0, wheat: 0, veg: 0, apple: 0, honey: 0 });
+export type Produce =
+  | "egg" | "milk" | "wheat" | "veg" | "apple" | "honey"
+  | "wool" | "bacon" | "fish" | "wood" | "flowers" | "mushroom"
+  | "bread" | "cheese" | "pie";
+export const PRODUCE: readonly Produce[] = [
+  "egg", "milk", "wheat", "veg", "apple", "honey", "wool", "bacon", "fish", "wood", "flowers", "mushroom", "bread", "cheese", "pie",
+];
+export const PRODUCE_EMOJI: Record<Produce, string> = {
+  egg: "🥚", milk: "🥛", wheat: "🌾", veg: "🥕", apple: "🍎", honey: "🍯", wool: "🧶", bacon: "🥓", fish: "🐟",
+  wood: "🪵", flowers: "💐", mushroom: "🍄", bread: "🍞", cheese: "🧀", pie: "🥧",
+};
+export const emptyGoods = (): Record<Produce, number> => Object.fromEntries(PRODUCE.map((k) => [k, 0])) as Record<Produce, number>;
+/** What a good is worth in the farm shop and in orders: made goods are worth more than what went into them. */
+export const GOODS_VALUE: Record<Produce, number> = { ...emptyGoods(), egg: 1, milk: 1, wheat: 1, veg: 1, apple: 1, honey: 1, wool: 1, bacon: 1, fish: 1, wood: 1, flowers: 1, mushroom: 1, bread: 3, cheese: 3, pie: 5 };
+const goodsValue = (goods: Partial<Record<Produce, number>>) => PRODUCE.reduce((sum, k) => sum + (goods[k] ?? 0) * GOODS_VALUE[k], 0);
+
+/** What a building makes, and from what. */
+export interface Recipe { needs: Partial<Record<Produce, number>>; makes: Produce }
 
 /** Animals that need a home, by the kind of home. */
 export type HomeGroup = "dog" | "cat" | "chicken" | "farm" | "duck";
@@ -38,6 +55,12 @@ export interface GardenItem {
   produce?: Produce;
   /** A crop: grown, it can be harvested, and then grows again. */
   harvest?: Produce;
+  /** A helper: while it is on the farm, collecting these gives one more. */
+  boosts?: Produce[];
+  /** Mailbox: one more order a day. Horse: every order pays one more star. */
+  orders?: "extraOrder" | "extraStar";
+  /** A finished building that turns goods into something better (the mill bakes bread). */
+  recipe?: Recipe;
   /** Roads, paths and fences join up with neighbours of the same kind. */
   connects?: boolean;
 }
@@ -46,45 +69,45 @@ const BUILDING = "🚧";
 
 export const GARDEN_ITEMS: GardenItem[] = [
   // Plants
-  { id: "flower", price: 3, level: 1, category: "plants", stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"] },
+  { id: "flower", price: 3, level: 1, category: "plants", stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"], produce: "flowers" },
   { id: "wheat", price: 3, level: 1, category: "plants", stages: ["🌱", "🌾"], days: [0, 1], harvest: "wheat" },
-  { id: "mushroom", price: 2, level: 1, category: "plants", stages: ["🍄"], days: [0] },
-  { id: "tree", price: 12, level: 1, category: "plants", stages: ["🌱", "🪴", "🌳"], days: [0, 3, 7], variants: ["🌳", "🌲"] },
+  { id: "mushroom", price: 2, level: 1, category: "plants", stages: ["🍄"], days: [0], produce: "mushroom" },
+  { id: "tree", price: 12, level: 1, category: "plants", stages: ["🌱", "🪴", "🌳"], days: [0, 3, 7], variants: ["🌳", "🌲"], produce: "wood" },
   { id: "vegetable", price: 4, level: 2, category: "plants", stages: ["🌱", "🌿", "🥕"], days: [0, 1, 2], variants: ["🥕", "🥬", "🎃", "🍅", "🥔"], harvest: "veg" },
   { id: "appletree", price: 20, level: 4, category: "plants", stages: ["🌱", "🪴", "🌳"], days: [0, 2, 4], produce: "apple" },
-  // Animals: small ones live anywhere; farm animals need their home first.
-  { id: "snail", price: 4, level: 1, category: "animals", stages: ["🐌"], days: [0] },
-  { id: "ladybug", price: 5, level: 1, category: "animals", stages: ["🐞"], days: [0] },
-  { id: "butterfly", price: 6, level: 1, category: "animals", stages: ["🦋"], days: [0] },
-  { id: "bee", price: 6, level: 1, category: "animals", stages: ["🐝"], days: [0] },
-  { id: "rabbit", price: 8, level: 2, category: "animals", stages: ["🐇"], days: [0] },
-  { id: "dog", price: 15, level: 2, category: "animals", stages: ["🐕"], days: [0], needs: "dog" },
+  // Animals: small ones live anywhere and help; farm animals need their home first.
+  { id: "snail", price: 4, level: 1, category: "animals", stages: ["🐌"], days: [0], boosts: ["mushroom"] },
+  { id: "ladybug", price: 5, level: 1, category: "animals", stages: ["🐞"], days: [0], boosts: ["veg"] },
+  { id: "butterfly", price: 6, level: 1, category: "animals", stages: ["🦋"], days: [0], boosts: ["flowers"] },
+  { id: "bee", price: 6, level: 1, category: "animals", stages: ["🐝"], days: [0], boosts: ["apple", "honey"] },
+  { id: "rabbit", price: 8, level: 2, category: "animals", stages: ["🐇"], days: [0], produce: "wool" },
+  { id: "dog", price: 15, level: 2, category: "animals", stages: ["🐕"], days: [0], needs: "dog", boosts: ["wool"] },
   { id: "chick", price: 6, level: 2, category: "animals", stages: ["🐣", "🐥", "🐔"], days: [0, 2, 4], needs: "chicken", produce: "egg" },
-  { id: "duck", price: 8, level: 3, category: "animals", stages: ["🦆"], days: [0], needs: "duck" },
-  { id: "cat", price: 12, level: 3, category: "animals", stages: ["🐈"], days: [0], needs: "cat" },
-  { id: "sheep", price: 15, level: 4, category: "animals", stages: ["🐑"], days: [0], needs: "farm" },
-  { id: "goat", price: 15, level: 4, category: "animals", stages: ["🐐"], days: [0], needs: "farm" },
-  { id: "pig", price: 18, level: 5, category: "animals", stages: ["🐖"], days: [0], needs: "farm" },
+  { id: "duck", price: 8, level: 3, category: "animals", stages: ["🦆"], days: [0], needs: "duck", produce: "egg" },
+  { id: "cat", price: 12, level: 3, category: "animals", stages: ["🐈"], days: [0], needs: "cat", boosts: ["wheat"] },
+  { id: "sheep", price: 15, level: 4, category: "animals", stages: ["🐑"], days: [0], needs: "farm", produce: "wool" },
+  { id: "goat", price: 15, level: 4, category: "animals", stages: ["🐐"], days: [0], needs: "farm", produce: "milk" },
+  { id: "pig", price: 18, level: 5, category: "animals", stages: ["🐖"], days: [0], needs: "farm", produce: "bacon" },
   { id: "cow", price: 25, level: 5, category: "animals", stages: ["🐄"], days: [0], needs: "farm", produce: "milk" },
-  { id: "horse", price: 30, level: 6, category: "animals", stages: ["🐴"], days: [0], needs: "farm" },
+  { id: "horse", price: 30, level: 6, category: "animals", stages: ["🐴"], days: [0], needs: "farm", orders: "extraStar" },
   // Buildings take a few days to build.
   { id: "doghouse", price: 15, level: 2, category: "buildings", stages: [BUILDING, "art:doghouse"], days: [0, 1], houses: { group: "dog", capacity: 1 } },
   { id: "coop", price: 20, level: 2, category: "buildings", stages: [BUILDING, "art:coop"], days: [0, 1], houses: { group: "chicken", capacity: 4 } },
   { id: "house", price: 30, level: 3, category: "buildings", stages: ["🏡"], days: [0], houses: { group: "cat", capacity: 2 } },
-  { id: "pond", price: 25, level: 3, category: "buildings", stages: [BUILDING, "art:pond"], days: [0, 1], size: [2, 1], houses: { group: "duck", capacity: 3 } },
-  { id: "barn", price: 40, level: 4, category: "buildings", stages: [BUILDING, "art:barn"], days: [0, 2], size: [2, 2], houses: { group: "farm", capacity: 4 } },
+  { id: "pond", price: 25, level: 3, category: "buildings", stages: [BUILDING, "art:pond"], days: [0, 1], size: [2, 1], houses: { group: "duck", capacity: 3 }, produce: "fish" },
+  { id: "barn", price: 40, level: 4, category: "buildings", stages: [BUILDING, "art:barn"], days: [0, 2], size: [2, 2], houses: { group: "farm", capacity: 4 }, recipe: { needs: { milk: 2 }, makes: "cheese" } },
   { id: "beehive", price: 25, level: 5, category: "buildings", stages: [BUILDING, "art:beehive"], days: [0, 1], produce: "honey" },
-  { id: "farmhouse", price: 60, level: 6, category: "buildings", stages: [BUILDING, "art:farmhouse"], days: [0, 3], size: [2, 2], houses: { group: "cat", capacity: 2 } },
-  { id: "windmill", price: 50, level: 7, category: "buildings", stages: [BUILDING, "art:windmill"], days: [0, 2], size: [1, 2] },
+  { id: "farmhouse", price: 60, level: 6, category: "buildings", stages: [BUILDING, "art:farmhouse"], days: [0, 3], size: [2, 2], houses: { group: "cat", capacity: 2 }, recipe: { needs: { apple: 1, egg: 1, wheat: 1 }, makes: "pie" } },
+  { id: "windmill", price: 50, level: 7, category: "buildings", stages: [BUILDING, "art:windmill"], days: [0, 2], size: [1, 2], recipe: { needs: { wheat: 2 }, makes: "bread" } },
   // Roads, paths and fences are free, so children can lay out their farm.
   { id: "road", price: 0, level: 1, category: "paths", stages: ["art:road"], days: [0], connects: true },
   { id: "path", price: 0, level: 1, category: "paths", stages: ["art:path"], days: [0], connects: true },
   { id: "fence", price: 0, level: 1, category: "paths", stages: ["art:fence"], days: [0], connects: true },
-  // Decorations
+  // Decorations, and a few that help
   { id: "stone", price: 1, level: 1, category: "decor", stages: ["🪨"], days: [0] },
-  { id: "mailbox", price: 3, level: 2, category: "decor", stages: ["📫"], days: [0] },
-  { id: "fountain", price: 20, level: 4, category: "decor", stages: ["⛲"], days: [0] },
-  { id: "tractor", price: 30, level: 8, category: "decor", stages: ["🚜"], days: [0] },
+  { id: "mailbox", price: 3, level: 2, category: "decor", stages: ["📫"], days: [0], orders: "extraOrder" },
+  { id: "fountain", price: 20, level: 4, category: "decor", stages: ["⛲"], days: [0], boosts: ["milk"] },
+  { id: "tractor", price: 30, level: 8, category: "decor", stages: ["🚜"], days: [0], boosts: ["wheat", "veg"] },
 ];
 
 export const gardenItem = (id: string) => GARDEN_ITEMS.find((i) => i.id === id);
@@ -350,6 +373,23 @@ export function readyProduce(plot: GardenPlot, now: Date): Produce | undefined {
   return plot.collectedDay === dayKey(now) ? undefined : item.produce;
 }
 
+/** Finished items on the farm, one per kind (one of a kind is enough for its effect). */
+function finishedKinds(garden: Garden, now: Date): GardenItem[] {
+  const seen = new Map<string, GardenItem>();
+  for (const plot of garden) {
+    const item = plot && gardenItem(plot.itemId);
+    if (item && !seen.has(item.id) && isGrown(item, plot, now)) seen.set(item.id, item);
+  }
+  return [...seen.values()];
+}
+
+/** Helpers on the farm that make collecting this good give more. */
+export const helpersFor = (garden: Garden, produce: Produce, now: Date): GardenItem[] =>
+  finishedKinds(garden, now).filter((i) => i.boosts?.includes(produce));
+
+/** How many of a good one collection gives: one, plus one for each kind of helper. */
+export const collectAmount = (garden: Garden, produce: Produce, now: Date) => 1 + helpersFor(garden, produce, now).length;
+
 export function collectProduce(p: Profile, cell: number, now: Date): Profile {
   const anchor = occupancy(p.garden)[cell];
   const plot = anchor === undefined ? undefined : p.garden[anchor];
@@ -359,7 +399,36 @@ export function collectProduce(p: Profile, cell: number, now: Date): Profile {
   const harvested = gardenItem(plot.itemId)?.harvest;
   // A harvested crop starts growing again; other gifts wait for tomorrow.
   garden[anchor] = harvested ? { ...plot, plantedDay: dayKey(now) } : { ...plot, collectedDay: dayKey(now) };
-  return withXp({ ...p, garden, farmGoods: { ...p.farmGoods, [produce]: (p.farmGoods[produce] ?? 0) + 1 } }, XP_FOR_COLLECTING);
+  const farmGoods = { ...emptyGoods(), ...p.farmGoods };
+  farmGoods[produce] += collectAmount(p.garden, produce, now);
+  return withXp({ ...p, garden, farmGoods }, XP_FOR_COLLECTING);
+}
+
+// MARK: Making things
+
+/** The recipe of the finished building covering this cell, if it has one. */
+export function recipeAt(garden: Garden, cell: number, now: Date): Recipe | undefined {
+  const anchor = occupancy(garden)[cell];
+  const plot = anchor === undefined ? undefined : garden[anchor];
+  const item = plot && gardenItem(plot.itemId);
+  return plot && item?.recipe && isGrown(item, plot, now) ? item.recipe : undefined;
+}
+
+const hasGoods = (p: Profile, wants: Partial<Record<Produce, number>>) => PRODUCE.every((k) => (p.farmGoods[k] ?? 0) >= (wants[k] ?? 0));
+
+export function canMake(p: Profile, cell: number, now: Date): boolean {
+  const recipe = recipeAt(p.garden, cell, now);
+  return !!recipe && hasGoods(p, recipe.needs);
+}
+
+/** The mill, barn or farmhouse makes one batch from goods in the storage. */
+export function makeGoods(p: Profile, cell: number, now: Date): Profile {
+  const recipe = recipeAt(p.garden, cell, now);
+  if (!recipe || !hasGoods(p, recipe.needs)) return p;
+  const farmGoods = { ...emptyGoods(), ...p.farmGoods };
+  for (const k of PRODUCE) farmGoods[k] -= recipe.needs[k] ?? 0;
+  farmGoods[recipe.makes] += 1;
+  return withXp({ ...p, farmGoods }, XP_FOR_COLLECTING);
 }
 
 /** Every cell with something ready, one per item. */
@@ -369,19 +438,52 @@ export function readyCells(garden: Garden, now: Date): number[] {
 
 export const goodsCount = (goods: Partial<Record<Produce, number>>) => PRODUCE.reduce((sum, k) => sum + (goods[k] ?? 0), 0);
 
-/** The farm shop buys goods in fives: 5 → 1 ⭐ (spendable only; lifetime stars stay learning stars). */
+/**
+ * The farm shop pays 1 ⭐ for every 5 goods; bread and cheese count as 3, a pie
+ * as 5 (spendable only; lifetime stars stay learning stars).
+ */
 export const GOODS_PER_STAR = 5;
 
-export function sellGoods(p: Profile): Profile {
-  const stars = Math.floor(goodsCount(p.farmGoods) / GOODS_PER_STAR);
-  if (stars === 0) return p;
-  let toSell = stars * GOODS_PER_STAR;
-  const farmGoods = { ...emptyGoods(), ...p.farmGoods };
-  for (const kind of PRODUCE) {
-    const sold = Math.min(farmGoods[kind], toSell);
-    farmGoods[kind] -= sold;
-    toSell -= sold;
+/**
+ * What the farm shop takes: the most whole stars' worth that the goods add up to
+ * exactly, using plain goods first so bread, cheese and pies stay for orders.
+ */
+function shopSale(goods: Partial<Record<Produce, number>>): { stars: number; sold: Record<Produce, number> } {
+  const kinds = [...PRODUCE].sort((a, b) => GOODS_VALUE[a] - GOODS_VALUE[b]);
+  const total = goodsValue(goods);
+  // reachable[i][v]: some choice from the first i kinds is worth exactly v.
+  const reachable: boolean[][] = [[true, ...Array<boolean>(total).fill(false)]];
+  kinds.forEach((kind, i) => {
+    const before = reachable[i], value = GOODS_VALUE[kind], have = goods[kind] ?? 0;
+    reachable.push(before.map((_, v) => {
+      for (let n = 0; n <= have && n * value <= v; n++) if (before[v - n * value]) return true;
+      return false;
+    }));
+  });
+  const sold = emptyGoods();
+  let target = total - (total % GOODS_PER_STAR);
+  while (target > 0 && !reachable[kinds.length][target]) target -= GOODS_PER_STAR;
+  // Walk back from the most valuable kind, taking as few of each as still works.
+  let rest = target;
+  for (let i = kinds.length - 1; i >= 0; i--) {
+    const kind = kinds[i], value = GOODS_VALUE[kind];
+    let n = 0;
+    while (!reachable[i][rest - n * value]) n++;
+    sold[kind] = n;
+    rest -= n * value;
   }
+  return { stars: target / GOODS_PER_STAR, sold };
+}
+
+/** Stars the farm shop pays for what is in the storage. */
+export const sellableStars = (goods: Partial<Record<Produce, number>>) => shopSale(goods).stars;
+
+/** Sells to the farm shop; what doesn't add up to a whole star stays in the storage. */
+export function sellGoods(p: Profile): Profile {
+  const { stars, sold } = shopSale(p.farmGoods);
+  if (stars === 0) return p;
+  const farmGoods = { ...emptyGoods(), ...p.farmGoods };
+  for (const k of PRODUCE) farmGoods[k] -= sold[k];
   return { ...p, walletStars: p.walletStars + stars, farmGoods };
 }
 
@@ -395,22 +497,28 @@ export interface FarmOrder {
   done?: boolean;
 }
 
-/** Goods this farm can make: from what's on it, grown or not. */
+/** Goods this farm can make: from what's on it, grown or not, and what its buildings make from those. */
 export function producibleGoods(garden: Garden): Produce[] {
   const kinds = new Set<Produce>();
+  const recipes: Recipe[] = [];
   for (const plot of garden) {
     const item = plot && gardenItem(plot.itemId);
     const kind = item?.produce ?? item?.harvest;
     if (kind) kinds.add(kind);
+    if (item?.recipe) recipes.push(item.recipe);
   }
+  for (const r of recipes) if (PRODUCE.every((k) => !r.needs[k] || kinds.has(k))) kinds.add(r.makes);
   return PRODUCE.filter((k) => kinds.has(k));
 }
+
+const onFarm = (garden: Garden, bonus: GardenItem["orders"]) => garden.some((plot) => plot && gardenItem(plot.itemId)?.orders === bonus);
 
 const hash = (s: string) => [...s].reduce((h, ch) => (Math.imul(h, 31) + ch.charCodeAt(0)) | 0, 7);
 
 /**
- * Three orders a day, for goods this farm can make. They pay better than the
- * farm shop: about 1 ⭐ for every 3 goods, plus XP. Made once per day.
+ * Three orders a day (four with a mailbox), for goods this farm can make. They
+ * pay better than the farm shop: about 1 ⭐ for every 3 goods (bread and cheese
+ * count 3, a pie 5), one more with a horse, plus XP. Made once per day.
  */
 export function withTodaysOrders(p: Profile, now: Date): Profile {
   const today = dayKey(now);
@@ -419,18 +527,20 @@ export function withTodaysOrders(p: Profile, now: Date): Profile {
   if (current?.day === today && (current.orders.length > 0 || kinds.length === 0)) return p;
   const rng = seededRng(hash(`${p.id}:${today}`));
   const big = farmLevel(p.farmXp).level >= 5 ? 1 : 0;
-  const orders: FarmOrder[] = kinds.length === 0 ? [] : Array.from({ length: 3 }, (_, i) => {
+  const count = onFarm(p.garden, "extraOrder") ? 4 : 3;
+  const extraStar = onFarm(p.garden, "extraStar") ? 1 : 0;
+  const orders: FarmOrder[] = kinds.length === 0 ? [] : Array.from({ length: count }, (_, i) => {
     const picked = shuffled(rng, kinds).slice(0, kinds.length > 1 && rng() < 0.5 ? 2 : 1);
     const wants: Partial<Record<Produce, number>> = {};
-    for (const kind of picked) wants[kind] = randomInt(rng, 2, 3 + big);
-    const total = goodsCount(wants);
-    return { id: `${today}-${i}`, wants, stars: 1 + Math.floor(total / 3), xp: total * 3 };
+    for (const kind of picked) wants[kind] = GOODS_VALUE[kind] > 1 ? randomInt(rng, 1, 2) : randomInt(rng, 2, 3 + big);
+    const value = goodsValue(wants);
+    return { id: `${today}-${i}`, wants, stars: 1 + Math.floor(value / 3) + extraStar, xp: value * 3 };
   });
   return { ...p, farmOrders: { day: today, orders } };
 }
 
 export function canFulfil(p: Profile, order: FarmOrder): boolean {
-  return !order.done && PRODUCE.every((k) => (p.farmGoods[k] ?? 0) >= (order.wants[k] ?? 0));
+  return !order.done && hasGoods(p, order.wants);
 }
 
 export function fulfilOrder(p: Profile, orderId: string): Profile {

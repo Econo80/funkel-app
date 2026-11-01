@@ -111,6 +111,7 @@ struct FarmMeadow: View {
                     picture: Farm.picture(of: plot, now: now),
                     cell: layout.cell,
                     ready: Farm.readyProduce(plot, now: now),
+                    makes: Farm.readyProduce(plot, now: now) == nil && farm.canMake(at: anchor, now: now) ? farm.recipe(at: anchor, now: now)?.makes : nil,
                     building: Farm.isUnderConstruction(plot, now: now),
                     moving: movingAnchor == anchor,
                     seed: anchor
@@ -173,6 +174,8 @@ private struct FarmObject: View {
     let picture: String
     let cell: CGFloat
     let ready: Produce?
+    /// A building that can make this now from the storage.
+    let makes: Produce?
     let building: Bool
     let moving: Bool
     let seed: Int
@@ -229,8 +232,8 @@ private struct FarmObject: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            if let ready {
-                Bubble(produce: ready, cell: cell)
+            if let shown = ready ?? makes {
+                Bubble(produce: shown, cell: cell, ring: makes != nil)
                     .offset(x: width * 0.08, y: -height * 0.12)
             }
         }
@@ -312,10 +315,11 @@ private struct FarmObject: View {
     }
 }
 
-/// Something to collect: a bubble with what it is.
+/// Something to collect: a bubble with what it is. With a ring: what a building can make now.
 private struct Bubble: View {
     let produce: Produce
     let cell: CGFloat
+    var ring = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -323,6 +327,7 @@ private struct Bubble: View {
             .font(.system(size: cell * 0.3))
             .frame(width: cell * 0.52, height: cell * 0.52)
             .background(.white, in: .circle)
+            .overlay { if ring { Circle().strokeBorder(Color(hex: "#f2b84b"), lineWidth: 3) } }
             .shadow(color: .black.opacity(0.22), radius: 4, y: 3)
         if reduceMotion {
             bubble

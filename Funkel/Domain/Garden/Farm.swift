@@ -315,7 +315,8 @@ extension Farm {
 
 extension Farm {
     static let xpForCollecting = 3
-    /// The farm shop buys goods in fives: 5 → 1 ⭐ (spendable only; lifetime stars stay learning stars).
+    /// The farm shop pays 1 ⭐ for every 5 goods; bread and cheese count as 3, a pie
+    /// as 5 (spendable only; lifetime stars stay learning stars).
     static let goodsPerStar = 5
 
     /// What a plot has ready: grown crops can be harvested (then they grow again);
@@ -341,44 +342,136 @@ extension Farm {
         }
         var farm = self
         farm.garden[anchor] = plot
-        farm.goods[produce] = goods(produce) + 1
+        farm.goods[produce] = goods(produce) + collectAmount(produce, now: now)
         return farm.withXp(Self.xpForCollecting)
     }
+
+    /// Finished items on the farm, one per kind (one of a kind is enough for its effect).
+    private static func finishedKinds(_ garden: [GardenPlot?], now: Date) -> [GardenItem] {
+        var seen = Set<String>()
+        var kinds: [GardenItem] = []
+        for plot in garden {
+            guard let plot, let item = plot.item, !seen.contains(item.id), isGrown(plot, item: item, now: now) else { continue }
+            seen.insert(item.id)
+            kinds.append(item)
+        }
+        return kinds
+    }
+
+    /// Helpers on the farm that make collecting this good give more.
+    func helpers(for produce: Produce, now: Date) -> [GardenItem] {
+        Self.finishedKinds(garden, now: now).filter { $0.boosts?.contains(produce) == true }
+    }
+
+    /// How many of a good one collection gives: one, plus one for each kind of helper.
+    func collectAmount(_ produce: Produce, now: Date) -> Int { 1 + helpers(for: produce, now: now).count }
 
     /// Every cell with something ready, one per item.
     static func readyCells(_ garden: [GardenPlot?], now: Date) -> [Int] {
         garden.indices.filter { garden[$0].map { readyProduce($0, now: now) != nil } ?? false }
     }
 
-    func selling() -> Farm {
-        let stars = goodsCount / Self.goodsPerStar
-        guard stars > 0 else { return self }
-        var toSell = stars * Self.goodsPerStar
-        var farm = self
-        for kind in Produce.allCases {
-            let sold = min(goods(kind), toSell)
-            farm.goods[kind] = goods(kind) - sold
-            toSell -= sold
+    /// What the farm shop takes: the most whole stars' worth that the goods add up to
+    /// exactly, using plain goods first so bread, cheese and pies stay for orders.
+    private var shopSale: (stars: Int, sold: [Produce: Int]) {
+        let kinds = Produce.allCases.enumerated().sorted { ($0.element.value, $0.offset) < ($1.element.value, $1.offset) }.map(\.element)
+        let total = Produce.value(goods)
+        // reachable[i][v]: some choice from the first i kinds is worth exactly v.
+        var reachable: [[Bool]] = [[true] + Array(repeating: false, count: total)]
+        for kind in kinds {
+            let before = reachable[reachable.count - 1]
+            let have = goods(kind)
+            reachable.append(before.indices.map { v in
+                var n = 0
+                while n <= have && n * kind.value <= v {
+                    if before[v - n * kind.value] { return true }
+                    n += 1
+                }
+                return false
+            })
         }
-        farm.walletStars += stars
+        var target = total - total % Self.goodsPerStar
+        while target > 0 && !reachable[kinds.count][target] { target -= Self.goodsPerStar }
+        // Walk back from the most valuable kind, taking as few of each as still works.
+        var sold: [Produce: Int] = [:]
+        var rest = target
+        for i in stride(from: kinds.count - 1, through: 0, by: -1) {
+            let kind = kinds[i]
+            var n = 0
+            while !reachable[i][rest - n * kind.value] { n += 1 }
+            sold[kind] = n
+            rest -= n * kind.value
+        }
+        return (target / Self.goodsPerStar, sold)
+    }
+
+    /// Stars the farm shop pays for what is in the storage.
+    var sellableStars: Int { shopSale.stars }
+
+    /// Sells to the farm shop; what doesn't add up to a whole star stays in the storage.
+    func selling() -> Farm {
+        let sale = shopSale
+        guard sale.stars > 0 else { return self }
+        var farm = self
+        for kind in Produce.allCases { farm.goods[kind] = goods(kind) - (sale.sold[kind] ?? 0) }
+        farm.walletStars += sale.stars
         return farm
+    }
+}
+
+// MARK: Making things
+
+extension Farm {
+    /// The recipe of the finished building covering this cell, if it has one.
+    func recipe(at cell: Int, now: Date) -> Recipe? {
+        let covered = Self.occupancy(garden)
+        guard covered.indices.contains(cell), let anchor = covered[cell], let plot = garden[anchor],
+              let item = plot.item, let recipe = item.recipe, Self.isGrown(plot, item: item, now: now)
+        else { return nil }
+        return recipe
+    }
+
+    private func has(_ wants: [Produce: Int]) -> Bool {
+        wants.allSatisfy { goods($0.key) >= $0.value }
+    }
+
+    func canMake(at cell: Int, now: Date) -> Bool {
+        recipe(at: cell, now: now).map { has($0.needs) } ?? false
+    }
+
+    /// The mill, barn or farmhouse makes one batch from goods in the storage.
+    func making(at cell: Int, now: Date) -> Farm {
+        guard let recipe = recipe(at: cell, now: now), has(recipe.needs) else { return self }
+        var farm = self
+        for (kind, n) in recipe.needs { farm.goods[kind] = goods(kind) - n }
+        farm.goods[recipe.makes] = goods(recipe.makes) + 1
+        return farm.withXp(Self.xpForCollecting)
     }
 }
 
 // MARK: Orders
 
 extension Farm {
-    /// Goods this farm can make: from what's on it, grown or not.
+    /// Goods this farm can make: from what's on it, grown or not, and what its buildings make from those.
     static func producibleGoods(_ garden: [GardenPlot?]) -> [Produce] {
         var kinds = Set<Produce>()
+        var recipes: [Recipe] = []
         for plot in garden {
-            if let item = plot?.item, let kind = item.produce ?? item.harvest { kinds.insert(kind) }
+            guard let item = plot?.item else { continue }
+            if let kind = item.produce ?? item.harvest { kinds.insert(kind) }
+            if let recipe = item.recipe { recipes.append(recipe) }
         }
+        for recipe in recipes where recipe.needs.keys.allSatisfy(kinds.contains) { kinds.insert(recipe.makes) }
         return Produce.allCases.filter(kinds.contains)
     }
 
-    /// Three orders a day, for goods this farm can make. They pay better than the
-    /// farm shop: about 1 ⭐ for every 3 goods, plus XP. Made once per day, the
+    private static func has(_ bonus: OrderBonus, in garden: [GardenPlot?]) -> Bool {
+        garden.contains { $0?.item?.orders == bonus }
+    }
+
+    /// Three orders a day (four with a mailbox), for goods this farm can make. They
+    /// pay better than the farm shop: about 1 ⭐ for every 3 goods (bread and cheese
+    /// count 3, a pie 5), one more with a horse, plus XP. Made once per day, the
     /// same ones the web app would make for this child.
     func withTodaysOrders(now: Date) -> Farm {
         let today = FarmDay.key(now)
@@ -386,14 +479,16 @@ extension Farm {
         if let current = orders, current.day == today, !current.orders.isEmpty || kinds.isEmpty { return self }
         var rng = Mulberry32(seed: Mulberry32.hash("\(profileID):\(today)"))
         let big = level.level >= 5 ? 1 : 0
-        let made: [FarmOrder] = kinds.isEmpty ? [] : (0..<3).map { i in
+        let count = Self.has(.extraOrder, in: garden) ? 4 : 3
+        let extraStar = Self.has(.extraStar, in: garden) ? 1 : 0
+        let made: [FarmOrder] = kinds.isEmpty ? [] : (0..<count).map { i in
             let shuffled = rng.shuffled(kinds)
-            var count = 1
-            if kinds.count > 1, rng.next() < 0.5 { count = 2 }
+            var picks = 1
+            if kinds.count > 1, rng.next() < 0.5 { picks = 2 }
             var wants: [String: Int] = [:]
-            for kind in shuffled.prefix(count) { wants[kind.rawValue] = rng.int(2, 3 + big) }
-            let total = wants.values.reduce(0, +)
-            return FarmOrder(id: "\(today)-\(i)", wants: wants, stars: 1 + total / 3, xp: total * 3)
+            for kind in shuffled.prefix(picks) { wants[kind.rawValue] = kind.value > 1 ? rng.int(1, 2) : rng.int(2, 3 + big) }
+            let value = wants.reduce(0) { $0 + (Produce(rawValue: $1.key)?.value ?? 1) * $1.value }
+            return FarmOrder(id: "\(today)-\(i)", wants: wants, stars: 1 + value / 3 + extraStar, xp: value * 3)
         }
         var farm = self
         farm.orders = FarmOrders(day: today, orders: made)
