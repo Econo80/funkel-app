@@ -34,6 +34,7 @@ final class GardenScreenshotTests: XCTestCase {
             if levelUp.waitForExistence(timeout: 2) {
                 snap("41b-garden-level-up", app, settle: 0.5)
                 levelUp.tap()
+                XCTAssertTrue(levelUp.waitForNonExistence(timeout: 5), "level-up card should close")
             }
         }
 
