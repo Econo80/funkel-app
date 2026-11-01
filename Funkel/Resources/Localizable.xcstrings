@@ -301,6 +301,42 @@
         }
       }
     },
+    "editor.birthday": {
+      "comment": "UI text. (Profile editor: birthday.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geburtstag (freiwillig)"
+          }
+        }
+      }
+    },
+    "editor.birthday.clear": {
+      "comment": "UI text. (Profile editor: birthday.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        }
+      }
+    },
+    "editor.birthday.footer": {
+      "comment": "UI text. (Profile editor: birthday.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit dem Geburtstag wird das Alter jedes Jahr von selbst angepasst. Ohne Geburtstag stellst du das Alter selbst ein."
+          }
+        }
+      }
+    },
     "editor.cancel": {
       "comment": "Cancel button.",
       "extractionState": "manual",
@@ -752,7 +788,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alles bleibt auf diesem Gerät. Gespeichert werden nur Vorname, Alter und Lernfortschritt."
+            "value": "Alles bleibt auf diesem Gerät. Gespeichert werden nur Vorname, Alter (oder Geburtstag) und Lernfortschritt."
           }
         }
       }
@@ -2720,7 +2756,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Funkel funktioniert komplett ohne Internet. Es gibt keine Konten, keine Werbung, keine In-App-Käufe und keine Datenweitergabe. Gespeichert werden nur Vorname, Alter und Lernfortschritt – und zwar nur auf diesem Gerät."
+            "value": "Funkel funktioniert komplett ohne Internet. Es gibt keine Konten, keine Werbung, keine In-App-Käufe und keine Datenweitergabe. Gespeichert werden nur Vorname, Alter (oder Geburtstag) und Lernfortschritt – und zwar nur auf diesem Gerät."
           }
         }
       }

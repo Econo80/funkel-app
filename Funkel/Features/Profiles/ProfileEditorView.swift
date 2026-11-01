@@ -53,11 +53,26 @@ struct ProfileEditorView: View {
                     .accessibilityIdentifier("editor-name")
             }
 
-            Section("editor.age") {
-                Stepper(value: $settings.age, in: DifficultyTuning.ageRange) {
+            Section {
+                if settings.birthDate == nil {
+                    Stepper(value: $settings.age, in: DifficultyTuning.ageRange) {
+                        Text("profile.age \(settings.age)")
+                            .font(.funkelHeadline)
+                    }
+                } else {
                     Text("profile.age \(settings.age)")
                         .font(.funkelHeadline)
                 }
+                Toggle("editor.birthday", isOn: hasBirthday)
+                    .accessibilityIdentifier("editor-birthday")
+                if settings.birthDate != nil {
+                    DatePicker("editor.birthday", selection: birthday, in: ...Date.now, displayedComponents: .date)
+                        .labelsHidden()
+                }
+            } header: {
+                Text("editor.age")
+            } footer: {
+                Text("editor.birthday.footer")
             }
 
             Section("editor.color") {
@@ -275,6 +290,24 @@ struct ProfileEditorView: View {
             Text("editor.levels")
         } footer: {
             Text("editor.level.footer")
+        }
+    }
+
+    /// Turning the birthday on starts from a date that matches the age set so far.
+    private var hasBirthday: Binding<Bool> {
+        Binding {
+            settings.birthDate != nil
+        } set: { on in
+            settings.birthDate = on ? Calendar.current.date(byAdding: .year, value: -settings.age, to: .now) : nil
+        }
+    }
+
+    private var birthday: Binding<Date> {
+        Binding {
+            settings.birthDate ?? .now
+        } set: { date in
+            settings.birthDate = date
+            settings.age = ChildProfile.age(bornOn: date).clamped(to: DifficultyTuning.ageRange)
         }
     }
 

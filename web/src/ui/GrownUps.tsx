@@ -10,6 +10,7 @@ import {
   COUNTRIES,
   ROUND_LENGTH_CHOICES,
   allowsGentleTimer,
+  ageOn,
   applySettings,
   createProfile,
   defaultSettings,
@@ -207,6 +208,12 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
   const subjectIds = language?.subjects.map((x) => x.id) ?? [];
   const valid = s.name.trim().length > 0;
   const set = (patch: Partial<ProfileSettings>) => setS((prev) => ({ ...prev, ...patch }));
+  /** A birthday sets the age (half-typed dates are ignored until complete). */
+  const setBirthday = (value: string) => {
+    const years = ageOn(value);
+    if (years === undefined) return;
+    set({ birthDate: value, age: Math.min(Math.max(years, Tuning.minAge), Tuning.maxAge) });
+  };
   // Per-subject levels a grown-up changed here (years above/below the age), saved with "Speichern".
   const [levels, setLevels] = useState<Record<string, number>>({});
   // Stars to give, added to the wallet on "Speichern".
@@ -257,12 +264,23 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
 
         <h3 class="section-title">{t("editor.age")}</h3>
         <div class="list row-between">
-          <strong>{t("profile.age %lld", s.age)}</strong>
-          <div class="stepper">
-            <button aria-label="−" disabled={s.age <= Tuning.minAge} onClick={() => set({ age: s.age - 1 })}>−</button>
-            <button aria-label="+" disabled={s.age >= Tuning.maxAge} onClick={() => set({ age: s.age + 1 })}>+</button>
-          </div>
+          <strong data-testid="editor-age">{t("profile.age %lld", s.age)}</strong>
+          {!s.birthDate && (
+            <div class="stepper">
+              <button aria-label="−" disabled={s.age <= Tuning.minAge} onClick={() => set({ age: s.age - 1 })}>−</button>
+              <button aria-label="+" disabled={s.age >= Tuning.maxAge} onClick={() => set({ age: s.age + 1 })}>+</button>
+            </div>
+          )}
         </div>
+        <label class="footnote" for="birthday">{t("editor.birthday")}</label>
+        <div class="list row-between">
+          <input id="birthday" type="date" class="text-input" value={s.birthDate ?? ""} max={localDay(new Date())}
+            onInput={(e) => setBirthday(e.currentTarget.value)} data-testid="editor-birthday" />
+          {s.birthDate && (
+            <button class="link" onClick={() => set({ birthDate: undefined })} data-testid="editor-birthday-clear">{t("editor.birthday.clear")}</button>
+          )}
+        </div>
+        <p class="footnote">{t("editor.birthday.footer")}</p>
 
         <h3 class="section-title">{t("editor.color")}</h3>
         <div class="list colors" role="radiogroup" aria-label={t("editor.color")}>
@@ -473,4 +491,10 @@ function Toggle({ checked, disabled, onChange, children }: {
       <span class="switch" aria-hidden="true" />
     </label>
   );
+}
+
+/** "YYYY-MM-DD" in local time, for the date field's limit. */
+function localDay(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

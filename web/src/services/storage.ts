@@ -1,5 +1,5 @@
 // Saves profiles on this device only (IndexedDB). Nothing leaves the device.
-import { normalizeProfile, type Profile } from "../domain/profile";
+import { normalizeProfile, withCurrentAge, type Profile } from "../domain/profile";
 
 const DB_NAME = "funkel";
 const DB_VERSION = 1;
@@ -33,7 +33,10 @@ async function run<T>(store: string, mode: IDBTransactionMode, action: (s: IDBOb
 
 export async function loadProfiles(): Promise<Profile[]> {
   const stored = await run<Profile[]>(PROFILES, "readonly", (s) => s.getAll());
-  return stored.map(normalizeProfile).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  // A birthday since the last visit: the new age is saved right away.
+  const profiles = stored.map((p) => withCurrentAge(normalizeProfile(p)));
+  await Promise.all(profiles.filter((p, i) => p.age !== stored[i].age).map(saveProfile));
+  return profiles.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export async function saveProfile(profile: Profile): Promise<void> {

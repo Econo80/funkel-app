@@ -1,7 +1,7 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
-import { giftSeen, type Profile } from "../domain/profile";
+import { giftSeen, withCurrentAge, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
 import { deleteProfile, replaceAllProfiles, saveProfile, setMeta } from "../services/storage";
 import { GrownUpGate, GrownUps, ProfileEditor } from "./GrownUps";
@@ -40,6 +40,19 @@ export function App({ library, initialProfiles, initialActiveId }: {
       return exists ? list.map((p) => (p.id === profile.id ? profile : p)) : [...list, profile];
     });
   };
+
+  // The app can stay open for days on a tablet: catch birthdays when it comes back.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      for (const p of profiles) {
+        const current = withCurrentAge(p);
+        if (current !== p) void upsert(current);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [profiles]);
 
   const remove = async (id: string) => {
     await deleteProfile(id);

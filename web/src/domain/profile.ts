@@ -50,6 +50,8 @@ export interface RoundRecord {
 export interface ProfileSettings {
   name: string;
   age: number;
+  /** Birthday "YYYY-MM-DD" (optional): the age then goes up by itself. */
+  birthDate?: string;
   avatarColor: string;
   learningLanguage: string;
   country: Country;
@@ -318,13 +320,47 @@ export function withLanguage(s: ProfileSettings, code: string): ProfileSettings 
   return code === s.learningLanguage ? s : { ...s, learningLanguage: code, enabledSubjectIds: [] };
 }
 
-/** Writes settings back; a new age resets adaptivity; no timer below 9. */
+/** Full years on `now` for a birthday "YYYY-MM-DD"; undefined if there is none or it isn't a date. */
+export function ageOn(birthDate: string | undefined, now = new Date()): number | undefined {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate ?? "");
+  if (!m) return undefined;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  const beforeBirthday = now.getMonth() + 1 < month || (now.getMonth() + 1 === month && now.getDate() < day);
+  return now.getFullYear() - year - (beforeBirthday ? 1 : 0);
+}
+
+/**
+ * A birthday since the last visit: the age goes up by itself. A subject that
+ * was ahead keeps its level (the lead shrinks by the years gained); the others
+ * grow with the child. A grown-up changing the age by hand still starts fresh.
+ */
+export function withCurrentAge(p: Profile, now = new Date()): Profile {
+  const years = ageOn(p.birthDate, now);
+  if (years === undefined) return p;
+  const age = clamp(years, Tuning.minAge, Tuning.maxAge);
+  if (age === p.age) return p;
+  const gained = age - p.age;
+  const shift = (a: number) => (gained > 0 && a > 0 ? Math.max(0, a - gained) : a);
+  return {
+    ...p,
+    age,
+    gentleTimerEnabled: p.gentleTimerEnabled && allowsGentleTimer(age),
+    difficultyAdjustment: shift(p.difficultyAdjustment),
+    progress: Object.fromEntries(Object.entries(p.progress).map(([k, v]) =>
+      [k, v.adjustment === undefined ? v : { ...v, adjustment: shift(v.adjustment) }])),
+  };
+}
+
+/** Writes settings back; a new age resets adaptivity; no timer below 9. With a birthday, the age follows it. */
 export function applySettings(p: Profile, s: ProfileSettings): Profile {
-  const age = clamp(Math.round(s.age), Tuning.minAge, Tuning.maxAge);
+  const fromBirthday = ageOn(s.birthDate);
+  const age = clamp(Math.round(fromBirthday ?? s.age), Tuning.minAge, Tuning.maxAge);
   return {
     ...p,
     name: s.name.trim(),
     age,
+    birthDate: fromBirthday === undefined ? undefined : s.birthDate,
     avatarColor: s.avatarColor,
     learningLanguage: s.learningLanguage,
     country: COUNTRIES.includes(s.country) ? s.country : defaultCountry(),

@@ -7,6 +7,8 @@ struct ProfileSettings: Equatable {
 
     var name = ""
     var age = 6
+    /// Optional; when set, the age follows it.
+    var birthDate: Date?
     var avatarColor = "sun"
     var learningLanguage = ContentLibrary.fallbackLanguageCode
     var country = Country.fromDevice()
@@ -27,6 +29,7 @@ struct ProfileSettings: Equatable {
     init(profile: ChildProfile) {
         name = profile.name
         age = profile.age
+        birthDate = profile.birthDate
         avatarColor = profile.avatarColor
         learningLanguage = profile.learningLanguage
         country = profile.country
@@ -84,6 +87,7 @@ struct ProfileSettings: Equatable {
 
     func apply(to profile: ChildProfile) {
         profile.name = trimmedName
+        profile.birthDate = birthDate
         profile.setAge(age)   // resets adaptivity when the age changes
         profile.avatarColor = avatarColor
         profile.learningLanguage = learningLanguage

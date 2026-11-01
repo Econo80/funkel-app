@@ -154,4 +154,34 @@ final class LevelsAndGiftsTests: XCTestCase {
         XCTAssertEqual(extras["gamesEnabled"] as? Bool, false, "settings stay")
         XCTAssertEqual(extras["id"] as? String, "abc")
     }
+
+    // MARK: Birthday
+
+    func testTheAgeFollowsTheBirthday() throws {
+        let context = try makeContext()
+        let profile = ChildProfile(name: "Emil", age: 7)
+        context.insert(profile)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let day = { (y: Int, m: Int, d: Int) in calendar.date(from: DateComponents(year: y, month: m, day: d, hour: 12))! }
+        profile.birthDate = day(2019, 3, 15)
+        XCTAssertEqual(profile.webField("birthDate", as: String.self), "2019-03-15", "same field as the web app")
+
+        ProfileMaintenance.setSubjectAdjustment(2.5, subjectID: "generalKnowledge", language: "de", of: profile, in: context)
+        ProfileMaintenance.setSubjectAdjustment(0.5, subjectID: "maths", language: "de", of: profile, in: context)
+        ProfileMaintenance.setSubjectAdjustment(-1, subjectID: "vocabulary", language: "de", of: profile, in: context)
+
+        XCTAssertFalse(profile.refreshAgeFromBirthday(now: day(2027, 3, 14), calendar: calendar))
+        XCTAssertEqual(profile.age, 7)
+        XCTAssertTrue(profile.refreshAgeFromBirthday(now: day(2027, 3, 15), calendar: calendar))
+        XCTAssertEqual(profile.age, 8)
+        // A lead shrinks by the year gained; the others grow with the child.
+        XCTAssertEqual(profile.adaptivity(for: "generalKnowledge", language: "de").adjustment, 1.5)
+        XCTAssertEqual(profile.adaptivity(for: "maths", language: "de").adjustment, 0)
+        XCTAssertEqual(profile.adaptivity(for: "vocabulary", language: "de").adjustment, -1)
+
+        profile.birthDate = nil
+        XCTAssertNil(profile.webField("birthDate", as: String.self))
+        XCTAssertFalse(profile.refreshAgeFromBirthday(now: day(2030, 1, 1), calendar: calendar))
+    }
 }
