@@ -29,6 +29,12 @@ final class GardenScreenshotTests: XCTestCase {
         if collect.waitForExistence(timeout: 3) {
             collect.tap()
             snap("41-garden-collected", app, settle: 0.5)
+            // So much is ready on the sample farm that collecting can reach a new level.
+            let levelUp = app.buttons["level-up-ok"]
+            if levelUp.waitForExistence(timeout: 2) {
+                snap("41b-garden-level-up", app, settle: 0.5)
+                levelUp.tap()
+            }
         }
 
         // The shop, with locked items and land.

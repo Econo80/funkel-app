@@ -478,7 +478,11 @@ final class GardenTests: XCTestCase {
         XCTAssertEqual((garden[4] as! [String: Any])["variant"] as? String, "🌻")
         XCTAssertEqual((garden[6] as! [String: Any])["itemId"] as? String, "stone")
         XCTAssertEqual(p["gardenColumns"] as? Int, 16)
-        XCTAssertEqual(p["farmGoods"] as? [String: Int], ["egg": 3, "milk": 2, "wheat": 0, "veg": 0, "apple": 0, "honey": 0])
+        // Every kind of good is written, like the web app's emptyGoods().
+        var goods = Dictionary(uniqueKeysWithValues: Produce.allCases.map { ($0.rawValue, 0) })
+        goods["egg"] = 3
+        goods["milk"] = 2
+        XCTAssertEqual(p["farmGoods"] as? [String: Int], goods)
         XCTAssertEqual(p["farmXp"] as? Int, 140 + 3 + 1)
         XCTAssertEqual(p["walletStars"] as? Int, 99)
         XCTAssertEqual(p["totalStars"] as? Int, 62)
