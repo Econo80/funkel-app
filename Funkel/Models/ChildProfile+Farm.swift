@@ -1,7 +1,7 @@
 import Foundation
 
 /// Pips Garten lives in the web app's fields (`garden`, `gardenColumns`,
-/// `farmGoods`, `farmXp`, `farmOrders`, `gardenMinutesPerDay`, `gardenDay`,
+/// `farmGoods`, `farmXp`, `farmOrders`, `farmSeason`, `gardenMinutesPerDay`, `gardenDay`,
 /// `gardenSeconds`, `gardenBonusMinutes`), in the web app's JSON shapes, so
 /// backups move between both apps unchanged. Only the wallet is a native field.
 extension ChildProfile {
@@ -35,6 +35,12 @@ extension ChildProfile {
         setWebField("farmGoods", Dictionary(uniqueKeysWithValues: Produce.allCases.map { ($0.rawValue, farm.goods($0)) }))
         setWebField("farmXp", farm.xp)
         setWebField("farmOrders", farm.orders)
+    }
+
+    /// The first day of the season whose welcome card was last shown on the farm.
+    var farmSeason: String? {
+        get { webField("farmSeason") }
+        set { setWebField("farmSeason", newValue) }
     }
 
     var gardenTime: GardenTime {

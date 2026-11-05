@@ -22,6 +22,14 @@ final class GardenScreenshotTests: XCTestCase {
         open("game-garden", app)
 
         let shop = app.buttons["farm-shop"]
+        XCTAssertTrue(shop.waitForExistence(timeout: 10))
+        // A new season (and the very first one) is greeted with a card: close it first.
+        let seasonOK = app.buttons["season-ok"]
+        if seasonOK.waitForExistence(timeout: 3) {
+            snap("40b-garden-season", app, settle: 0.8)
+            seasonOK.tap()
+            XCTAssertTrue(seasonOK.waitForNonExistence(timeout: 5), "season card should close")
+        }
         snap("40-garden", app, waitFor: shop, settle: 2.0)
 
         // Collect everything that's ready: goods and XP float up.

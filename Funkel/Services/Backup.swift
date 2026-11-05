@@ -247,7 +247,7 @@ enum BackupExtras {
 
     /// Game and garden progress, cleared by "Fortschritt zurücksetzen" like in the web app.
     static let progressFields: Set<String> = [
-        "garden", "farmGoods", "farmXp", "farmOrders", "gamesToday", "gameDay",
+        "garden", "farmGoods", "farmXp", "farmOrders", "farmSeason", "gamesToday", "gameDay",
         "bonusGames", "bonusDay", "gardenDay", "gardenSeconds", "gardenBonusMinutes",
     ]
 

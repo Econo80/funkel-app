@@ -120,7 +120,7 @@ struct RoundTool: View {
 // MARK: Bottom bar
 
 struct FarmBarButton: View {
-    enum Style { case plain, shop, collect, active }
+    enum Style { case plain, shop, collect, care, active }
 
     let icon: String
     let title: LocalizedStringKey
@@ -159,7 +159,7 @@ struct FarmBarButton: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .frame(minWidth: 22, minHeight: 22)
-                        .background(Color(hex: "#e2455b"), in: .capsule)
+                        .background(Color(hex: style == .care ? "#e5675a" : "#e2455b"), in: .capsule)
                         .overlay(Capsule().stroke(.white, lineWidth: 2))
                         .offset(x: 4, y: -4)
                 }
@@ -171,7 +171,7 @@ struct FarmBarButton: View {
 
     private var background: AnyShapeStyle {
         switch style {
-        case .plain: AnyShapeStyle(Color(hex: "#f4efe4"))
+        case .plain, .care: AnyShapeStyle(Color(hex: "#f4efe4"))
         case .shop: AnyShapeStyle(LinearGradient(colors: [Color(hex: "#ffd25e"), Color(hex: "#f5a623")], startPoint: .top, endPoint: .bottom))
         case .collect: AnyShapeStyle(LinearGradient(colors: [Color(hex: "#a6e98a"), Color(hex: "#5cc24a")], startPoint: .top, endPoint: .bottom))
         case .active: AnyShapeStyle(FarmColors.ink)
@@ -492,6 +492,31 @@ struct LevelUpCard: View {
                 .ignoresSafeArea()
         }
         .onAppear { confetti += 1 }
+    }
+}
+
+/// "Der Winter ist da!": each new season is greeted with what it means on the farm.
+struct SeasonCard: View {
+    let season: Season
+    let onDone: () -> Void
+
+    var body: some View {
+        FarmDialog {
+            Text(verbatim: season.emoji)
+                .font(.system(size: 72))
+                .idleBob()
+                .accessibilityHidden(true)
+            Text(LocalizedStringKey("garden.season.new." + season.rawValue))
+                .font(.funkelTitle)
+                .multilineTextAlignment(.center)
+            Text(LocalizedStringKey("garden.season.text." + season.rawValue))
+                .font(.funkelBody)
+                .foregroundStyle(FarmColors.muted)
+                .multilineTextAlignment(.center)
+            BigButton(title: "garden.great", color: FarmColors.ink, action: onDone)
+                .accessibilityIdentifier("season-ok")
+        }
+        .accessibilityIdentifier("season-card")
     }
 }
 

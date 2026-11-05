@@ -10,8 +10,10 @@ enum GardenSample {
             FarmDay.key(Calendar.current.date(byAdding: .day, value: -days, to: now) ?? now)
         }
         var garden = Farm.emptyGarden()
-        func put(_ cell: Int, _ id: String, _ age: Int = 10, variant: String? = nil) {
-            garden[cell] = GardenPlot(itemId: id, plantedDay: daysAgo(age), variant: variant)
+        // Looked after yesterday, so the animals and buildings keep working on any day.
+        func put(_ cell: Int, _ id: String, _ age: Int = 10, variant: String? = nil, caredAgo: Int = 1) {
+            let cared: String? = GardenItem.with(id: id)?.care == nil ? nil : daysAgo(min(age, caredAgo))
+            garden[cell] = GardenPlot(itemId: id, plantedDay: daysAgo(age), variant: variant, caredDay: cared)
         }
         let c = Farm.columns
         put(0, "tree", variant: "🌲")
@@ -50,7 +52,7 @@ enum GardenSample {
         for (i, flower) in ["🌸", "🌹", "🪻", "🌻"].enumerated() { put(7 * c + i, "flower", variant: flower) }
         put(7 * c + 6, "tractor")
         put(7 * c + 9, "fountain")
-        put(7 * c + 11, "rabbit")
+        put(7 * c + 11, "rabbit", caredAgo: 3) // hungry (from the care start on)
 
         var farm = profile.farm
         farm.garden = garden

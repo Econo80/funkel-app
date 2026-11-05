@@ -320,6 +320,13 @@ enum FarmTextures {
         c.fill(ArtPen.circle(8, 62, 2), with: ArtPen.color("#fff8d6"))
     }
 
+    /// Snow on the meadow in winter: a few white flakes.
+    static let snow = tile(CGSize(width: 80, height: 80)) { c in
+        for (x, y, r) in [(10.0, 14.0, 2.0), (52, 30, 2.5), (30, 62, 2), (70, 70, 1.6)] {
+            c.fill(ArtPen.circle(x, y, r), with: ArtPen.color("#ffffff"))
+        }
+    }
+
     static let soil = tile(CGSize(width: 10, height: 10)) { c in
         c.fill(ArtPen.rect(0, 0, 10, 7), with: ArtPen.color("#8b5a2b"))
         c.fill(ArtPen.rect(0, 7, 10, 3), with: ArtPen.color("#74471f"))

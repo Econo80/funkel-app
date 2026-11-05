@@ -1,18 +1,21 @@
 import Foundation
 
-/// One square's item, stored like the web app: `{ itemId, plantedDay, variant?, collectedDay? }`.
+/// One square's item, stored like the web app: `{ itemId, plantedDay, variant?, collectedDay?, caredDay? }`.
 struct GardenPlot: Codable, Equatable {
     var itemId: String
     var plantedDay: String
     var variant: String?
     /// Last day the daily gift (egg, milk, honey, apples) was collected.
     var collectedDay: String?
+    /// Last fed, serviced or repaired (for things that need care).
+    var caredDay: String?
 
-    init(itemId: String, plantedDay: String, variant: String? = nil, collectedDay: String? = nil) {
+    init(itemId: String, plantedDay: String, variant: String? = nil, collectedDay: String? = nil, caredDay: String? = nil) {
         self.itemId = itemId
         self.plantedDay = plantedDay
         self.variant = variant
         self.collectedDay = collectedDay
+        self.caredDay = caredDay
     }
 
     var item: GardenItem? { GardenItem.with(id: itemId) }
@@ -38,7 +41,9 @@ struct FarmOrder: Codable, Equatable, Identifiable {
 
 /// Pip's farm as the rules see it (web/src/domain/garden.ts): every change
 /// returns a new farm, and an impossible one returns the farm unchanged.
-/// Spending comes from the wallet; lifetime stars never change here.
+/// Spending comes from the wallet; lifetime stars never change here. A farm
+/// year has four one-week seasons (fields wither in winter), and animals, the
+/// tractor and buildings need looking after now and then or they stop working.
 struct Farm: Equatable {
     /// The child's id, so each child gets their own daily orders.
     var profileID: String
@@ -210,6 +215,7 @@ extension Farm {
     /// The picture a plot shows today: an emoji, or "art:<id>" for a drawn one.
     static func picture(of plot: GardenPlot, now: Date) -> String {
         guard let item = plot.item else { return "" }
+        if isWithered(plot, now: now) { return item.id == "flower" ? "🥀" : "🍂" }
         let stage = stageIndex(plot, item: item, now: now)
         if stage == item.stages.count - 1, let variant = plot.variant { return variant }
         return item.stages[stage]
@@ -227,10 +233,130 @@ extension Farm {
     }
 }
 
+// MARK: Seasons
+
+/// A farm year has four seasons of a week each, the same for every child.
+enum Season: String, CaseIterable {
+    case spring, summer, autumn, winter
+
+    var emoji: String {
+        switch self {
+        case .spring: "🌸"
+        case .summer: "☀️"
+        case .autumn: "🍂"
+        case .winter: "❄️"
+        }
+    }
+}
+
+/// Today's season, which day of it (0–6), the days left, and the day it began.
+struct SeasonDay: Equatable {
+    let season: Season
+    let day: Int
+    let daysLeft: Int
+    let startDay: String
+}
+
+extension Farm {
+    static let seasonDays = 7
+    /// The first farm spring began on this Monday; every season is a week, the same for every child.
+    static let seasonsStart = "2026-11-02"
+
+    static func season(on now: Date) -> SeasonDay {
+        let year = Season.allCases.count * seasonDays
+        // Before the first farm year it is always early spring.
+        let index = max(0, FarmDay.daysSince(seasonsStart, now: now)) % year
+        let day = index % seasonDays
+        return SeasonDay(
+            season: Season.allCases[index / seasonDays],
+            day: day,
+            daysLeft: seasonDays - day,
+            startDay: FarmDay.key(FarmDay.adding(-day, to: now))
+        )
+    }
+
+    /// The day the latest winter began (none before the first farm year).
+    static func lastWinterStart(_ now: Date) -> String? {
+        let year = Season.allCases.count * seasonDays, winter = 3 * seasonDays
+        let index = ((FarmDay.daysSince(seasonsStart, now: now) % year) + year) % year
+        let start = FarmDay.key(FarmDay.adding(-((index - winter + year) % year), to: now))
+        return start < seasonsStart ? nil : start
+    }
+
+    /// A field or flower from before the last winter: withered, to be cleared and planted again.
+    static func isWithered(_ plot: GardenPlot, now: Date) -> Bool {
+        guard plot.item?.annual == true, let winter = lastWinterStart(now) else { return false }
+        return plot.plantedDay < winter
+    }
+
+    /// Trees and bees rest in winter.
+    static func restsInWinter(_ item: GardenItem) -> Bool {
+        item.category == .plants || item.id == "beehive"
+    }
+}
+
+// MARK: Care
+
+extension Farm {
+    /// Care is counted from here for farms built before it existed, so nobody starts with a big bill.
+    static let careStart = "2026-11-05"
+
+    /// Days until this needs care again (0 = now); nil if it never does.
+    static func daysUntilCare(_ plot: GardenPlot, now: Date) -> Int? {
+        guard let care = plot.item?.care else { return nil }
+        let last = max(plot.caredDay ?? plot.plantedDay, careStart)
+        return max(0, care.every - FarmDay.daysSince(last, now: now))
+    }
+
+    /// It's hungry, due a service or a repair: until then it stops working (it stays on the farm).
+    static func needsCare(_ plot: GardenPlot, now: Date) -> Bool {
+        daysUntilCare(plot, now: now) == 0
+    }
+
+    /// Finished, looked after and not resting for the winter: it does what it does.
+    static func isWorking(_ plot: GardenPlot, item: GardenItem, now: Date) -> Bool {
+        isGrown(plot, item: item, now: now)
+            && !needsCare(plot, now: now)
+            && !isWithered(plot, now: now)
+            && !(restsInWinter(item) && season(on: now).season == .winter)
+    }
+
+    /// Every item that needs care now (by its top-left cell).
+    static func careCells(_ garden: [GardenPlot?], now: Date) -> [Int] {
+        garden.indices.filter { garden[$0].map { needsCare($0, now: now) } ?? false }
+    }
+
+    /// What it costs to look after this cell now, or nil if it doesn't need it.
+    static func careCost(_ garden: [GardenPlot?], cell: Int, now: Date) -> Int? {
+        let covered = occupancy(garden)
+        guard covered.indices.contains(cell), let anchor = covered[cell], let plot = garden[anchor],
+              needsCare(plot, now: now)
+        else { return nil }
+        return plot.item?.care?.cost
+    }
+
+    /// Feeds, services or repairs it (paid from the wallet; every star spent is one XP).
+    func caring(for cell: Int, now: Date) -> Farm {
+        let covered = Self.occupancy(garden)
+        guard covered.indices.contains(cell), let anchor = covered[cell],
+              let cost = Self.careCost(garden, cell: cell, now: now), walletStars >= cost
+        else { return self }
+        var farm = self
+        farm.garden[anchor]?.caredDay = FarmDay.key(now)
+        farm.walletStars -= cost
+        return farm.withXp(cost)
+    }
+
+    /// Looks after everything that needs it, as far as the stars go.
+    func caringForAll(now: Date) -> Farm {
+        Self.careCells(garden, now: now).reduce(self) { next, cell in next.caring(for: cell, now: now) }
+    }
+}
+
 // MARK: Homes and placing
 
 enum PlacementProblem: Equatable {
-    case level, stars, space, home, full
+    case level, stars, space, home, full, winter
 }
 
 extension Farm {
@@ -253,6 +379,7 @@ extension Farm {
         guard let item = GardenItem.with(id: itemID) else { return .stars }
         if level.level < item.level { return .level }
         if walletStars < item.price { return .stars }
+        if item.annual && Self.season(on: now).season == .winter { return .winter }
         if let needs = item.needs {
             let space = homeSpace(needs, now: now)
             if space.capacity == 0 { return .home }
@@ -323,7 +450,7 @@ extension Farm {
     /// hens, cows, bees and apple trees give something once a day, from the day
     /// after they arrived.
     static func readyProduce(_ plot: GardenPlot, now: Date) -> Produce? {
-        guard let item = plot.item, isGrown(plot, item: item, now: now) else { return nil }
+        guard let item = plot.item, isWorking(plot, item: item, now: now) else { return nil }
         if let harvest = item.harvest { return harvest }
         guard let produce = item.produce, FarmDay.daysSince(plot.plantedDay, now: now) >= 1 else { return nil }
         return plot.collectedDay == FarmDay.key(now) ? nil : produce
@@ -346,12 +473,12 @@ extension Farm {
         return farm.withXp(Self.xpForCollecting)
     }
 
-    /// Finished items on the farm, one per kind (one of a kind is enough for its effect).
+    /// Working items on the farm, one per kind (one of a kind is enough for its effect).
     private static func finishedKinds(_ garden: [GardenPlot?], now: Date) -> [GardenItem] {
         var seen = Set<String>()
         var kinds: [GardenItem] = []
         for plot in garden {
-            guard let plot, let item = plot.item, !seen.contains(item.id), isGrown(plot, item: item, now: now) else { continue }
+            guard let plot, let item = plot.item, !seen.contains(item.id), isWorking(plot, item: item, now: now) else { continue }
             seen.insert(item.id)
             kinds.append(item)
         }
@@ -426,7 +553,7 @@ extension Farm {
     func recipe(at cell: Int, now: Date) -> Recipe? {
         let covered = Self.occupancy(garden)
         guard covered.indices.contains(cell), let anchor = covered[cell], let plot = garden[anchor],
-              let item = plot.item, let recipe = item.recipe, Self.isGrown(plot, item: item, now: now)
+              let item = plot.item, let recipe = item.recipe, Self.isWorking(plot, item: item, now: now)
         else { return nil }
         return recipe
     }
@@ -465,8 +592,9 @@ extension Farm {
         return Produce.allCases.filter(kinds.contains)
     }
 
-    private static func has(_ bonus: OrderBonus, in garden: [GardenPlot?]) -> Bool {
-        garden.contains { $0?.item?.orders == bonus }
+    /// A working mailbox or horse on the farm.
+    private static func has(_ bonus: OrderBonus, in garden: [GardenPlot?], now: Date) -> Bool {
+        finishedKinds(garden, now: now).contains { $0.orders == bonus }
     }
 
     /// Three orders a day (four with a mailbox), for goods this farm can make. They
@@ -479,8 +607,8 @@ extension Farm {
         if let current = orders, current.day == today, !current.orders.isEmpty || kinds.isEmpty { return self }
         var rng = Mulberry32(seed: Mulberry32.hash("\(profileID):\(today)"))
         let big = level.level >= 5 ? 1 : 0
-        let count = Self.has(.extraOrder, in: garden) ? 4 : 3
-        let extraStar = Self.has(.extraStar, in: garden) ? 1 : 0
+        let count = Self.has(.extraOrder, in: garden, now: now) ? 4 : 3
+        let extraStar = Self.has(.extraStar, in: garden, now: now) ? 1 : 0
         let made: [FarmOrder] = kinds.isEmpty ? [] : (0..<count).map { i in
             let shuffled = rng.shuffled(kinds)
             var picks = 1
@@ -548,6 +676,11 @@ struct FarmLevel: Equatable {
 enum FarmDay {
     static func key(_ date: Date, calendar: Calendar = .current) -> String {
         Backup.dayKey(date, calendar: calendar)
+    }
+
+    /// The same time of day, some days later (or earlier, for negative days).
+    static func adding(_ days: Int, to date: Date, calendar: Calendar = .current) -> Date {
+        calendar.date(byAdding: .day, value: days, to: date) ?? date
     }
 
     /// Whole days from `from` (a day key) to the day of `now`.

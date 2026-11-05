@@ -399,6 +399,124 @@ final class GardenTests: XCTestCase {
         XCTAssertEqual(p.moving(from: 5, to: 4).garden[4]?.itemId, "barn")
     }
 
+    // MARK: Seasons and care
+
+    // The first farm year: spring from 2 November 2026, then a week each of summer, autumn and winter.
+    private func nov(_ d: Int) -> Date {
+        Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: d, hour: 10))!
+    }
+
+    private func at(_ farm: Farm, _ cell: Int, _ id: String, _ d: Int) -> Farm {
+        var rng = SeededGenerator(seed: UInt64(cell))
+        return farm.placing(id, at: cell, now: nov(d), using: &rng)
+    }
+
+    func testSeasonsTurnEveryWeekAndBeforeTheFirstFarmYearItIsSpring() {
+        XCTAssertEqual(Farm.season(on: day(20)).season, .spring)
+        XCTAssertEqual(Farm.season(on: nov(5)), SeasonDay(season: .spring, day: 3, daysLeft: 4, startDay: "2026-11-02"))
+        XCTAssertEqual(Farm.season(on: nov(9)).season, .summer)
+        XCTAssertEqual(Farm.season(on: nov(16)).season, .autumn)
+        XCTAssertEqual(Farm.season(on: nov(23)).season, .winter)
+        XCTAssertEqual(Farm.season(on: nov(23)).startDay, "2026-11-23")
+        XCTAssertEqual(Farm.season(on: nov(30)).season, .spring)
+        XCTAssertEqual(Farm.season(on: nov(30)).startDay, "2026-11-30")
+    }
+
+    func testFieldsAndFlowersWitherInWinterAndNothingCanBePlantedUntilSpring() {
+        var p = at(rich(), 0, "wheat", 20)
+        p = at(p, 1, "flower", 20)
+        p = at(p, 2, "appletree", 2)
+        XCTAssertEqual(Farm.readyProduce(p.garden[0]!, now: nov(22)), .wheat)
+        XCTAssertTrue(Farm.isWithered(p.garden[0]!, now: nov(23)))
+        XCTAssertEqual(Farm.picture(of: p.garden[0]!, now: nov(23)), "🍂")
+        XCTAssertEqual(Farm.picture(of: p.garden[1]!, now: nov(23)), "🥀")
+        XCTAssertNil(Farm.readyProduce(p.garden[0]!, now: nov(23)))
+        // Trees survive but rest in winter.
+        XCTAssertFalse(Farm.isWithered(p.garden[2]!, now: nov(23)))
+        XCTAssertNil(Farm.readyProduce(p.garden[2]!, now: nov(23)))
+        XCTAssertEqual(Farm.readyProduce(p.garden[2]!, now: nov(30)), .apple)
+        // Still withered in spring until cleared and planted again.
+        XCTAssertTrue(Farm.isWithered(p.garden[0]!, now: nov(30)))
+        XCTAssertEqual(p.placementProblem(at: 5, itemID: "wheat", now: nov(24)), .winter)
+        XCTAssertNotEqual(p.placementProblem(at: 5, itemID: "cow", now: nov(24)), .winter)
+        XCTAssertNil(p.placementProblem(at: 5, itemID: "wheat", now: nov(30)))
+    }
+
+    // Care tests run in December, after the care start (5 November): spring from 30 November.
+    private func dec(_ d: Int) -> Date {
+        Calendar.current.date(from: DateComponents(year: 2026, month: 12, day: d, hour: 10))!
+    }
+
+    private func atDec(_ farm: Farm, _ cell: Int, _ id: String, _ d: Int) -> Farm {
+        var rng = SeededGenerator(seed: UInt64(cell))
+        return farm.placing(id, at: cell, now: dec(d), using: &rng)
+    }
+
+    func testAnimalsGetHungryAndStopWorkingUntilFedFeedingCostsStarsAndGivesXp() {
+        var p = atDec(rich(100), 0, "coop", 1)
+        p = atDec(p, 2, "rabbit", 1)
+        p.walletStars = 100
+        let rabbit = p.garden[2]!
+        XCTAssertEqual(Farm.readyProduce(rabbit, now: dec(3)), .wool)
+        XCTAssertFalse(Farm.needsCare(rabbit, now: dec(3)))
+        XCTAssertTrue(Farm.needsCare(rabbit, now: dec(4)), "three days after it came it is hungry …")
+        XCTAssertNil(Farm.readyProduce(rabbit, now: dec(4)), "… and gives nothing")
+        XCTAssertEqual(Farm.careCells(p.garden, now: dec(4)), [2])
+        XCTAssertEqual(Farm.careCost(p.garden, cell: 2, now: dec(4)), 1)
+        let fed = p.caring(for: 2, now: dec(4))
+        XCTAssertEqual(fed.walletStars, 99)
+        XCTAssertEqual(fed.xp, p.xp + 1)
+        XCTAssertEqual(fed.garden[2]?.caredDay, "2026-12-04")
+        XCTAssertEqual(Farm.readyProduce(fed.garden[2]!, now: dec(4)), .wool)
+        XCTAssertEqual(Farm.daysUntilCare(fed.garden[2]!, now: dec(5)), 2)
+        // Not enough stars: nothing happens.
+        var broke = p
+        broke.walletStars = 0
+        XCTAssertEqual(broke.caring(for: 2, now: dec(4)), broke)
+    }
+
+    func testATractorNeedsAServiceAndBuildingsARepairOrTheyStopHelpingAndMaking() {
+        var p = atDec(rich(), 0, "tractor", 1)
+        p = atDec(p, 1, "windmill", 1)
+        p = atDec(p, 3, "wheat", 1)
+        p.goods[.wheat] = 4
+        XCTAssertEqual(p.collecting(3, now: dec(4)).goods(.wheat), 6)
+        XCTAssertTrue(p.canMake(at: 1, now: dec(4)))
+        XCTAssertTrue(Farm.needsCare(p.garden[0]!, now: dec(8)))
+        XCTAssertEqual(p.collecting(3, now: dec(8)).goods(.wheat), 5)
+        XCTAssertFalse(p.canMake(at: 1, now: dec(15)), "the windmill is due a repair after 14 days")
+        let all = p.caringForAll(now: dec(15))
+        XCTAssertEqual(Farm.careCells(all.garden, now: dec(15)), [])
+        XCTAssertEqual(all.walletStars, p.walletStars - 5 - 6)
+        XCTAssertTrue(all.canMake(at: 1, now: dec(15)))
+    }
+
+    func testFarmsFromBeforeCareExistedStartFreshAndDecorationsNeverNeedCare() {
+        var p = place(rich(), 0, "rabbit") // October, long before the care start
+        p = place(p, 1, "stone")
+        XCTAssertEqual(Farm.daysUntilCare(p.garden[0]!, now: nov(5)), 3)
+        XCTAssertNil(Farm.daysUntilCare(p.garden[1]!, now: nov(5)))
+        XCTAssertTrue(GardenItem.all.filter { $0.category == .animals && $0.needs != nil }.allSatisfy { $0.care?.kind == .feed })
+    }
+
+    /// `caredDay` and `farmSeason` are stored under the web app's names, and cleared with the progress.
+    func testCareAndTheSeasonCardAreStoredLikeTheWebApp() throws {
+        let context = try makeContext()
+        let child = ChildProfile(name: "Lena", age: 6)
+        context.insert(child)
+        var farm = child.farm
+        farm.garden[0] = GardenPlot(itemId: "rabbit", plantedDay: "2026-11-05", caredDay: "2026-11-08")
+        child.setFarm(farm)
+        child.farmSeason = "2026-11-02"
+        let garden = try XCTUnwrap(BackupExtras.decode(child.backupExtras)["garden"] as? [Any])
+        XCTAssertEqual((garden[0] as? [String: Any])?["caredDay"] as? String, "2026-11-08")
+        XCTAssertEqual(child.webField("farmSeason", as: String.self), "2026-11-02")
+        XCTAssertEqual(child.farm.garden[0]?.caredDay, "2026-11-08")
+
+        ProfileMaintenance.resetProgress(of: child, in: context)
+        XCTAssertNil(child.farmSeason)
+    }
+
     // MARK: Garden time
 
     func testLimitsGardenTimePerDayWithExtraMinutesForTodayOnly() throws {

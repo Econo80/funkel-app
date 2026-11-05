@@ -45,6 +45,8 @@ struct FarmPopup: Identifiable, Equatable {
 struct FarmMeadow: View {
     let farm: Farm
     let now: Date
+    /// The meadow turns golden in autumn and snowy in winter.
+    var season: Season = .spring
     let layout: FarmLayout
     var showsFreeSquares = false
     var movingAnchor: Int?
@@ -57,7 +59,7 @@ struct FarmMeadow: View {
     var body: some View {
         let covered = Farm.occupancy(farm.garden)
         ZStack(alignment: .topLeading) {
-            Color(hex: "#3d8a43")
+            Color(hex: forestColor)
             FarmTextures.forest.resizable(resizingMode: .tile)
             meadow
                 .offset(x: layout.side, y: layout.top)
@@ -68,19 +70,44 @@ struct FarmMeadow: View {
         .frame(width: layout.contentSize.width, height: layout.contentSize.height, alignment: .topLeading)
     }
 
+    /// Ground colours (top, bottom, light spot, edge) by season, like the web app's `season-*` styles.
+    private var ground: (top: String, bottom: String, light: String, edge: String) {
+        switch season {
+        case .autumn: (top: "#cdbb5e", bottom: "#b59a45", light: "#e6cf7a", edge: "#a98e3e")
+        case .winter: (top: "#e9f2f6", bottom: "#cfe0e9", light: "#ffffff", edge: "#b7cfdb")
+        case .spring, .summer: (top: "#8fd970", bottom: "#73c457", light: "#a3e283", edge: "#6cb653")
+        }
+    }
+
+    private var forestColor: String {
+        switch season {
+        case .autumn: "#8a7a35"
+        case .winter: "#5f7f8c"
+        case .spring, .summer: "#3d8a43"
+        }
+    }
+
     private var meadow: some View {
         let shape = RoundedRectangle(cornerRadius: 36, style: .continuous)
+        let colors = ground
         return ZStack {
-            shape.fill(LinearGradient(colors: [Color(hex: "#8fd970"), Color(hex: "#73c457")], startPoint: .top, endPoint: .bottom))
-            shape.fill(RadialGradient(colors: [Color(hex: "#a3e283"), Color(hex: "#a3e283").opacity(0)], center: UnitPoint(x: 0.3, y: 0.2), startRadius: 0, endRadius: max(layout.meadowSize.width, layout.meadowSize.height) * 0.6))
-            FarmTextures.grass.resizable(resizingMode: .tile).clipShape(shape)
+            shape.fill(LinearGradient(colors: [Color(hex: colors.top), Color(hex: colors.bottom)], startPoint: .top, endPoint: .bottom))
+            shape.fill(RadialGradient(colors: [Color(hex: colors.light), Color(hex: colors.light).opacity(0)], center: UnitPoint(x: 0.3, y: 0.2), startRadius: 0, endRadius: max(layout.meadowSize.width, layout.meadowSize.height) * 0.6))
+            switch season {
+            case .spring, .summer:
+                FarmTextures.grass.resizable(resizingMode: .tile).clipShape(shape)
+            case .winter:
+                FarmTextures.snow.resizable(resizingMode: .tile).clipShape(shape)
+            case .autumn:
+                EmptyView()
+            }
         }
         .frame(width: layout.meadowSize.width, height: layout.meadowSize.height)
         .background {
-            shape.inset(by: -7).stroke(Color.black.opacity(0.12), lineWidth: 6).padding(-3)
+            shape.inset(by: -7).stroke(Color.black.opacity(season == .winter ? 0.1 : 0.12), lineWidth: 6).padding(-3)
         }
         .background {
-            shape.inset(by: -4).stroke(Color(hex: "#6cb653"), lineWidth: 8)
+            shape.inset(by: -4).stroke(Color(hex: colors.edge), lineWidth: 8)
         }
         .shadow(color: .black.opacity(0.3), radius: 30, y: 24)
     }
@@ -113,6 +140,8 @@ struct FarmMeadow: View {
                     ready: Farm.readyProduce(plot, now: now),
                     makes: Farm.readyProduce(plot, now: now) == nil && farm.canMake(at: anchor, now: now) ? farm.recipe(at: anchor, now: now)?.makes : nil,
                     building: Farm.isUnderConstruction(plot, now: now),
+                    care: Farm.needsCare(plot, now: now) ? item.care?.kind : nil,
+                    withered: Farm.isWithered(plot, now: now),
                     moving: movingAnchor == anchor,
                     seed: anchor
                 )
@@ -177,6 +206,10 @@ private struct FarmObject: View {
     /// A building that can make this now from the storage.
     let makes: Produce?
     let building: Bool
+    /// Needs feeding, a service or a repair: faded, with a red-ringed bubble.
+    let care: CareKind?
+    /// A field or flower from before the winter: stands still.
+    let withered: Bool
     let moving: Bool
     let seed: Int
 
@@ -219,6 +252,9 @@ private struct FarmObject: View {
                 shadow
             }
             animated(pictureView)
+                .grayscale(care != nil ? 0.75 : 0)
+                .opacity(care != nil ? 0.75 : 1)
+                .saturation(withered ? 0.6 : 1)
             if kind == .crop, ready != nil {
                 ReadyGlow(width: width)
             }
@@ -233,7 +269,10 @@ private struct FarmObject: View {
         }
         .overlay(alignment: .topTrailing) {
             if let shown = ready ?? makes {
-                Bubble(produce: shown, cell: cell, ring: makes != nil)
+                Bubble(emoji: shown.emoji, cell: cell, ring: makes != nil ? Color(hex: "#f2b84b") : nil)
+                    .offset(x: width * 0.08, y: -height * 0.12)
+            } else if let care {
+                Bubble(emoji: care.emoji, cell: cell, ring: Color(hex: "#e5675a"))
                     .offset(x: width * 0.08, y: -height * 0.12)
             }
         }
@@ -273,7 +312,7 @@ private struct FarmObject: View {
     }
 
     @ViewBuilder private func animated(_ content: some View) -> some View {
-        if reduceMotion || building {
+        if reduceMotion || building || withered {
             content
         } else {
             switch kind {
@@ -315,19 +354,20 @@ private struct FarmObject: View {
     }
 }
 
-/// Something to collect: a bubble with what it is. With a ring: what a building can make now.
+/// Something to collect: a bubble with what it is. With a golden ring: what a
+/// building can make now; with a red one: what it needs (food, a service, a repair).
 private struct Bubble: View {
-    let produce: Produce
+    let emoji: String
     let cell: CGFloat
-    var ring = false
+    var ring: Color?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let bubble = Text(verbatim: produce.emoji)
+        let bubble = Text(verbatim: emoji)
             .font(.system(size: cell * 0.3))
             .frame(width: cell * 0.52, height: cell * 0.52)
             .background(.white, in: .circle)
-            .overlay { if ring { Circle().strokeBorder(Color(hex: "#f2b84b"), lineWidth: 3) } }
+            .overlay { if let ring { Circle().strokeBorder(ring, lineWidth: 3) } }
             .shadow(color: .black.opacity(0.22), radius: 4, y: 3)
         if reduceMotion {
             bubble

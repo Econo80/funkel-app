@@ -40,14 +40,23 @@ struct GardenView: View {
     /// While drawing a road with a finger, changes collect here and are saved when the finger lifts.
     @State private var draft: Farm?
     @State private var extending = false
+    /// The first day of the season whose welcome card was last shown (web field `farmSeason`).
+    @State private var farmSeason: String?
 
     init(profile: ChildProfile) {
         self.profile = profile
         _farm = State(initialValue: profile.farm)
         _clock = State(initialValue: GardenClock(time: profile.gardenTime))
+        _farmSeason = State(initialValue: profile.farmSeason)
     }
 
     private var shown: Farm { draft ?? farm }
+    private var season: SeasonDay { Farm.season(on: now) }
+    /// A new season (and the very first one) is greeted with a card that says what it means.
+    private var seasonCard: Season? {
+        let today = season
+        return today.startDay >= Farm.seasonsStart && farmSeason != today.startDay ? today.season : nil
+    }
     private var zoomIndex: Int { zoom ?? (sizeClass == .regular ? 2 : 1) }
     private var drawItem: String? {
         if case .place(let id) = tool, GardenItem.with(id: id)?.connects == true { return id }
@@ -87,6 +96,16 @@ struct GardenView: View {
                         .transition(.opacity)
                         .zIndex(40)
                 }
+                if levelUp == nil, let seasonCard {
+                    SeasonCard(season: seasonCard) {
+                        let startDay = season.startDay
+                        withAnimation { farmSeason = startDay }
+                        profile.farmSeason = startDay
+                        try? modelContext.save()
+                    }
+                    .transition(.opacity)
+                    .zIndex(45)
+                }
                 if let levelUp {
                     LevelUpCard(level: levelUp) {
                         withAnimation { self.levelUp = nil }
@@ -125,6 +144,7 @@ struct GardenView: View {
             FarmMeadow(
                 farm: shown,
                 now: now,
+                season: season.season,
                 layout: layout,
                 showsFreeSquares: tool != nil,
                 movingAnchor: movingAnchor,
@@ -167,6 +187,7 @@ struct GardenView: View {
                 .accessibilityIdentifier("garden-back")
             FarmLevelPill(level: shown.level)
                 .frame(minWidth: 60, maxWidth: compact ? 150 : 230)
+            seasonPill(compact: compact)
             Spacer(minLength: 0)
             HStack(spacing: 8) {
                 if clock.time.minutesPerDay > 0 {
@@ -189,6 +210,21 @@ struct GardenView: View {
                     .accessibilityIdentifier("farm-wallet")
             }
         }
+    }
+
+    /// 🌸 Frühling: a tap says what the season means and how long it lasts.
+    private func seasonPill(compact: Bool) -> some View {
+        let today = season
+        let seasonName = Self.seasonName(today.season)
+        let left = String(localized: "garden.season.left \(today.daysLeft)")
+        return Button {
+            show(Self.seasonHint(today.season) + " (" + left + ")")
+        } label: {
+            Text(verbatim: compact ? today.season.emoji : "\(today.season.emoji) \(seasonName)").farmPill(compact: compact)
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityLabel(Text(verbatim: "\(seasonName), \(left)"))
+        .accessibilityIdentifier("farm-season")
     }
 
     @ViewBuilder private var banner: some View {
@@ -256,6 +292,7 @@ struct GardenView: View {
 
     private var bar: some View {
         let ready = Farm.readyCells(farm.garden, now: now).count
+        let toCare = Farm.careCells(farm.garden, now: now).count
         let deliverable = farm.orders?.orders.filter { farm.canFulfil($0) }.count ?? 0
         let buttons = HStack(spacing: 8) {
             FarmBarButton(icon: "🛒", title: "garden.shop", style: .shop) {
@@ -271,6 +308,11 @@ struct GardenView: View {
                     .accessibilityIdentifier("farm-collect")
                     .transition(.scale.combined(with: .opacity))
             }
+            if toCare > 0 {
+                FarmBarButton(icon: "🍽️", title: "garden.careAll", style: .care, badge: toCare, action: careAll)
+                    .accessibilityIdentifier("farm-care")
+                    .transition(.scale.combined(with: .opacity))
+            }
             FarmBarButton(icon: "✋", title: "garden.move", style: isMoving ? .active : .plain) {
                 tool = isMoving ? nil : .move(from: nil)
                 toast = ""
@@ -284,6 +326,7 @@ struct GardenView: View {
         }
         .padding(8)
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: ready > 0)
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: toCare > 0)
 
         return ViewThatFits(in: .horizontal) {
             buttons
@@ -460,6 +503,18 @@ struct GardenView: View {
             haptic()
             return commit(collect(anchor, from: farm, now: now))
         }
+        // Hungry animals, a tractor due a service, a building to repair: a tap looks after it.
+        if tool == nil, let anchor, let plot, Farm.needsCare(plot, now: now), let care = plot.item?.care {
+            guard farm.walletStars >= care.cost else {
+                sound(.gentle)
+                return show(String(localized: "garden.care.noStars \(care.cost)"))
+            }
+            haptic()
+            popup(anchor, "−\(care.cost) ⭐", .goods)
+            popup(anchor, care.kind.emoji, .sparkle, delay: 0.15)
+            show(Self.caredText(care.kind))
+            return commit(farm.caring(for: anchor, now: now))
+        }
         // The mill, barn and farmhouse make something from the storage on a tap.
         if tool == nil, let anchor, farm.canMake(at: anchor, now: now), let recipe = farm.recipe(at: anchor, now: now) {
             haptic()
@@ -524,6 +579,32 @@ struct GardenView: View {
         commit(next)
     }
 
+    /// Looks after everything that needs it, as far as the stars go.
+    private func careAll() {
+        let now = Date()
+        let before = Farm.careCells(farm.garden, now: now)
+        let next = farm.caringForAll(now: now)
+        if next == farm {
+            sound(.gentle)
+            let cheapest = before.compactMap { Farm.careCost(farm.garden, cell: $0, now: now) }.min() ?? 0
+            return show(String(localized: "garden.care.noStars \(cheapest)"))
+        }
+        let after = Farm.careCells(next.garden, now: now)
+        for (i, cell) in before.filter({ !after.contains($0) }).enumerated() {
+            if let kind = farm.garden[cell]?.item?.care?.kind {
+                popup(cell, kind.emoji, .sparkle, delay: Double(min(i, 12)) * 0.09)
+            }
+        }
+        sound(.correct)
+        if let first = after.first {
+            let cost = Farm.careCost(next.garden, cell: first, now: now) ?? 1
+            show(String(localized: "garden.care.noStars \(cost)"))
+        } else {
+            show(String(localized: "garden.caredAll"))
+        }
+        commit(next)
+    }
+
     private func pick(_ item: GardenItem) {
         withAnimation(.easeOut(duration: 0.2)) { drawer = nil }
         tool = .place(item.id)
@@ -539,10 +620,17 @@ struct GardenView: View {
         guard let plot = farm.garden[anchor], let item = plot.item else { return "" }
         let itemName = Self.name(item)
         let days = Farm.daysUntilNextStage(plot, now: now)
+        if Farm.isWithered(plot, now: now) { return "\(itemName): " + String(localized: "garden.withered") }
+        if let care = item.care, Farm.needsCare(plot, now: now) {
+            return "\(itemName) " + Self.careNeedText(care.kind) + " · " + String(localized: "garden.care.cost \(care.cost)")
+        }
         if Farm.isUnderConstruction(plot, now: now) {
             return "\(itemName): " + String(localized: "garden.builds \(days ?? 1)")
         }
         if let days { return "\(itemName): " + String(localized: "garden.grows \(days)") }
+        if Farm.season(on: now).season == .winter && Farm.restsInWinter(item) {
+            return "\(itemName): " + String(localized: "garden.resting")
+        }
         var parts: [String] = []
         if let houses = item.houses {
             let space = farm.homeSpace(houses.group, now: now)
@@ -555,6 +643,9 @@ struct GardenView: View {
             parts.append(String(localized: "garden.use.boost \(goodsText)"))
         }
         if let orders = item.orders { parts.append(String(localized: String.LocalizationValue("garden.use." + orders.rawValue))) }
+        if let care = item.care, let careIn = Farm.daysUntilCare(plot, now: now) {
+            parts.append(Self.careInText(care.kind, days: careIn))
+        }
         return parts.isEmpty ? itemName : "\(itemName): " + parts.joined(separator: " · ")
     }
 
@@ -566,11 +657,41 @@ struct GardenView: View {
         case .space: return String(localized: "garden.noSpace")
         case .level: return String(localized: "garden.level \(item.level)")
         case .stars: return String(localized: "garden.noStars")
+        case .winter: return String(localized: "garden.winterNoPlant")
         }
     }
 
     static func name(_ item: GardenItem) -> String {
         NSLocalizedString(item.nameKey, comment: "")
+    }
+
+    // MARK: Season and care texts
+
+    static func seasonName(_ season: Season) -> String {
+        String(localized: String.LocalizationValue("garden.season." + season.rawValue))
+    }
+
+    static func seasonHint(_ season: Season) -> String {
+        String(localized: String.LocalizationValue("garden.season.hint." + season.rawValue))
+    }
+
+    /// "hat Hunger", "braucht einen Service", "muss repariert werden".
+    static func careNeedText(_ kind: CareKind) -> String {
+        String(localized: String.LocalizationValue("garden.care." + kind.rawValue))
+    }
+
+    /// "Gefüttert!", "Service gemacht!", "Repariert!".
+    static func caredText(_ kind: CareKind) -> String {
+        String(localized: String.LocalizationValue("garden.cared." + kind.rawValue))
+    }
+
+    /// "Futter in 2 Tagen" (plural forms, so each key is written out).
+    static func careInText(_ kind: CareKind, days: Int) -> String {
+        switch kind {
+        case .feed: String(localized: "garden.careIn.feed \(days)")
+        case .service: String(localized: "garden.careIn.service \(days)")
+        case .repair: String(localized: "garden.careIn.repair \(days)")
+        }
     }
 
     // MARK: Saving

@@ -5,7 +5,8 @@ import Foundation
 // everything does something: animals, trees and flowers give something once a
 // day, little helpers (and the tractor) make a harvest bigger, the mill, barn
 // and farmhouse turn goods into bread, cheese and pie, and the mailbox and
-// horse make orders better.
+// horse make orders better. Fields and flowers wither in winter, and animals,
+// the tractor and buildings need looking after now and then.
 
 enum GardenCategory: String, CaseIterable, Identifiable {
     case plants, animals, buildings, paths, decor
@@ -82,6 +83,31 @@ enum OrderBonus: String {
     case extraOrder, extraStar
 }
 
+/// Animals are fed, the tractor is serviced, buildings are repaired.
+enum CareKind: String {
+    case feed, service, repair
+
+    var emoji: String {
+        switch self {
+        case .feed: "🍽️"
+        case .service: "🔧"
+        case .repair: "🔨"
+        }
+    }
+}
+
+/// Looking after something: every few days, for a few stars.
+struct Care: Equatable {
+    let kind: CareKind
+    /// Days between two feeds, services or repairs.
+    let every: Int
+    /// Stars it costs.
+    let cost: Int
+
+    static func feed(_ cost: Int) -> Care { Care(kind: .feed, every: 3, cost: cost) }
+    static func repair(_ cost: Int) -> Care { Care(kind: .repair, every: 14, cost: cost) }
+}
+
 /// Animals that need a home, by the kind of home.
 enum HomeGroup: String {
     case dog, cat, chicken, farm, duck
@@ -132,6 +158,10 @@ struct GardenItem: Identifiable, Equatable {
     var recipe: Recipe? = nil
     /// Roads, paths and fences join up with neighbours of the same kind.
     var connects = false
+    /// Fields and flowers: wither when winter comes and can't be planted in winter.
+    var annual = false
+    /// Needs looking after every few days (for a few stars), or it stops working until then.
+    var care: Care? = nil
 
     /// What the shop shows: the finished look.
     var shopPicture: String { variants?.first ?? stages[stages.count - 1] }
@@ -144,36 +174,36 @@ extension GardenItem {
 
     static let all: [GardenItem] = [
         // Plants
-        GardenItem(id: "flower", price: 3, level: 1, category: .plants, stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"], produce: .flowers),
-        GardenItem(id: "wheat", price: 3, level: 1, category: .plants, stages: ["🌱", "🌾"], days: [0, 1], harvest: .wheat),
-        GardenItem(id: "mushroom", price: 2, level: 1, category: .plants, stages: ["🍄"], days: [0], produce: .mushroom),
+        GardenItem(id: "flower", price: 3, level: 1, category: .plants, stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"], produce: .flowers, annual: true),
+        GardenItem(id: "wheat", price: 3, level: 1, category: .plants, stages: ["🌱", "🌾"], days: [0, 1], harvest: .wheat, annual: true),
+        GardenItem(id: "mushroom", price: 2, level: 1, category: .plants, stages: ["🍄"], days: [0], produce: .mushroom, annual: true),
         GardenItem(id: "tree", price: 12, level: 1, category: .plants, stages: ["🌱", "🪴", "🌳"], days: [0, 3, 7], variants: ["🌳", "🌲"], produce: .wood),
-        GardenItem(id: "vegetable", price: 4, level: 2, category: .plants, stages: ["🌱", "🌿", "🥕"], days: [0, 1, 2], variants: ["🥕", "🥬", "🎃", "🍅", "🥔"], harvest: .veg),
+        GardenItem(id: "vegetable", price: 4, level: 2, category: .plants, stages: ["🌱", "🌿", "🥕"], days: [0, 1, 2], variants: ["🥕", "🥬", "🎃", "🍅", "🥔"], harvest: .veg, annual: true),
         GardenItem(id: "appletree", price: 20, level: 4, category: .plants, stages: ["🌱", "🪴", "🌳"], days: [0, 2, 4], produce: .apple),
         // Animals: small ones live anywhere and help; farm animals need their home first.
         GardenItem(id: "snail", price: 4, level: 1, category: .animals, stages: ["🐌"], days: [0], boosts: [.mushroom]),
         GardenItem(id: "ladybug", price: 5, level: 1, category: .animals, stages: ["🐞"], days: [0], boosts: [.veg]),
         GardenItem(id: "butterfly", price: 6, level: 1, category: .animals, stages: ["🦋"], days: [0], boosts: [.flowers]),
         GardenItem(id: "bee", price: 6, level: 1, category: .animals, stages: ["🐝"], days: [0], boosts: [.apple, .honey]),
-        GardenItem(id: "rabbit", price: 8, level: 2, category: .animals, stages: ["🐇"], days: [0], produce: .wool),
-        GardenItem(id: "dog", price: 15, level: 2, category: .animals, stages: ["🐕"], days: [0], needs: .dog, boosts: [.wool]),
-        GardenItem(id: "chick", price: 6, level: 2, category: .animals, stages: ["🐣", "🐥", "🐔"], days: [0, 2, 4], needs: .chicken, produce: .egg),
-        GardenItem(id: "duck", price: 8, level: 3, category: .animals, stages: ["🦆"], days: [0], needs: .duck, produce: .egg),
-        GardenItem(id: "cat", price: 12, level: 3, category: .animals, stages: ["🐈"], days: [0], needs: .cat, boosts: [.wheat]),
-        GardenItem(id: "sheep", price: 15, level: 4, category: .animals, stages: ["🐑"], days: [0], needs: .farm, produce: .wool),
-        GardenItem(id: "goat", price: 15, level: 4, category: .animals, stages: ["🐐"], days: [0], needs: .farm, produce: .milk),
-        GardenItem(id: "pig", price: 18, level: 5, category: .animals, stages: ["🐖"], days: [0], needs: .farm, produce: .bacon),
-        GardenItem(id: "cow", price: 25, level: 5, category: .animals, stages: ["🐄"], days: [0], needs: .farm, produce: .milk),
-        GardenItem(id: "horse", price: 30, level: 6, category: .animals, stages: ["🐴"], days: [0], needs: .farm, orders: .extraStar),
+        GardenItem(id: "rabbit", price: 8, level: 2, category: .animals, stages: ["🐇"], days: [0], produce: .wool, care: Care.feed(1)),
+        GardenItem(id: "dog", price: 15, level: 2, category: .animals, stages: ["🐕"], days: [0], needs: .dog, boosts: [.wool], care: Care.feed(1)),
+        GardenItem(id: "chick", price: 6, level: 2, category: .animals, stages: ["🐣", "🐥", "🐔"], days: [0, 2, 4], needs: .chicken, produce: .egg, care: Care.feed(1)),
+        GardenItem(id: "duck", price: 8, level: 3, category: .animals, stages: ["🦆"], days: [0], needs: .duck, produce: .egg, care: Care.feed(1)),
+        GardenItem(id: "cat", price: 12, level: 3, category: .animals, stages: ["🐈"], days: [0], needs: .cat, boosts: [.wheat], care: Care.feed(1)),
+        GardenItem(id: "sheep", price: 15, level: 4, category: .animals, stages: ["🐑"], days: [0], needs: .farm, produce: .wool, care: Care.feed(2)),
+        GardenItem(id: "goat", price: 15, level: 4, category: .animals, stages: ["🐐"], days: [0], needs: .farm, produce: .milk, care: Care.feed(2)),
+        GardenItem(id: "pig", price: 18, level: 5, category: .animals, stages: ["🐖"], days: [0], needs: .farm, produce: .bacon, care: Care.feed(2)),
+        GardenItem(id: "cow", price: 25, level: 5, category: .animals, stages: ["🐄"], days: [0], needs: .farm, produce: .milk, care: Care.feed(2)),
+        GardenItem(id: "horse", price: 30, level: 6, category: .animals, stages: ["🐴"], days: [0], needs: .farm, orders: .extraStar, care: Care.feed(3)),
         // Buildings take a few days to build.
-        GardenItem(id: "doghouse", price: 15, level: 2, category: .buildings, stages: [building, "art:doghouse"], days: [0, 1], houses: Home(group: .dog, capacity: 1)),
-        GardenItem(id: "coop", price: 20, level: 2, category: .buildings, stages: [building, "art:coop"], days: [0, 1], houses: Home(group: .chicken, capacity: 4)),
-        GardenItem(id: "house", price: 30, level: 3, category: .buildings, stages: ["🏡"], days: [0], houses: Home(group: .cat, capacity: 2)),
-        GardenItem(id: "pond", price: 25, level: 3, category: .buildings, stages: [building, "art:pond"], days: [0, 1], width: 2, houses: Home(group: .duck, capacity: 3), produce: .fish),
-        GardenItem(id: "barn", price: 40, level: 4, category: .buildings, stages: [building, "art:barn"], days: [0, 2], width: 2, height: 2, houses: Home(group: .farm, capacity: 4), recipe: Recipe(needs: [.milk: 2], makes: .cheese)),
-        GardenItem(id: "beehive", price: 25, level: 5, category: .buildings, stages: [building, "art:beehive"], days: [0, 1], produce: .honey),
-        GardenItem(id: "farmhouse", price: 60, level: 6, category: .buildings, stages: [building, "art:farmhouse"], days: [0, 3], width: 2, height: 2, houses: Home(group: .cat, capacity: 2), recipe: Recipe(needs: [.apple: 1, .egg: 1, .wheat: 1], makes: .pie)),
-        GardenItem(id: "windmill", price: 50, level: 7, category: .buildings, stages: [building, "art:windmill"], days: [0, 2], height: 2, recipe: Recipe(needs: [.wheat: 2], makes: .bread)),
+        GardenItem(id: "doghouse", price: 15, level: 2, category: .buildings, stages: [building, "art:doghouse"], days: [0, 1], houses: Home(group: .dog, capacity: 1), care: Care.repair(2)),
+        GardenItem(id: "coop", price: 20, level: 2, category: .buildings, stages: [building, "art:coop"], days: [0, 1], houses: Home(group: .chicken, capacity: 4), care: Care.repair(3)),
+        GardenItem(id: "house", price: 30, level: 3, category: .buildings, stages: ["🏡"], days: [0], houses: Home(group: .cat, capacity: 2), care: Care.repair(4)),
+        GardenItem(id: "pond", price: 25, level: 3, category: .buildings, stages: [building, "art:pond"], days: [0, 1], width: 2, houses: Home(group: .duck, capacity: 3), produce: .fish, care: Care.repair(3)),
+        GardenItem(id: "barn", price: 40, level: 4, category: .buildings, stages: [building, "art:barn"], days: [0, 2], width: 2, height: 2, houses: Home(group: .farm, capacity: 4), recipe: Recipe(needs: [.milk: 2], makes: .cheese), care: Care.repair(6)),
+        GardenItem(id: "beehive", price: 25, level: 5, category: .buildings, stages: [building, "art:beehive"], days: [0, 1], produce: .honey, care: Care.repair(3)),
+        GardenItem(id: "farmhouse", price: 60, level: 6, category: .buildings, stages: [building, "art:farmhouse"], days: [0, 3], width: 2, height: 2, houses: Home(group: .cat, capacity: 2), recipe: Recipe(needs: [.apple: 1, .egg: 1, .wheat: 1], makes: .pie), care: Care.repair(8)),
+        GardenItem(id: "windmill", price: 50, level: 7, category: .buildings, stages: [building, "art:windmill"], days: [0, 2], height: 2, recipe: Recipe(needs: [.wheat: 2], makes: .bread), care: Care.repair(6)),
         // Roads, paths and fences are free, so children can lay out their farm.
         GardenItem(id: "road", price: 0, level: 1, category: .paths, stages: ["art:road"], days: [0], connects: true),
         GardenItem(id: "path", price: 0, level: 1, category: .paths, stages: ["art:path"], days: [0], connects: true),
@@ -181,8 +211,8 @@ extension GardenItem {
         // Decorations, and a few that help
         GardenItem(id: "stone", price: 1, level: 1, category: .decor, stages: ["🪨"], days: [0]),
         GardenItem(id: "mailbox", price: 3, level: 2, category: .decor, stages: ["📫"], days: [0], orders: .extraOrder),
-        GardenItem(id: "fountain", price: 20, level: 4, category: .decor, stages: ["⛲"], days: [0], boosts: [.milk]),
-        GardenItem(id: "tractor", price: 30, level: 8, category: .decor, stages: ["🚜"], days: [0], boosts: [.wheat, .veg]),
+        GardenItem(id: "fountain", price: 20, level: 4, category: .decor, stages: ["⛲"], days: [0], boosts: [.milk], care: Care.repair(3)),
+        GardenItem(id: "tractor", price: 30, level: 8, category: .decor, stages: ["🚜"], days: [0], boosts: [.wheat, .veg], care: Care(kind: .service, every: 7, cost: 5)),
     ]
 
     private static let byID = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
@@ -201,6 +231,8 @@ extension GardenItem {
         if let boosts { uses.append(boosts.map(\.emoji).joined() + " +1") }
         if let recipe { uses.append(recipe.text) }
         if let orders { uses.append(String(localized: String.LocalizationValue("garden.use." + orders.rawValue))) }
+        if annual { uses.append("❄️ " + String(localized: "garden.use.annual")) }
+        if let care { uses.append("\(care.kind.emoji) " + String(localized: "garden.use.care \(care.cost) \(care.every)")) }
         return uses
     }
 
