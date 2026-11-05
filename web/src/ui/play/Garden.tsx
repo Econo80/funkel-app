@@ -1,6 +1,17 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import {
+  CARE_EMOJI,
+  SEASONS_START,
+  SEASON_EMOJI,
+  careCells,
+  careCost,
+  careFor,
+  careForAll,
+  daysUntilCare,
+  isWithered,
+  needsCare,
+  seasonOn,
   GARDEN_CATEGORIES,
   GARDEN_COLUMNS,
   GARDEN_ITEMS,
@@ -77,6 +88,8 @@ export function itemUses(item: GardenItem): string[] {
   if (item.boosts) uses.push(`${item.boosts.map((k) => PRODUCE_EMOJI[k]).join("")} +1`);
   if (item.recipe) uses.push(recipeText(item.recipe));
   if (item.orders) uses.push(t(`garden.use.${item.orders}`));
+  if (item.annual) uses.push(`❄️ ${t("garden.use.annual")}`);
+  if (item.care) uses.push(`${CARE_EMOJI[item.care.kind]} ${t("garden.use.care %lld %lld", item.care.cost, item.care.every)}`);
   return uses;
 }
 
@@ -111,6 +124,9 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   const level = farmLevel(profile.farmXp);
   const cell = CELL_SIZES[zoom];
   const name = (id: string) => t(`garden.item.${id}`);
+  const season = seasonOn(now);
+  // A new season (and the very first one) is greeted with a card that says what it means.
+  const seasonCard = season.startDay >= SEASONS_START && saved.farmSeason !== season.startDay ? season.season : undefined;
   const sound = (kind: "pop" | "gentle" | "finish" | "correct") => saved.soundEnabled && playSound(kind);
 
   // Today's orders are made when the farm opens (and once there is something to order).
@@ -184,8 +200,11 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     const item = gardenItem(plot.itemId);
     if (!item) return "";
     const days = daysUntilNextStage(plot, now);
+    if (isWithered(plot, now)) return `${name(item.id)}: ${t("garden.withered")}`;
+    if (item.care && needsCare(plot, now)) return `${name(item.id)} ${t(`garden.care.${item.care.kind}`)} · ${t("garden.care.cost %lld", item.care.cost)}`;
     if (isUnderConstruction(plot, now)) return `${name(item.id)}: ${t("garden.builds %lld", days ?? 1)}`;
     if (days !== undefined) return `${name(item.id)}: ${t("garden.grows %lld", days)}`;
+    if (season.season === "winter" && (item.category === "plants" || item.id === "beehive")) return `${name(item.id)}: ${t("garden.resting")}`;
     const parts: string[] = [];
     if (item.houses) {
       const { capacity, used } = homeSpace(garden, item.houses.group, now);
@@ -195,6 +214,8 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     if (item.recipe) parts.push(t("garden.notEnough %@", goodsText(item.recipe.needs)));
     if (item.boosts) parts.push(t("garden.use.boost %@", item.boosts.map((k) => PRODUCE_EMOJI[k]).join("")));
     if (item.orders) parts.push(t(`garden.use.${item.orders}`));
+    const careIn = daysUntilCare(plot, now);
+    if (item.care && careIn !== undefined) parts.push(t(`garden.careIn.${item.care.kind} %lld`, careIn));
     return parts.length ? `${name(item.id)}: ${parts.join(" · ")}` : name(item.id);
   };
 
@@ -204,6 +225,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     : problem === "space" ? t("garden.noSpace")
     : problem === "level" ? t("garden.level %lld", item.level)
     : problem === "stars" ? t("garden.noStars")
+    : problem === "winter" ? t("garden.winterNoPlant")
     : "";
 
   const tapCell = async (cellIndex: number) => {
@@ -227,6 +249,16 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     if (plot && anchor !== undefined && readyProduce(plot, now) && tool?.kind !== "clear") {
       sound("pop");
       return commit(collect(anchor, saved));
+    }
+    // Hungry animals, a tractor due a service, a building to repair: a tap looks after it.
+    if (plot && anchor !== undefined && !tool && needsCare(plot, now)) {
+      const care = gardenItem(plot.itemId)!.care!;
+      if (saved.walletStars < care.cost) { sound("gentle"); return setToast(t("garden.care.noStars %lld", care.cost)); }
+      sound("pop");
+      pop(anchor, `−${care.cost} ⭐`, "goods");
+      pop(anchor, CARE_EMOJI[care.kind], "sparkle", 150);
+      setToast(t(`garden.cared.${care.kind}`));
+      return commit(careFor(saved, anchor, now));
     }
     // The mill, barn and farmhouse make something from the storage on a tap.
     if (anchor !== undefined && !tool && canMake(saved, anchor, now)) {
@@ -288,6 +320,20 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     void commit(next);
   };
 
+  const careAll = () => {
+    const next = careForAll(saved, now);
+    if (next === saved) {
+      sound("gentle");
+      const cheapest = Math.min(...careCells(saved.garden, now).map((c) => careCost(saved.garden, c, now) ?? 0));
+      return setToast(t("garden.care.noStars %lld", cheapest));
+    }
+    careCells(saved.garden, now).filter((c) => !careCells(next.garden, now).includes(c))
+      .forEach((c, i) => pop(c, CARE_EMOJI[gardenItem(saved.garden[c]!.itemId)!.care!.kind], "sparkle", Math.min(i, 12) * 90));
+    sound("correct");
+    setToast(careCells(next.garden, now).length ? t("garden.care.noStars %lld", careCost(next.garden, careCells(next.garden, now)[0], now) ?? 1) : t("garden.caredAll"));
+    void commit(next);
+  };
+
   const pick = (item: GardenItem) => {
     setSheet(undefined);
     setTool({ kind: "place", id: item.id });
@@ -295,6 +341,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   };
 
   const ready = readyCells(garden, now).length;
+  const toCare = careCells(garden, now).length;
   const orders = profile.farmOrders?.orders ?? [];
   const deliverable = orders.filter((o) => canFulfil(profile, o)).length;
   const goods = goodsCount(profile.farmGoods);
@@ -307,7 +354,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
     : undefined;
 
   return (
-    <main class={`farm time-${timeUp ? "night" : daylight(now.getHours())}`}>
+    <main class={`farm time-${timeUp ? "night" : daylight(now.getHours())} season-${season.season}`}>
       <div class="farm-world" data-testid="garden-scroll">
         <div class={`farm-ground${tool ? " placing" : ""}${drawTool ? " drawing" : ""}`}
           style={{ "--cell": `${cell}px`, gridTemplateColumns: `repeat(${GARDEN_COLUMNS}, var(--cell))` } as never}
@@ -323,6 +370,8 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
             const produce = plot && readyProduce(plot, now);
             const makes = !produce && plot && canMake(profile, i, now) ? recipeAt(garden, i, now)?.makes : undefined;
             const building = plot && isUnderConstruction(plot, now);
+            const care = plot && needsCare(plot, now) ? item?.care : undefined;
+            const withered = plot && isWithered(plot, now);
             const kind = !item ? ""
               : item.connects ? " way"
               : item.category === "animals" ? " animal"
@@ -332,7 +381,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
             const moving = tool?.kind === "move" && tool.from === i;
             return (
               <button key={i}
-                class={`farm-tile${plot ? " filled" : ""}${kind}${building ? " building" : ""}${placed === i ? " pop-in" : ""}${moving ? " moving" : ""}${produce ? " ready" : ""}`}
+                class={`farm-tile${plot ? " filled" : ""}${kind}${building ? " building" : ""}${placed === i ? " pop-in" : ""}${moving ? " moving" : ""}${produce ? " ready" : ""}${care ? " tired" : ""}${withered ? " withered" : ""}`}
                 style={{ gridColumn: `${col + 1} / span ${w}`, gridRow: `${row + 1} / span ${h}`, zIndex: plot ? 2 + (row + h) * 2 : 1, "--delay": `${-((i * 37) % 23) / 10}s` } as never}
                 onClick={() => tapCell(i)} aria-label={plot ? name(plot.itemId) : t("garden.empty")} data-testid="garden-plot" data-item={plot?.itemId} data-cell={i}>
                 {item?.connects ? <PathArt id={item.id} links={connections(garden, i)} />
@@ -340,6 +389,7 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
                 {building && <span class="hammer" aria-hidden="true">🔨</span>}
                 {produce && <span class="bubble" aria-hidden="true">{PRODUCE_EMOJI[produce]}</span>}
                 {makes && <span class="bubble make" aria-hidden="true">{PRODUCE_EMOJI[makes]}</span>}
+                {care && <span class="bubble care" aria-hidden="true">{CARE_EMOJI[care.kind]}</span>}
               </button>
             );
           })}
@@ -359,6 +409,10 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
           <span class="level-badge">{level.level}</span>
           <span class="xp-bar"><span class="xp-fill" style={{ width: `${(100 * level.xpInLevel) / level.xpForNext}%` }} /></span>
         </div>
+        <button class="hud-pill season" onClick={() => setToast(`${t(`garden.season.hint.${season.season}`)} (${t("garden.season.left %lld", season.daysLeft)})`)}
+          aria-label={`${t(`garden.season.${season.season}`)}, ${t("garden.season.left %lld", season.daysLeft)}`} data-testid="farm-season">
+          {SEASON_EMOJI[season.season]} <span class="season-name">{t(`garden.season.${season.season}`)}</span>
+        </button>
         <div class="hud-right">
           {secondsLeft !== undefined && (
             <span class={`hud-pill clock${secondsLeft <= 120 ? " low" : ""}`} role="timer" aria-label={t("garden.timeLeft %lld", Math.ceil(secondsLeft / 60))} data-testid="garden-clock">
@@ -390,6 +444,11 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
         {ready > 0 && (
           <button class="bar-button collect" onClick={collectAll} data-testid="farm-collect">
             <span aria-hidden="true">🧺</span>{t("garden.collectAll")}<span class="badge">{ready}</span>
+          </button>
+        )}
+        {toCare > 0 && (
+          <button class="bar-button care" onClick={careAll} data-testid="farm-care">
+            <span aria-hidden="true">🍽️</span>{t("garden.careAll")}<span class="badge">{toCare}</span>
           </button>
         )}
         <button class={`bar-button${tool?.kind === "move" ? " active" : ""}`} onClick={() => { setTool(tool?.kind === "move" ? undefined : { kind: "move" }); setToast(""); }} data-testid="farm-move">
@@ -513,6 +572,17 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
             </div>
           </Sheet>
         </GrownUpGate>
+      )}
+
+      {seasonCard && levelUp === undefined && (
+        <div class="game-over" role="dialog" aria-modal="true" aria-label={t(`garden.season.new.${seasonCard}`)} data-testid="season-card">
+          <div class={`card game-over-card season-card season-${seasonCard}`}>
+            <div class="season-badge" aria-hidden="true">{SEASON_EMOJI[seasonCard]}</div>
+            <h1>{t(`garden.season.new.${seasonCard}`)}</h1>
+            <p class="muted">{t(`garden.season.text.${seasonCard}`)}</p>
+            <BigButton color="var(--ink)" onClick={() => void persist({ ...latest.current, farmSeason: season.startDay })} testId="season-ok">{t("garden.great")}</BigButton>
+          </div>
+        </div>
       )}
 
       {levelUp !== undefined && (

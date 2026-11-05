@@ -101,6 +101,8 @@ export interface Profile extends ProfileSettings {
   farmXp: number;
   /** Today's orders on the order board. */
   farmOrders?: { day: string; orders: FarmOrder[] };
+  /** The first day of the season whose welcome card was last shown on the farm. */
+  farmSeason?: string;
   /** Time spent in the garden on `gardenDay`, and extra minutes a grown-up gave for that day. */
   gardenDay?: string;
   gardenSeconds?: number;
@@ -541,7 +543,7 @@ export function recordSudoku(p: Profile, stars: number, now = new Date()): Profi
 export function resetProgress(p: Profile): Profile {
   return {
     ...p,
-    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: emptyGoods(), farmXp: 0, farmOrders: undefined,
+    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: emptyGoods(), farmXp: 0, farmOrders: undefined, farmSeason: undefined,
     currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [],
   };
 }

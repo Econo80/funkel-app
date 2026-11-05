@@ -5,6 +5,10 @@
 // the mill, barn and farmhouse turn goods into bread, cheese and pie, and the
 // mailbox and horse make orders better. Orders ask for goods, and spending stars
 // on the farm earns XP towards farm levels that unlock more.
+// A farm year has four seasons of a week each: fields and flowers wither when
+// winter comes and are planted again in spring, and animals need feeding, the
+// tractor a service and buildings a repair now and then, or they stop working
+// (nothing dies or disappears). So the farm keeps needing stars from learning.
 // Everything is paid from the wallet; lifetime stars never change here.
 import { dayKey, type Profile } from "./profile";
 import { randomElement, randomInt, seededRng, shuffled, type Rng } from "./random";
@@ -63,42 +67,52 @@ export interface GardenItem {
   recipe?: Recipe;
   /** Roads, paths and fences join up with neighbours of the same kind. */
   connects?: boolean;
+  /** Fields and flowers: wither when winter comes and can't be planted in winter. */
+  annual?: boolean;
+  /** Needs looking after every few days (for a few stars), or it stops working until then. */
+  care?: Care;
 }
+
+export type CareKind = "feed" | "service" | "repair";
+export interface Care { kind: CareKind; every: number; cost: number }
+export const CARE_EMOJI: Record<CareKind, string> = { feed: "🍽️", service: "🔧", repair: "🔨" };
+const feed = (cost: number): Care => ({ kind: "feed", every: 3, cost });
+const repair = (cost: number): Care => ({ kind: "repair", every: 14, cost });
 
 const BUILDING = "🚧";
 
 export const GARDEN_ITEMS: GardenItem[] = [
   // Plants
-  { id: "flower", price: 3, level: 1, category: "plants", stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"], produce: "flowers" },
-  { id: "wheat", price: 3, level: 1, category: "plants", stages: ["🌱", "🌾"], days: [0, 1], harvest: "wheat" },
-  { id: "mushroom", price: 2, level: 1, category: "plants", stages: ["🍄"], days: [0], produce: "mushroom" },
+  { id: "flower", price: 3, level: 1, category: "plants", stages: ["🌱", "🌿", "🌷"], days: [0, 1, 3], variants: ["🌷", "🌻", "🌼", "🌸", "🌹", "🪻"], produce: "flowers", annual: true },
+  { id: "wheat", price: 3, level: 1, category: "plants", stages: ["🌱", "🌾"], days: [0, 1], harvest: "wheat", annual: true },
+  { id: "mushroom", price: 2, level: 1, category: "plants", stages: ["🍄"], days: [0], produce: "mushroom", annual: true },
   { id: "tree", price: 12, level: 1, category: "plants", stages: ["🌱", "🪴", "🌳"], days: [0, 3, 7], variants: ["🌳", "🌲"], produce: "wood" },
-  { id: "vegetable", price: 4, level: 2, category: "plants", stages: ["🌱", "🌿", "🥕"], days: [0, 1, 2], variants: ["🥕", "🥬", "🎃", "🍅", "🥔"], harvest: "veg" },
+  { id: "vegetable", price: 4, level: 2, category: "plants", stages: ["🌱", "🌿", "🥕"], days: [0, 1, 2], variants: ["🥕", "🥬", "🎃", "🍅", "🥔"], harvest: "veg", annual: true },
   { id: "appletree", price: 20, level: 4, category: "plants", stages: ["🌱", "🪴", "🌳"], days: [0, 2, 4], produce: "apple" },
   // Animals: small ones live anywhere and help; farm animals need their home first.
   { id: "snail", price: 4, level: 1, category: "animals", stages: ["🐌"], days: [0], boosts: ["mushroom"] },
   { id: "ladybug", price: 5, level: 1, category: "animals", stages: ["🐞"], days: [0], boosts: ["veg"] },
   { id: "butterfly", price: 6, level: 1, category: "animals", stages: ["🦋"], days: [0], boosts: ["flowers"] },
   { id: "bee", price: 6, level: 1, category: "animals", stages: ["🐝"], days: [0], boosts: ["apple", "honey"] },
-  { id: "rabbit", price: 8, level: 2, category: "animals", stages: ["🐇"], days: [0], produce: "wool" },
-  { id: "dog", price: 15, level: 2, category: "animals", stages: ["🐕"], days: [0], needs: "dog", boosts: ["wool"] },
-  { id: "chick", price: 6, level: 2, category: "animals", stages: ["🐣", "🐥", "🐔"], days: [0, 2, 4], needs: "chicken", produce: "egg" },
-  { id: "duck", price: 8, level: 3, category: "animals", stages: ["🦆"], days: [0], needs: "duck", produce: "egg" },
-  { id: "cat", price: 12, level: 3, category: "animals", stages: ["🐈"], days: [0], needs: "cat", boosts: ["wheat"] },
-  { id: "sheep", price: 15, level: 4, category: "animals", stages: ["🐑"], days: [0], needs: "farm", produce: "wool" },
-  { id: "goat", price: 15, level: 4, category: "animals", stages: ["🐐"], days: [0], needs: "farm", produce: "milk" },
-  { id: "pig", price: 18, level: 5, category: "animals", stages: ["🐖"], days: [0], needs: "farm", produce: "bacon" },
-  { id: "cow", price: 25, level: 5, category: "animals", stages: ["🐄"], days: [0], needs: "farm", produce: "milk" },
-  { id: "horse", price: 30, level: 6, category: "animals", stages: ["🐴"], days: [0], needs: "farm", orders: "extraStar" },
+  { id: "rabbit", price: 8, level: 2, category: "animals", stages: ["🐇"], days: [0], produce: "wool", care: feed(1) },
+  { id: "dog", price: 15, level: 2, category: "animals", stages: ["🐕"], days: [0], needs: "dog", boosts: ["wool"], care: feed(1) },
+  { id: "chick", price: 6, level: 2, category: "animals", stages: ["🐣", "🐥", "🐔"], days: [0, 2, 4], needs: "chicken", produce: "egg", care: feed(1) },
+  { id: "duck", price: 8, level: 3, category: "animals", stages: ["🦆"], days: [0], needs: "duck", produce: "egg", care: feed(1) },
+  { id: "cat", price: 12, level: 3, category: "animals", stages: ["🐈"], days: [0], needs: "cat", boosts: ["wheat"], care: feed(1) },
+  { id: "sheep", price: 15, level: 4, category: "animals", stages: ["🐑"], days: [0], needs: "farm", produce: "wool", care: feed(2) },
+  { id: "goat", price: 15, level: 4, category: "animals", stages: ["🐐"], days: [0], needs: "farm", produce: "milk", care: feed(2) },
+  { id: "pig", price: 18, level: 5, category: "animals", stages: ["🐖"], days: [0], needs: "farm", produce: "bacon", care: feed(2) },
+  { id: "cow", price: 25, level: 5, category: "animals", stages: ["🐄"], days: [0], needs: "farm", produce: "milk", care: feed(2) },
+  { id: "horse", price: 30, level: 6, category: "animals", stages: ["🐴"], days: [0], needs: "farm", orders: "extraStar", care: feed(3) },
   // Buildings take a few days to build.
-  { id: "doghouse", price: 15, level: 2, category: "buildings", stages: [BUILDING, "art:doghouse"], days: [0, 1], houses: { group: "dog", capacity: 1 } },
-  { id: "coop", price: 20, level: 2, category: "buildings", stages: [BUILDING, "art:coop"], days: [0, 1], houses: { group: "chicken", capacity: 4 } },
-  { id: "house", price: 30, level: 3, category: "buildings", stages: ["🏡"], days: [0], houses: { group: "cat", capacity: 2 } },
-  { id: "pond", price: 25, level: 3, category: "buildings", stages: [BUILDING, "art:pond"], days: [0, 1], size: [2, 1], houses: { group: "duck", capacity: 3 }, produce: "fish" },
-  { id: "barn", price: 40, level: 4, category: "buildings", stages: [BUILDING, "art:barn"], days: [0, 2], size: [2, 2], houses: { group: "farm", capacity: 4 }, recipe: { needs: { milk: 2 }, makes: "cheese" } },
-  { id: "beehive", price: 25, level: 5, category: "buildings", stages: [BUILDING, "art:beehive"], days: [0, 1], produce: "honey" },
-  { id: "farmhouse", price: 60, level: 6, category: "buildings", stages: [BUILDING, "art:farmhouse"], days: [0, 3], size: [2, 2], houses: { group: "cat", capacity: 2 }, recipe: { needs: { apple: 1, egg: 1, wheat: 1 }, makes: "pie" } },
-  { id: "windmill", price: 50, level: 7, category: "buildings", stages: [BUILDING, "art:windmill"], days: [0, 2], size: [1, 2], recipe: { needs: { wheat: 2 }, makes: "bread" } },
+  { id: "doghouse", price: 15, level: 2, category: "buildings", stages: [BUILDING, "art:doghouse"], days: [0, 1], houses: { group: "dog", capacity: 1 }, care: repair(2) },
+  { id: "coop", price: 20, level: 2, category: "buildings", stages: [BUILDING, "art:coop"], days: [0, 1], houses: { group: "chicken", capacity: 4 }, care: repair(3) },
+  { id: "house", price: 30, level: 3, category: "buildings", stages: ["🏡"], days: [0], houses: { group: "cat", capacity: 2 }, care: repair(4) },
+  { id: "pond", price: 25, level: 3, category: "buildings", stages: [BUILDING, "art:pond"], days: [0, 1], size: [2, 1], houses: { group: "duck", capacity: 3 }, produce: "fish", care: repair(3) },
+  { id: "barn", price: 40, level: 4, category: "buildings", stages: [BUILDING, "art:barn"], days: [0, 2], size: [2, 2], houses: { group: "farm", capacity: 4 }, recipe: { needs: { milk: 2 }, makes: "cheese" }, care: repair(6) },
+  { id: "beehive", price: 25, level: 5, category: "buildings", stages: [BUILDING, "art:beehive"], days: [0, 1], produce: "honey", care: repair(3) },
+  { id: "farmhouse", price: 60, level: 6, category: "buildings", stages: [BUILDING, "art:farmhouse"], days: [0, 3], size: [2, 2], houses: { group: "cat", capacity: 2 }, recipe: { needs: { apple: 1, egg: 1, wheat: 1 }, makes: "pie" }, care: repair(8) },
+  { id: "windmill", price: 50, level: 7, category: "buildings", stages: [BUILDING, "art:windmill"], days: [0, 2], size: [1, 2], recipe: { needs: { wheat: 2 }, makes: "bread" }, care: repair(6) },
   // Roads, paths and fences are free, so children can lay out their farm.
   { id: "road", price: 0, level: 1, category: "paths", stages: ["art:road"], days: [0], connects: true },
   { id: "path", price: 0, level: 1, category: "paths", stages: ["art:path"], days: [0], connects: true },
@@ -106,8 +120,8 @@ export const GARDEN_ITEMS: GardenItem[] = [
   // Decorations, and a few that help
   { id: "stone", price: 1, level: 1, category: "decor", stages: ["🪨"], days: [0] },
   { id: "mailbox", price: 3, level: 2, category: "decor", stages: ["📫"], days: [0], orders: "extraOrder" },
-  { id: "fountain", price: 20, level: 4, category: "decor", stages: ["⛲"], days: [0], boosts: ["milk"] },
-  { id: "tractor", price: 30, level: 8, category: "decor", stages: ["🚜"], days: [0], boosts: ["wheat", "veg"] },
+  { id: "fountain", price: 20, level: 4, category: "decor", stages: ["⛲"], days: [0], boosts: ["milk"], care: repair(3) },
+  { id: "tractor", price: 30, level: 8, category: "decor", stages: ["🚜"], days: [0], boosts: ["wheat", "veg"], care: { kind: "service", every: 7, cost: 5 } },
 ];
 
 export const gardenItem = (id: string) => GARDEN_ITEMS.find((i) => i.id === id);
@@ -172,6 +186,8 @@ export function widenGarden(old: Garden): Garden {
 }
 
 export interface GardenPlot {
+  /** Last fed, serviced or repaired (for things that need care). */
+  caredDay?: string;
   itemId: string;
   plantedDay: string;
   variant?: string;
@@ -211,10 +227,69 @@ function stageIndex(item: GardenItem, plot: GardenPlot, now: Date): number {
 
 const isGrown = (item: GardenItem, plot: GardenPlot, now: Date) => stageIndex(item, plot, now) === item.stages.length - 1;
 
+const addDays = (now: Date, days: number) => { const d = new Date(now); d.setDate(d.getDate() + days); return d; };
+
+// MARK: Seasons
+
+export type Season = "spring" | "summer" | "autumn" | "winter";
+export const SEASONS: readonly Season[] = ["spring", "summer", "autumn", "winter"];
+export const SEASON_EMOJI: Record<Season, string> = { spring: "🌸", summer: "☀️", autumn: "🍂", winter: "❄️" };
+export const SEASON_DAYS = 7;
+/** The first farm spring began on this Monday; every season is a week, the same for every child. */
+export const SEASONS_START = "2026-11-02";
+
+/** Today's season, which day of it (0–6), the days left, and the day it began. */
+export function seasonOn(now: Date): { season: Season; day: number; daysLeft: number; startDay: string } {
+  const year = SEASONS.length * SEASON_DAYS;
+  // Before the first farm year it is always early spring.
+  const index = Math.max(0, daysSince(SEASONS_START, now)) % year;
+  const day = index % SEASON_DAYS;
+  return { season: SEASONS[Math.floor(index / SEASON_DAYS)], day, daysLeft: SEASON_DAYS - day, startDay: dayKey(addDays(now, -day)) };
+}
+
+/** The day the latest winter began (none before the first farm year). */
+function lastWinterStart(now: Date): string | undefined {
+  const year = SEASONS.length * SEASON_DAYS, winter = 3 * SEASON_DAYS;
+  const index = ((daysSince(SEASONS_START, now) % year) + year) % year;
+  const start = dayKey(addDays(now, -((index - winter + year) % year)));
+  return start < SEASONS_START ? undefined : start;
+}
+
+/** A field or flower from before the last winter: withered, to be cleared and planted again. */
+export function isWithered(plot: GardenPlot, now: Date): boolean {
+  const winter = gardenItem(plot.itemId)?.annual ? lastWinterStart(now) : undefined;
+  return winter !== undefined && plot.plantedDay < winter;
+}
+
+/** Trees and bees rest in winter. */
+const restsInWinter = (item: GardenItem) => item.category === "plants" || item.id === "beehive";
+
+// MARK: Care
+
+/** Care is counted from here for farms built before it existed, so nobody starts with a big bill. */
+export const CARE_START = "2026-11-05";
+
+/** Days until this needs care again (0 = now); undefined if it never does. */
+export function daysUntilCare(plot: GardenPlot, now: Date): number | undefined {
+  const care = gardenItem(plot.itemId)?.care;
+  if (!care) return undefined;
+  const last = [plot.caredDay ?? plot.plantedDay, CARE_START].sort()[1];
+  return Math.max(0, care.every - daysSince(last, now));
+}
+
+/** It's hungry, due a service or a repair: until then it stops working (it stays on the farm). */
+export const needsCare = (plot: GardenPlot, now: Date) => daysUntilCare(plot, now) === 0;
+
+/** Finished, looked after and not resting for the winter: it does what it does. */
+function isWorking(item: GardenItem, plot: GardenPlot, now: Date): boolean {
+  return isGrown(item, plot, now) && !needsCare(plot, now) && !isWithered(plot, now) && !(restsInWinter(item) && seasonOn(now).season === "winter");
+}
+
 /** The picture a plot shows today: an emoji, or "art:<id>" for a drawn one. */
 export function plotPicture(plot: GardenPlot, now: Date): string {
   const item = gardenItem(plot.itemId);
   if (!item) return "";
+  if (isWithered(plot, now)) return item.id === "flower" ? "🥀" : "🍂";
   const stage = stageIndex(item, plot, now);
   return stage === item.stages.length - 1 && plot.variant ? plot.variant : item.stages[stage];
 }
@@ -297,13 +372,14 @@ export function homeSpace(garden: Garden, group: HomeGroup, now: Date): { capaci
 /** Which building an animal needs (for "first build a …"). */
 export const homeFor = (group: HomeGroup) => GARDEN_ITEMS.find((i) => i.houses?.group === group && i.id !== "farmhouse")!;
 
-export type PlacementProblem = "level" | "stars" | "space" | "home" | "full";
+export type PlacementProblem = "level" | "stars" | "space" | "home" | "full" | "winter";
 
 export function placementProblem(p: Profile, cell: number, itemId: string, now: Date): PlacementProblem | undefined {
   const item = gardenItem(itemId);
   if (!item) return "stars";
   if (farmLevel(p.farmXp).level < item.level) return "level";
   if (p.walletStars < item.price) return "stars";
+  if (item.annual && seasonOn(now).season === "winter") return "winter";
   if (item.needs) {
     const { capacity, used } = homeSpace(p.garden, item.needs, now);
     if (capacity === 0) return "home";
@@ -367,18 +443,18 @@ export function clearPlot(p: Profile, cell: number, now = new Date()): Profile {
  */
 export function readyProduce(plot: GardenPlot, now: Date): Produce | undefined {
   const item = gardenItem(plot.itemId);
-  if (!item || !isGrown(item, plot, now)) return undefined;
+  if (!item || !isWorking(item, plot, now)) return undefined;
   if (item.harvest) return item.harvest;
   if (!item.produce || daysSince(plot.plantedDay, now) < 1) return undefined;
   return plot.collectedDay === dayKey(now) ? undefined : item.produce;
 }
 
-/** Finished items on the farm, one per kind (one of a kind is enough for its effect). */
+/** Working items on the farm, one per kind (one of a kind is enough for its effect). */
 function finishedKinds(garden: Garden, now: Date): GardenItem[] {
   const seen = new Map<string, GardenItem>();
   for (const plot of garden) {
     const item = plot && gardenItem(plot.itemId);
-    if (item && !seen.has(item.id) && isGrown(item, plot, now)) seen.set(item.id, item);
+    if (item && !seen.has(item.id) && isWorking(item, plot, now)) seen.set(item.id, item);
   }
   return [...seen.values()];
 }
@@ -411,7 +487,7 @@ export function recipeAt(garden: Garden, cell: number, now: Date): Recipe | unde
   const anchor = occupancy(garden)[cell];
   const plot = anchor === undefined ? undefined : garden[anchor];
   const item = plot && gardenItem(plot.itemId);
-  return plot && item?.recipe && isGrown(item, plot, now) ? item.recipe : undefined;
+  return plot && item?.recipe && isWorking(item, plot, now) ? item.recipe : undefined;
 }
 
 const hasGoods = (p: Profile, wants: Partial<Record<Produce, number>>) => PRODUCE.every((k) => (p.farmGoods[k] ?? 0) >= (wants[k] ?? 0));
@@ -429,6 +505,35 @@ export function makeGoods(p: Profile, cell: number, now: Date): Profile {
   for (const k of PRODUCE) farmGoods[k] -= recipe.needs[k] ?? 0;
   farmGoods[recipe.makes] += 1;
   return withXp({ ...p, farmGoods }, XP_FOR_COLLECTING);
+}
+
+// MARK: Looking after things
+
+/** Every item that needs care now (by its top-left cell). */
+export function careCells(garden: Garden, now: Date): number[] {
+  return garden.flatMap((plot, i) => (plot && needsCare(plot, now) ? [i] : []));
+}
+
+/** What it costs to look after this cell now, or undefined if it doesn't need it. */
+export function careCost(garden: Garden, cell: number, now: Date): number | undefined {
+  const anchor = occupancy(garden)[cell];
+  const plot = anchor === undefined ? undefined : garden[anchor];
+  return plot && needsCare(plot, now) ? gardenItem(plot.itemId)?.care?.cost : undefined;
+}
+
+/** Feeds, services or repairs it (paid from the wallet; every star spent is one XP). */
+export function careFor(p: Profile, cell: number, now: Date): Profile {
+  const anchor = occupancy(p.garden)[cell];
+  const cost = careCost(p.garden, cell, now);
+  if (anchor === undefined || cost === undefined || p.walletStars < cost) return p;
+  const garden = [...p.garden];
+  garden[anchor] = { ...garden[anchor]!, caredDay: dayKey(now) };
+  return withXp({ ...p, walletStars: p.walletStars - cost, garden }, cost);
+}
+
+/** Looks after everything that needs it, as far as the stars go. */
+export function careForAll(p: Profile, now: Date): Profile {
+  return careCells(p.garden, now).reduce((next, cell) => careFor(next, cell, now), p);
 }
 
 /** Every cell with something ready, one per item. */
@@ -511,7 +616,7 @@ export function producibleGoods(garden: Garden): Produce[] {
   return PRODUCE.filter((k) => kinds.has(k));
 }
 
-const onFarm = (garden: Garden, bonus: GardenItem["orders"]) => garden.some((plot) => plot && gardenItem(plot.itemId)?.orders === bonus);
+const onFarm = (garden: Garden, bonus: GardenItem["orders"], now: Date) => finishedKinds(garden, now).some((item) => item.orders === bonus);
 
 const hash = (s: string) => [...s].reduce((h, ch) => (Math.imul(h, 31) + ch.charCodeAt(0)) | 0, 7);
 
@@ -527,8 +632,8 @@ export function withTodaysOrders(p: Profile, now: Date): Profile {
   if (current?.day === today && (current.orders.length > 0 || kinds.length === 0)) return p;
   const rng = seededRng(hash(`${p.id}:${today}`));
   const big = farmLevel(p.farmXp).level >= 5 ? 1 : 0;
-  const count = onFarm(p.garden, "extraOrder") ? 4 : 3;
-  const extraStar = onFarm(p.garden, "extraStar") ? 1 : 0;
+  const count = onFarm(p.garden, "extraOrder", now) ? 4 : 3;
+  const extraStar = onFarm(p.garden, "extraStar", now) ? 1 : 0;
   const orders: FarmOrder[] = kinds.length === 0 ? [] : Array.from({ length: count }, (_, i) => {
     const picked = shuffled(rng, kinds).slice(0, kinds.length > 1 && rng() < 0.5 ? 2 : 1);
     const wants: Partial<Record<Produce, number>> = {};

@@ -30,6 +30,14 @@ import {
   plotPicture,
   readyProduce,
   sellGoods,
+  careCells,
+  careCost,
+  careFor,
+  careForAll,
+  daysUntilCare,
+  isWithered,
+  needsCare,
+  seasonOn,
 } from "../src/domain/garden";
 import { createProfile, defaultSettings, normalizeProfile, type Profile } from "../src/domain/profile";
 import { seededRng } from "../src/domain/random";
@@ -333,5 +341,88 @@ describe("everything on the farm does something", () => {
     expect(producibleGoods(p.garden)).toContain("bread");
     expect(producibleGoods(p.garden)).not.toContain("cheese"); // no milk on this farm
     for (const o of better) expect(o.stars).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("seasons and care", () => {
+  // The first farm year: spring from 2 November 2026, then a week each of summer, autumn and winter.
+  const nov = (d: number) => new Date(2026, 10, d, 10);
+  const at = (p: Profile, cell: number, id: string, d: number) => placeInGarden(p, cell, id, nov(d), seededRng(cell));
+
+  it("turns every week, and before the first farm year it is spring", () => {
+    expect(seasonOn(day(20)).season).toBe("spring");
+    expect(seasonOn(nov(5))).toMatchObject({ season: "spring", day: 3, daysLeft: 4, startDay: "2026-11-02" });
+    expect(seasonOn(nov(9)).season).toBe("summer");
+    expect(seasonOn(nov(16)).season).toBe("autumn");
+    expect(seasonOn(nov(23))).toMatchObject({ season: "winter", startDay: "2026-11-23" });
+    expect(seasonOn(nov(30))).toMatchObject({ season: "spring", startDay: "2026-11-30" });
+  });
+
+  it("withers fields and flowers when winter comes; nothing can be planted until spring", () => {
+    let p = at(rich(), 0, "wheat", 20);
+    p = at(p, 1, "flower", 20);
+    p = at(p, 2, "appletree", 2);
+    expect(readyProduce(p.garden[0]!, nov(22))).toBe("wheat");
+    expect(isWithered(p.garden[0]!, nov(23))).toBe(true);
+    expect(plotPicture(p.garden[0]!, nov(23))).toBe("🍂");
+    expect(plotPicture(p.garden[1]!, nov(23))).toBe("🥀");
+    expect(readyProduce(p.garden[0]!, nov(23))).toBeUndefined();
+    // Trees survive but rest in winter.
+    expect(isWithered(p.garden[2]!, nov(23))).toBe(false);
+    expect(readyProduce(p.garden[2]!, nov(23))).toBeUndefined();
+    expect(readyProduce(p.garden[2]!, nov(30))).toBe("apple");
+    // Still withered in spring until cleared and planted again.
+    expect(isWithered(p.garden[0]!, nov(30))).toBe(true);
+    expect(placementProblem(p, 5, "wheat", nov(24))).toBe("winter");
+    expect(placementProblem(p, 5, "cow", nov(24))).not.toBe("winter");
+    expect(placementProblem(p, 5, "wheat", nov(30))).toBeUndefined();
+  });
+
+  // Care tests run in December, after the care start (5 November): spring from 30 November.
+  const dec = (d: number) => new Date(2026, 11, d, 10);
+  const atDec = (p: Profile, cell: number, id: string, d: number) => placeInGarden(p, cell, id, dec(d), seededRng(cell));
+
+  it("animals get hungry and stop working until fed; feeding costs stars and gives XP", () => {
+    let p = atDec(rich(100), 0, "coop", 1);
+    p = atDec(p, 2, "rabbit", 1);
+    p = { ...p, walletStars: 100 };
+    const rabbit = () => p.garden[2]!;
+    expect(readyProduce(rabbit(), dec(3))).toBe("wool");
+    expect(needsCare(rabbit(), dec(3))).toBe(false);
+    expect(needsCare(rabbit(), dec(4))).toBe(true);           // three days after it came it is hungry …
+    expect(readyProduce(rabbit(), dec(4))).toBeUndefined();   // … and gives nothing
+    expect(careCells(p.garden, dec(4))).toEqual([2]);
+    expect(careCost(p.garden, 2, dec(4))).toBe(1);
+    const fed = careFor(p, 2, dec(4));
+    expect(fed.walletStars).toBe(99);
+    expect(fed.farmXp).toBe(p.farmXp + 1);
+    expect(readyProduce(fed.garden[2]!, dec(4))).toBe("wool");
+    expect(daysUntilCare(fed.garden[2]!, dec(5))).toBe(2);
+    // Not enough stars: nothing happens.
+    expect(careFor({ ...p, walletStars: 0 }, 2, dec(4)).garden).toBe(p.garden);
+  });
+
+  it("a tractor needs a service and buildings a repair, or they stop helping and making", () => {
+    let p = atDec(rich(), 0, "tractor", 1);
+    p = atDec(p, 1, "windmill", 1);
+    p = atDec(p, 3, "wheat", 1);
+    p = { ...p, farmGoods: { ...emptyGoods(), wheat: 4 } };
+    expect(collectProduce(p, 3, dec(4)).farmGoods.wheat).toBe(6);
+    expect(canMake(p, 1, dec(4))).toBe(true);
+    expect(needsCare(p.garden[0]!, dec(8))).toBe(true);
+    expect(collectProduce(p, 3, dec(8)).farmGoods.wheat).toBe(5);
+    expect(canMake(p, 1, dec(15))).toBe(false); // the windmill is due a repair after 14 days
+    const all = careForAll(p, dec(15));
+    expect(careCells(all.garden, dec(15))).toEqual([]);
+    expect(all.walletStars).toBe(p.walletStars - 5 - 6);
+    expect(canMake(all, 1, dec(15))).toBe(true);
+  });
+
+  it("farms from before care existed start fresh, and decorations never need care", () => {
+    let p = place(rich(), 0, "rabbit"); // October, long before the care start
+    p = place(p, 1, "stone");
+    expect(daysUntilCare(p.garden[0]!, nov(5))).toBe(3);
+    expect(daysUntilCare(p.garden[1]!, nov(5))).toBeUndefined();
+    expect(GARDEN_ITEMS.filter((i) => i.category === "animals" && i.needs).every((i) => i.care?.kind === "feed")).toBe(true);
   });
 });

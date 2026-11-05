@@ -1501,6 +1501,198 @@
         }
       }
     },
+    "garden.care.cost %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippen kostet %lld ⭐"
+          }
+        }
+      }
+    },
+    "garden.care.feed": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hat Hunger"
+          }
+        }
+      }
+    },
+    "garden.care.noStars %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür brauchst du %lld ⭐. Sammle Sterne beim Lernen!"
+          }
+        }
+      }
+    },
+    "garden.care.repair": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muss repariert werden"
+          }
+        }
+      }
+    },
+    "garden.care.service": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "braucht einen Service"
+          }
+        }
+      }
+    },
+    "garden.careAll": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versorgen"
+          }
+        }
+      }
+    },
+    "garden.careIn.feed %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Futter in %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Futter in %lld Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.careIn.repair %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reparatur in %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Reparatur in %lld Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.careIn.service %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Service in %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Service in %lld Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.cared.feed": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gefüttert!"
+          }
+        }
+      }
+    },
+    "garden.cared.repair": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repariert!"
+          }
+        }
+      }
+    },
+    "garden.cared.service": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service gemacht!"
+          }
+        }
+      }
+    },
+    "garden.caredAll": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles versorgt!"
+          }
+        }
+      }
+    },
     "garden.clear": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -2377,6 +2569,234 @@
         }
       }
     },
+    "garden.resting": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ruht im Winter"
+          }
+        }
+      }
+    },
+    "garden.season.autumn": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herbst"
+          }
+        }
+      }
+    },
+    "garden.season.hint.autumn": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Herbst wird geerntet. Wenn der Winter kommt, verwelken Felder und Blumen."
+          }
+        }
+      }
+    },
+    "garden.season.hint.spring": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Frühling wächst alles. Jetzt Felder und Blumen pflanzen!"
+          }
+        }
+      }
+    },
+    "garden.season.hint.summer": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Sommer gibt der Hof am meisten. Ernte fleissig und sammle Vorräte!"
+          }
+        }
+      }
+    },
+    "garden.season.hint.winter": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Winter wächst nichts. Bäume und Bienen ruhen, die Tiere brauchen trotzdem Futter."
+          }
+        }
+      }
+    },
+    "garden.season.left %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Tage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "garden.season.new.autumn": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Herbst ist da!"
+          }
+        }
+      }
+    },
+    "garden.season.new.spring": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Frühling ist da!"
+          }
+        }
+      }
+    },
+    "garden.season.new.summer": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Sommer ist da!"
+          }
+        }
+      }
+    },
+    "garden.season.new.winter": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Winter ist da!"
+          }
+        }
+      }
+    },
+    "garden.season.spring": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frühling"
+          }
+        }
+      }
+    },
+    "garden.season.summer": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sommer"
+          }
+        }
+      }
+    },
+    "garden.season.text.autumn": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ernte, was du kannst: Wenn der Winter kommt, verwelken Felder und Blumen."
+          }
+        }
+      }
+    },
+    "garden.season.text.spring": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Jahreszeit dauert eine Woche. Jetzt kannst du Felder und Blumen pflanzen. Tiere brauchen Futter, der Traktor einen Service und Häuser ab und zu eine Reparatur, sonst machen sie Pause."
+          }
+        }
+      }
+    },
+    "garden.season.text.summer": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles wächst und gibt viel. Sammle Vorräte, damit du im Winter noch Aufträge erfüllen kannst."
+          }
+        }
+      }
+    },
+    "garden.season.text.winter": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Felder und Blumen sind verwelkt. Räum sie weg und pflanze im Frühling neu. Bäume und Bienen ruhen, die Tiere brauchen trotzdem Futter."
+          }
+        }
+      }
+    },
+    "garden.season.winter": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Winter"
+          }
+        }
+      }
+    },
     "garden.sell %lld": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2593,6 +3013,18 @@
         }
       }
     },
+    "garden.use.annual": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "welkt im Winter"
+          }
+        }
+      }
+    },
     "garden.use.boost %@": {
       "comment": "UI text. (Pip's garden and farm.)",
       "extractionState": "manual",
@@ -2601,6 +3033,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ +1 beim Sammeln"
+          }
+        }
+      }
+    },
+    "garden.use.care %lld %lld": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ⭐ alle %lld Tage"
           }
         }
       }
@@ -2649,6 +3093,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "zum Ernten"
+          }
+        }
+      }
+    },
+    "garden.winterNoPlant": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Winter wächst nichts. Warte auf den Frühling!"
+          }
+        }
+      }
+    },
+    "garden.withered": {
+      "comment": "UI text. (Pips Garten: seasons and care.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "verwelkt. Räum es weg und pflanze im Frühling neu."
           }
         }
       }

@@ -465,6 +465,24 @@ p { line-height: 1.4; }
 .popup.xp { color: #ffe066; font-size: 1rem; }
 .popup.sparkle { font-size: 2rem; }
 
+/* Seasons: the meadow turns golden in autumn and snowy in winter. */
+.season-autumn .farm-ground { background: radial-gradient(circle at 30% 20%, #e6cf7a, transparent 60%), linear-gradient(#cdbb5e, #b59a45); box-shadow: 0 0 0 8px #a98e3e, 0 0 0 14px rgba(0, 0, 0, 0.12), 0 24px 60px rgba(0, 0, 0, 0.3); }
+.season-autumn .farm-world { background-color: #8a7a35; }
+.season-winter .farm-ground {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='10' cy='14' r='2'/%3E%3Ccircle cx='52' cy='30' r='2.5'/%3E%3Ccircle cx='30' cy='62' r='2'/%3E%3Ccircle cx='70' cy='70' r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(circle at 30% 20%, #ffffff, transparent 60%), linear-gradient(#e9f2f6, #cfe0e9);
+  box-shadow: 0 0 0 8px #b7cfdb, 0 0 0 14px rgba(0, 0, 0, 0.1), 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+.season-winter .farm-world { background-color: #5f7f8c; }
+.hud-pill.season { border: none; font: inherit; cursor: pointer; }
+.season-card .season-badge { font-size: 4.5rem; line-height: 1.1; }
+/* Needs looking after: a little faded, with a red-ringed bubble. Withered fields stand still. */
+.farm-tile.tired .obj-picture { filter: grayscale(0.75) opacity(0.75); }
+.bubble.care { box-shadow: 0 0 0 3px #e5675a, 0 3px 8px rgba(0, 0, 0, 0.22); }
+.farm-tile.withered .obj-picture { animation: none; filter: saturate(0.6); }
+.bar-button.care .badge { background: #e5675a; }
+
 /* Time of day */
 .farm-light { position: absolute; inset: 0; pointer-events: none; transition: background 2s; z-index: 5; }
 .time-morning .farm-light { background: rgba(255, 190, 120, 0.12); }
