@@ -120,6 +120,9 @@ export function makeSudoku(level: SudokuLevel, rng: Rng): Sudoku {
   return { level, solution, given: puzzle.map((v) => v !== 0) };
 }
 
+/** Hints per puzzle: enough to get unstuck, not enough to have it solved for you. */
+export const SUDOKU_MAX_HINTS = 3;
+
 /** Stars for a solved puzzle: one less per hint and per three mistakes, at least one. */
 export function sudokuStars(level: SudokuLevel, mistakes: number, hints: number): number {
   return Math.max(1, level.stars - hints - Math.floor(mistakes / 3));

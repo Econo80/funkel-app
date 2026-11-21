@@ -20,7 +20,7 @@ struct SudokuView: View {
             VStack(spacing: 18) {
                 header
                 if let game {
-                    Text(game.level.pictures ? "sudoku.rule.pictures" : "sudoku.rule.numbers")
+                    Text(game.hintsLeft == 0 && !game.isSolved ? "sudoku.noHints" : game.level.pictures ? "sudoku.rule.pictures" : "sudoku.rule.numbers")
                         .font(.funkelBody)
                         .foregroundStyle(Palette.ink.opacity(0.8))
                         .multilineTextAlignment(.center)
@@ -63,9 +63,21 @@ struct SudokuView: View {
                 .minimumScaleFactor(0.6)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
+            let left = game?.hintsLeft ?? 0
             CircleIconButton(systemImage: "lightbulb.fill", label: "sudoku.hint", action: hint)
                 .accessibilityIdentifier("sudoku-hint")
-                .disabled(game?.isSolved ?? true)
+                .accessibilityValue(Text("sudoku.hintsLeft \(left)"))
+                .disabled(game?.isSolved ?? true || left == 0)
+                .opacity(left == 0 ? 0.4 : 1)
+                .overlay(alignment: .topTrailing) {
+                    Text(verbatim: String(left))
+                        .font(.caption.weight(.heavy))
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 22, minHeight: 22)
+                        .background(Self.color, in: .capsule)
+                        .offset(x: 4, y: -4)
+                        .accessibilityHidden(true)
+                }
         }
     }
 

@@ -205,7 +205,9 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
 }) {
   const [s, setS] = useState<ProfileSettings>(() => (profile ? { ...profile } : defaultSettings()));
   const language = library.resolvedLanguage(s.learningLanguage);
-  const subjectIds = language?.subjects.map((x) => x.id) ?? [];
+  const regular = language?.subjects.filter((x) => !x.topic) ?? [];
+  const topics = language?.subjects.filter((x) => x.topic) ?? [];
+  const subjectIds = regular.map((x) => x.id);
   const valid = s.name.trim().length > 0;
   const set = (patch: Partial<ProfileSettings>) => setS((prev) => ({ ...prev, ...patch }));
   /** A birthday sets the age (half-typed dates are ignored until complete). */
@@ -310,29 +312,44 @@ export function ProfileEditor({ library, profile, onSave, onDelete, onCancel }: 
 
         <h3 class="section-title">{t("editor.subjects")}</h3>
         <div class="list">
-          {language?.subjects.map((subject) => {
+          {regular.map((subject) => {
             const on = isSubjectEnabled(s, subject.id);
             return (
               <Toggle key={subject.id} checked={on} disabled={on && isLastEnabledSubject(s, subject.id, subjectIds)}
                 onChange={(v) => setS((prev) => withSubject(prev, subject.id, v, subjectIds))}>
-                <span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span> {subject.title}
+                <span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon, subject.emoji)}</span> {subject.title}
               </Toggle>
             );
           })}
         </div>
         <p class="footnote">{t("editor.subjects.footer")}</p>
 
+        {topics.length > 0 && (
+          <>
+            <h3 class="section-title">{t("editor.topic")}</h3>
+            <div class="list segmented" role="radiogroup" aria-label={t("editor.topic")}>
+              <button role="radio" aria-checked={!s.schoolTopic} class={!s.schoolTopic ? "selected" : ""}
+                onClick={() => set({ schoolTopic: undefined })} data-testid="editor-topic-none">{t("editor.topic.none")}</button>
+              {topics.map((topic) => (
+                <button key={topic.id} role="radio" aria-checked={s.schoolTopic === topic.id} class={s.schoolTopic === topic.id ? "selected" : ""}
+                  onClick={() => set({ schoolTopic: topic.id })} data-testid={`editor-topic-${topic.id}`}>{subjectGlyph(topic.icon, topic.emoji)} {topic.title}</button>
+              ))}
+            </div>
+            <p class="footnote">{t("editor.topic.footer")}</p>
+          </>
+        )}
+
         {profile && (
           <>
             <h3 class="section-title">{t("editor.levels")}</h3>
             <div class="list">
-              {language?.subjects.map((subject) => {
+              {language?.subjects.filter((x) => !x.topic || x.id === s.schoolTopic).map((subject) => {
                 const adjustment = levelOf(subject.languageCode, subject.id);
                 const levelAge = effectiveAge(s.age, adjustment);
                 const change = (step: number) => setLevels((l) => ({ ...l, [`${subject.languageCode}/${subject.id}`]: Math.round((adjustment + step) * 2) / 2 }));
                 return (
                   <div key={subject.id} class="row-between list-line level-line" data-testid={`level-${subject.id}`}>
-                    <span><span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span> {subject.title}</span>
+                    <span><span style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon, subject.emoji)}</span> {subject.title}</span>
                     <span class="level-stepper">
                       <button class="level-step" aria-label={t("editor.level.easier %@", subject.title)} disabled={adjustment <= -1.5 || levelAge <= 4}
                         onClick={() => change(-0.5)} data-testid={`level-down-${subject.id}`}>−</button>

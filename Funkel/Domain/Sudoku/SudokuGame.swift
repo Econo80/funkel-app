@@ -20,6 +20,9 @@ final class SudokuGame {
     var selected: Int?
     private(set) var mistakes = 0
     private(set) var hints = 0
+    /// Hints per puzzle: enough to get unstuck, not enough to have it solved for you.
+    static let maxHints = 3
+    var hintsLeft: Int { max(0, Self.maxHints - hints) }
     /// Set once solved.
     private(set) var earned: Int?
 
@@ -67,7 +70,7 @@ final class SudokuGame {
 
     /// Fills the selected empty cell (or the first empty one) with its answer.
     func hint() -> Outcome {
-        guard !isSolved else { return .ignored }
+        guard !isSolved, hintsLeft > 0 else { return .ignored }
         let cell = selected.flatMap { values[$0] == 0 ? $0 : nil } ?? values.firstIndex(of: 0)
         guard let cell else { return .ignored }
         hints += 1

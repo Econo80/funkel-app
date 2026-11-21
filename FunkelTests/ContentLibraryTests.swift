@@ -5,10 +5,14 @@ import XCTest
 final class ContentLibraryTests: XCTestCase {
     private let library = ContentLibrary.bundled()
 
-    func testGermanIsDiscoveredWithThreeSubjects() throws {
+    func testGermanIsDiscoveredWithThreeSubjectsAndASchoolTopic() throws {
         let de = try XCTUnwrap(library.language(code: "de"))
         XCTAssertEqual(de.speechLocale, "de-DE")
-        XCTAssertEqual(de.subjects.map(\.id), ["maths", "vocabulary", "generalKnowledge"])
+        XCTAssertEqual(de.subjects.filter { !$0.isTopic }.map(\.id), ["maths", "vocabulary", "generalKnowledge"])
+        let pilze = try XCTUnwrap(de.subject(id: "topic-pilze"))
+        XCTAssertTrue(pilze.isTopic)
+        XCTAssertEqual(pilze.emoji, "🍄")
+        XCTAssertGreaterThan(try library.questionBank(for: pilze).questions.count, 50)
         XCTAssertNil(de.subject(id: "grammar"), "German does not offer grammar")
     }
 

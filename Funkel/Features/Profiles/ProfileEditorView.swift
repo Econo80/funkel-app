@@ -29,8 +29,17 @@ struct ProfileEditorView: View {
         environment.content.resolvedLanguage(code: settings.learningLanguage)
     }
 
+    /// Subjects a child can switch on and off (school topics are picked separately).
+    private var regularSubjects: [SubjectDescriptor] {
+        language?.subjects.filter { !$0.isTopic } ?? []
+    }
+
+    private var topics: [SubjectDescriptor] {
+        language?.subjects.filter(\.isTopic) ?? []
+    }
+
     private var subjectIDs: [String] {
-        language?.subjects.map(\.id) ?? []
+        regularSubjects.map(\.id)
     }
 
     var body: some View {
@@ -104,12 +113,12 @@ struct ProfileEditorView: View {
             }
 
             Section {
-                ForEach(language?.subjects ?? []) { subject in
+                ForEach(regularSubjects) { subject in
                     Toggle(isOn: subjectBinding(subject.id)) {
                         Label {
                             Text(verbatim: subject.title)
                         } icon: {
-                            Image(systemName: subject.icon)
+                            SubjectIcon(subject: subject)
                                 .foregroundStyle(Color(hex: subject.colorHex))
                         }
                     }
@@ -119,6 +128,22 @@ struct ProfileEditorView: View {
                 Text("editor.subjects")
             } footer: {
                 Text("editor.subjects.footer")
+            }
+
+            if !topics.isEmpty {
+                Section {
+                    Picker("editor.topic", selection: $settings.schoolTopic) {
+                        Text("editor.topic.none").tag(String?.none)
+                        ForEach(topics) { topic in
+                            Text(verbatim: [topic.emoji, topic.title].compactMap { $0 }.joined(separator: " ")).tag(String?.some(topic.id))
+                        }
+                    }
+                    .accessibilityIdentifier("editor-topic")
+                } header: {
+                    Text("editor.topic")
+                } footer: {
+                    Text("editor.topic.footer")
+                }
             }
 
             if let profile {
@@ -248,7 +273,7 @@ struct ProfileEditorView: View {
     /// − / + per subject, in half years. Shown relative to the age being edited.
     private func levelsSection(for profile: ChildProfile) -> some View {
         Section {
-            ForEach(language?.subjects ?? []) { subject in
+            ForEach((language?.subjects ?? []).filter { !$0.isTopic || $0.id == settings.schoolTopic }) { subject in
                 let adjustment = levelAdjustment(subject, profile: profile)
                 let levelAge = DifficultyScale.effectiveAge(age: settings.age, adjustment: adjustment)
                 let levelText = Self.formatLevelAge(levelAge)
@@ -256,7 +281,7 @@ struct ProfileEditorView: View {
                     Label {
                         Text(verbatim: subject.title)
                     } icon: {
-                        Image(systemName: subject.icon)
+                        SubjectIcon(subject: subject)
                             .foregroundStyle(Color(hex: subject.colorHex))
                     }
                     Spacer(minLength: 8)

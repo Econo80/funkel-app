@@ -10,6 +10,10 @@ struct LanguageManifest: Decodable, Sendable {
         let title: String
         let icon: String?
         let color: String?
+        /// Shown instead of the icon when given (school topics: "🍄").
+        let emoji: String?
+        /// A school topic: only shown for a child whose grown-up picked it.
+        let topic: Bool?
     }
 
     let code: String

@@ -14,7 +14,7 @@ struct HomeView: View {
     private let columns = [GridItem(.adaptive(minimum: 280, maximum: 420), spacing: 20)]
 
     private var subjects: [SubjectDescriptor] {
-        language.subjects.filter { profile.isSubjectEnabled($0.id) }
+        language.subjects.filter { $0.isTopic ? $0.id == profile.schoolTopic : profile.isSubjectEnabled($0.id) }
     }
 
     private var sudokuSubtitle: Text {
@@ -192,7 +192,7 @@ private struct SubjectCard: View {
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
                 : AnyLayout(HStackLayout(spacing: 18))
             layout {
-                Image(systemName: subject.icon)
+                SubjectIcon(subject: subject)
                     .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(color)
                     .frame(width: 72, height: 72)

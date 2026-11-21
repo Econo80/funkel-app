@@ -90,6 +90,9 @@ p { line-height: 1.4; }
 }
 .big-button:disabled { opacity: 0.5; }
 
+.hint-button { position: relative; display: inline-flex; }
+.hint-count { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: #14A3A3; color: #fff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.circle-button:disabled { opacity: 0.4; cursor: default; }
 .circle-button {
   width: 52px; height: 52px; border-radius: 50%;
   background: var(--card); box-shadow: var(--shadow);

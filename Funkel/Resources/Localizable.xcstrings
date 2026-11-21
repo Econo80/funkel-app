@@ -1040,7 +1040,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sudokus passen sich dem Alter an: Bilder-Sudokus (4×4) für die Jüngsten, Zahlen ab 6, 6×6 ab 8 und klassische 9×9 ab 10. Wer schneller ist, bekommt mit einer festen Grösse sein Lieblings-Sudoku. Ein gelöstes Sudoku bringt Sterne, mit Tipps etwas weniger."
+            "value": "Sudokus passen sich dem Alter an: Bilder-Sudokus (4×4) für die Jüngsten, Zahlen ab 6, 6×6 ab 8 und klassische 9×9 ab 10. Wer schneller ist, bekommt mit einer festen Grösse sein Lieblings-Sudoku. Ein gelöstes Sudoku bringt Sterne, mit Tipps etwas weniger. Pro Sudoku gibt es höchstens 3 Tipps."
           }
         }
       }
@@ -1113,6 +1113,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Neues Profil"
+          }
+        }
+      }
+    },
+    "editor.topic": {
+      "comment": "UI text. (Profile editor: school topic.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulthema"
+          }
+        }
+      }
+    },
+    "editor.topic.footer": {
+      "comment": "UI text. (Profile editor: school topic.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Extra-Fach mit Fragen zum Thema, das gerade in der Schule dran ist. Neue Themen kommen mit Updates dazu."
+          }
+        }
+      }
+    },
+    "editor.topic.none": {
+      "comment": "UI text. (Profile editor: school topic.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keins"
           }
         }
       }
@@ -3981,6 +4017,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tipp"
+          }
+        }
+      }
+    },
+    "sudoku.hintsLeft %lld": {
+      "comment": "UI text. (Sudoku.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Tipp"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "noch %lld Tipps"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sudoku.noHints": {
+      "comment": "UI text. (Sudoku.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Tipps mehr. Du schaffst das!"
           }
         }
       }

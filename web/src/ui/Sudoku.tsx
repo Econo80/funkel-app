@@ -1,7 +1,7 @@
 import { useMemo, useState } from "preact/hooks";
 import { recordSudoku, sudokuAge, type Profile } from "../domain/profile";
 import { systemRng } from "../domain/random";
-import { SUDOKU_PICTURES, makeSudoku, peers, sudokuLevel, sudokuStars, type Sudoku } from "../domain/sudoku";
+import { SUDOKU_MAX_HINTS, SUDOKU_PICTURES, makeSudoku, peers, sudokuLevel, sudokuStars, type Sudoku } from "../domain/sudoku";
 import { playSound, vibrate } from "../services/feedback";
 import { t } from "../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, avatarColor } from "./components";
@@ -58,9 +58,10 @@ export function SudokuScreen({ profile, onSave, onBack }: {
     if (profile.hapticsEnabled) vibrate("gentle");
   };
 
+  const hintsLeft = SUDOKU_MAX_HINTS - hints;
   const hint = () => {
     const cell = selected !== undefined && values[selected] === 0 ? selected : firstEmpty(values);
-    if (cell === undefined || earned !== undefined) return;
+    if (cell === undefined || earned !== undefined || hintsLeft <= 0) return;
     setHints((h) => h + 1);
     fill(cell, true);
   };
@@ -74,9 +75,12 @@ export function SudokuScreen({ profile, onSave, onBack }: {
         <header class="home-header">
           <CircleButton label={t("round.close")} onClick={onBack} testId="sudoku-close">✕</CircleButton>
           <h1 class="sudoku-title">🧩 {t("sudoku.title")}</h1>
-          <CircleButton label={t("sudoku.hint")} onClick={hint} testId="sudoku-hint">💡</CircleButton>
+          <span class="hint-button">
+            <CircleButton label={`${t("sudoku.hint")}, ${t("sudoku.hintsLeft %lld", hintsLeft)}`} onClick={hint} testId="sudoku-hint" disabled={hintsLeft <= 0 || earned !== undefined}>💡</CircleButton>
+            <span class="hint-count" aria-hidden="true" data-testid="sudoku-hints-left">{hintsLeft}</span>
+          </span>
         </header>
-        <p class="game-hint">{t(level.pictures ? "sudoku.rule.pictures" : "sudoku.rule.numbers")}</p>
+        <p class="game-hint">{hintsLeft <= 0 && earned === undefined ? t("sudoku.noHints") : t(level.pictures ? "sudoku.rule.pictures" : "sudoku.rule.numbers")}</p>
 
         <div class={`sudoku-grid size-${size}${level.pictures ? " pictures" : ""}`} style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }} role="grid">
           {values.map((v, cell) => {

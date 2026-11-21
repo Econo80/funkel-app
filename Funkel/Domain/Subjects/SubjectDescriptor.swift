@@ -25,4 +25,8 @@ struct SubjectDescriptor: Identifiable, Hashable, Sendable {
     let icon: String
     /// Hex colour, e.g. "#FF8A3D".
     let colorHex: String
+    /// Shown instead of the SF Symbol when given (school topics: "🍄").
+    var emoji: String? = nil
+    /// A school topic: only shown for a child whose grown-up picked it.
+    var isTopic = false
 }

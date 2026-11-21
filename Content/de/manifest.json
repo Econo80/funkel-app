@@ -26,6 +26,16 @@
       "title": "Wissen",
       "icon": "globe.europe.africa.fill",
       "color": "#23A363"
+    },
+    {
+      "id": "topic-pilze",
+      "provider": "questionBank",
+      "file": "topic-pilze.json",
+      "title": "Pilze",
+      "icon": "leaf.fill",
+      "color": "#B5651D",
+      "topic": true,
+      "emoji": "🍄"
     }
   ]
 }

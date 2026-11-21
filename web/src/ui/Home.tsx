@@ -1,5 +1,5 @@
 import type { ContentLanguage, SubjectDescriptor } from "../content/types";
-import { displayedStreak, isSubjectEnabled, progressKey, sudokusSolved, type Profile } from "../domain/profile";
+import { displayedStreak, homeSubjects, progressKey, sudokusSolved, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
@@ -15,7 +15,7 @@ export function Home({ profile, language, onStart, onPlay, onSudoku, onGiftSeen,
   onGrownUps: () => void;
 }) {
   const streak = displayedStreak(profile, new Date());
-  const subjects = language.subjects.filter((s) => isSubjectEnabled(profile, s.id));
+  const subjects = homeSubjects(language.subjects, profile);
 
   return (
     <main class="screen">
@@ -58,7 +58,7 @@ export function Home({ profile, language, onStart, onPlay, onSudoku, onGiftSeen,
                 onClick={() => onStart(subject)}
                 data-testid={`subject-${subject.id}`}
               >
-                <span class="subject-icon" style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon)}</span>
+                <span class="subject-icon" style={{ color: subject.color }} aria-hidden="true">{subjectGlyph(subject.icon, subject.emoji)}</span>
                 <span class="subject-text">
                   <span class="subject-title">{subject.title}</span>
                   <span class="subject-sub">

@@ -128,6 +128,18 @@ final class SudokuTests: XCTestCase {
         XCTAssertEqual(game.hints, 1)
     }
 
+    func testAtMostThreeHintsPerPuzzle() {
+        var rng = SeededGenerator(seed: 5)
+        let game = SudokuGame(age: 10, using: &rng)
+        XCTAssertEqual(game.hintsLeft, 3)
+        for _ in 0..<3 { XCTAssertEqual(game.hint(), .placed) }
+        XCTAssertEqual(game.hintsLeft, 0)
+        let empty = game.values.filter { $0 == 0 }.count
+        XCTAssertEqual(game.hint(), .ignored, "no fourth hint")
+        XCTAssertEqual(game.values.filter { $0 == 0 }.count, empty)
+        XCTAssertEqual(game.hints, 3)
+    }
+
     func testFillingTheLastCellSolvesThePuzzle() {
         var rng = SeededGenerator(seed: 5)
         let game = SudokuGame(age: 4, using: &rng)

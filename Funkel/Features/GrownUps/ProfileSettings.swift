@@ -12,6 +12,8 @@ struct ProfileSettings: Equatable {
     var avatarColor = "sun"
     var learningLanguage = ContentLibrary.fallbackLanguageCode
     var country = Country.fromDevice()
+    /// The school topic shown as an extra subject, if any.
+    var schoolTopic: String?
     /// Empty means "all subjects the learning language offers" — so subjects a
     /// language gains later (e.g. Grammar) are on by default.
     var enabledSubjectIDs: Set<String> = []
@@ -33,6 +35,7 @@ struct ProfileSettings: Equatable {
         avatarColor = profile.avatarColor
         learningLanguage = profile.learningLanguage
         country = profile.country
+        schoolTopic = profile.schoolTopic
         enabledSubjectIDs = Set(profile.enabledSubjectIDs)
         roundLength = profile.roundLength
         soundEnabled = profile.soundEnabled
@@ -92,6 +95,7 @@ struct ProfileSettings: Equatable {
         profile.avatarColor = avatarColor
         profile.learningLanguage = learningLanguage
         profile.country = country
+        profile.schoolTopic = schoolTopic
         profile.enabledSubjectIDs = enabledSubjectIDs.sorted()
         profile.roundLength = roundLength.clamped(to: ProfileDefaults.roundLengthRange)
         profile.soundEnabled = soundEnabled

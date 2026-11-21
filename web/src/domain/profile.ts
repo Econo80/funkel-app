@@ -52,6 +52,8 @@ export interface ProfileSettings {
   age: number;
   /** Birthday "YYYY-MM-DD" (optional): the age then goes up by itself. */
   birthDate?: string;
+  /** The school topic shown as an extra subject (e.g. "topic-pilze"), if any. */
+  schoolTopic?: string;
   avatarColor: string;
   learningLanguage: string;
   country: Country;
@@ -292,6 +294,11 @@ export function subjectLevelAge(p: Profile, languageCode: string, subjectId: str
 
 export const progressKey = (languageCode: string, subjectId: string) => `${languageCode}/${subjectId}`;
 
+/** The subjects on a child's home screen: the ones switched on, plus the chosen school topic. */
+export function homeSubjects<S extends { id: string; topic?: boolean }>(subjects: S[], p: Pick<ProfileSettings, "enabledSubjectIds" | "schoolTopic">): S[] {
+  return subjects.filter((s) => (s.topic ? s.id === p.schoolTopic : isSubjectEnabled(p, s.id)));
+}
+
 export function isSubjectEnabled(s: Pick<ProfileSettings, "enabledSubjectIds">, id: string): boolean {
   return s.enabledSubjectIds.length === 0 || s.enabledSubjectIds.includes(id);
 }
@@ -363,6 +370,7 @@ export function applySettings(p: Profile, s: ProfileSettings): Profile {
     name: s.name.trim(),
     age,
     birthDate: fromBirthday === undefined ? undefined : s.birthDate,
+    schoolTopic: s.schoolTopic || undefined,
     avatarColor: s.avatarColor,
     learningLanguage: s.learningLanguage,
     country: COUNTRIES.includes(s.country) ? s.country : defaultCountry(),

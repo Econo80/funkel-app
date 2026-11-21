@@ -91,6 +91,8 @@ function makeLanguage(manifest: RawManifest, folder: string): ContentLanguage {
       title: raw.title,
       icon: raw.icon ?? "star.fill",
       color: raw.color ?? "#FFB84D",
+      emoji: raw.emoji,
+      topic: raw.topic === true,
     });
   }
   return { code: folder, name: manifest.name, speechLocale: manifest.speechLocale, subjects };

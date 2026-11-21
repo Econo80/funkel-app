@@ -133,7 +133,9 @@ final class ContentLibrary: @unchecked Sendable {
                 file: raw.file,
                 title: raw.title,
                 icon: raw.icon ?? "star.fill",
-                colorHex: raw.color ?? "#FFB84D"
+                colorHex: raw.color ?? "#FFB84D",
+                emoji: raw.emoji,
+                isTopic: raw.topic ?? false
             )
         }
         return ContentLanguage(code: code, name: manifest.name, speechLocale: manifest.speechLocale, subjects: subjects)

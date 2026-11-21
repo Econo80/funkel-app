@@ -8,7 +8,7 @@ export interface RawManifest {
   code: string;
   name: string;
   speechLocale: string;
-  subjects: { id: string; provider: string; file: string; title: string; icon?: string; color?: string }[];
+  subjects: { id: string; provider: string; file: string; title: string; icon?: string; color?: string; emoji?: string; topic?: boolean }[];
 }
 
 export interface SubjectDescriptor {
@@ -20,6 +20,10 @@ export interface SubjectDescriptor {
   /** SF Symbol name from the manifest; mapped to an emoji/glyph on the web. */
   icon: string;
   color: string;
+  /** Shown instead of the icon when given (school topics: "🍄"). */
+  emoji?: string;
+  /** A school topic: only shown for a child whose grown-up picked it. */
+  topic?: boolean;
 }
 
 export interface ContentLanguage {

@@ -4,6 +4,7 @@ import {
   applySettings,
   createProfile,
   defaultSettings,
+  homeSubjects,
   displayedStreak,
   isLastEnabledSubject,
   recordRound,
@@ -228,3 +229,17 @@ describe("star gifts (web)", () => {
     expect(giftSeen(gifted)).toMatchObject({ walletStars: 78, giftStars: 0 });
   });
 });
+
+describe("school topic", () => {
+  const subjects = [{ id: "maths" }, { id: "generalKnowledge" }, { id: "topic-pilze", topic: true }];
+  it("shows a school topic only for the child whose grown-up picked it", () => {
+    const s = defaultSettings();
+    expect(homeSubjects(subjects, s).map((x) => x.id)).toEqual(["maths", "generalKnowledge"]);
+    expect(homeSubjects(subjects, { ...s, schoolTopic: "topic-pilze" }).map((x) => x.id)).toEqual(["maths", "generalKnowledge", "topic-pilze"]);
+    expect(homeSubjects(subjects, { ...s, enabledSubjectIds: ["maths"], schoolTopic: "topic-pilze" }).map((x) => x.id)).toEqual(["maths", "topic-pilze"]);
+    const p = createProfile({ ...s, name: "Emil", age: 7, schoolTopic: "topic-pilze" });
+    expect(p.schoolTopic).toBe("topic-pilze");
+    expect(applySettings(p, { ...p, schoolTopic: "" }).schoolTopic).toBeUndefined();
+  });
+});
+

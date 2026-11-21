@@ -125,3 +125,16 @@ struct ProgressRing: View {
         }
     }
 }
+
+/// A subject's icon: its emoji when the manifest gives one (school topics), otherwise its SF Symbol.
+struct SubjectIcon: View {
+    let subject: SubjectDescriptor
+
+    var body: some View {
+        if let emoji = subject.emoji {
+            Text(verbatim: emoji)
+        } else {
+            Image(systemName: subject.icon)
+        }
+    }
+}

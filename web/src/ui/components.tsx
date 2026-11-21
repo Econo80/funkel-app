@@ -16,7 +16,7 @@ const SUBJECT_GLYPHS: Record<string, string> = {
   "text.book.closed.fill": "📖",
   "star.fill": "⭐",
 };
-export const subjectGlyph = (icon: string) => SUBJECT_GLYPHS[icon] ?? "⭐";
+export const subjectGlyph = (icon: string, emoji?: string) => emoji ?? SUBJECT_GLYPHS[icon] ?? "⭐";
 
 // MARK: Pip, the mascot (same proportions as Pip.swift)
 
@@ -83,11 +83,11 @@ export function BigButton({ children, color = "var(--sun)", disabled, onClick, t
   );
 }
 
-export function CircleButton({ label, onClick, children, testId }: {
-  label: string; onClick: () => void; children: ComponentChildren; testId?: string;
+export function CircleButton({ label, onClick, children, testId, disabled = false }: {
+  label: string; onClick: () => void; children: ComponentChildren; testId?: string; disabled?: boolean;
 }) {
   return (
-    <button class="circle-button pressable" aria-label={label} title={label} onClick={onClick} data-testid={testId}>
+    <button class="circle-button pressable" aria-label={label} title={label} onClick={onClick} data-testid={testId} disabled={disabled}>
       <span aria-hidden="true">{children}</span>
     </button>
   );
