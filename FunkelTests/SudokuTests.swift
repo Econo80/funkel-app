@@ -143,13 +143,17 @@ final class SudokuTests: XCTestCase {
     func testFillingTheLastCellSolvesThePuzzle() {
         var rng = SeededGenerator(seed: 5)
         let game = SudokuGame(age: 4, using: &rng)
-        let blanks = game.values.filter { $0 == 0 }.count
+        // Two hints, then the child fills in the rest (a bounded loop: hints run out).
+        XCTAssertEqual(game.hint(), .placed)
+        XCTAssertEqual(game.hint(), .placed)
         var last = SudokuGame.Outcome.ignored
-        while !game.isSolved {
-            last = game.hint()
+        for cell in game.values.indices where game.values[cell] == 0 {
+            game.select(cell)
+            last = game.enter(game.puzzle.solution[cell])
         }
-        XCTAssertEqual(game.hints, blanks)
-        XCTAssertEqual(last, .solved(stars: game.level.stars(mistakes: 0, hints: blanks)))
+        XCTAssertTrue(game.isSolved)
+        XCTAssertEqual(game.hints, 2)
+        XCTAssertEqual(last, .solved(stars: game.level.stars(mistakes: 0, hints: 2)))
         XCTAssertEqual(game.values, game.puzzle.solution)
         XCTAssertEqual(game.hint(), .ignored)
     }
