@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
+import { skillTally } from "../domain/weekly";
 import { recordRound, subjectDifficulty, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
 import { correctAnswerText, houseCellValue, onlyCaseDiffers, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
 import { systemRng } from "../domain/random";
@@ -61,6 +62,7 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
       correctContentIds: state.correctContentIds,
       askedContentIds: state.questions.slice(0, state.results.length).flatMap((q) => (q.contentId ? [q.contentId] : [])),
       effectiveAge: difficulty.effectiveAge,
+      skills: skillTally(state.questions.map((q) => q.skill), state.results),
     });
     setSummary(s);
     void onSave(updated);

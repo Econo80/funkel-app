@@ -210,3 +210,17 @@ describe("question bank (mirrors QuestionBankTests.swift)", () => {
     expect(new QuestionBankProvider("x", items).makeQuestions(5, difficultyForAge(6), new Set(), seededRng(2)).map((q) => q.contentId)).toEqual(["a"]);
   });
 });
+
+describe("kinds of questions for the weekly overview", () => {
+  it("tags every question with its operation, word exercise or category", async () => {
+    const rng = seededRng(7);
+    for (const id of ["maths", "vocabulary", "generalKnowledge", "topic-pilze"]) {
+      const provider = await germanProvider(id);
+      for (const age of [6, 8, 10]) {
+        const questions = provider.makeQuestions(10, difficultyForAge(age), new Set(), rng);
+        expect(questions.length).toBeGreaterThan(0);
+        for (const q of questions) expect(q.skill, `${id} at ${age}`).toBeTruthy();
+      }
+    }
+  });
+});

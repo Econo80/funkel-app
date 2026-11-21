@@ -3961,6 +3961,366 @@
         }
       }
     },
+    "skill.addition": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus"
+          }
+        }
+      }
+    },
+    "skill.animals": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiere"
+          }
+        }
+      }
+    },
+    "skill.aussehen": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussehen der Pilze"
+          }
+        }
+      }
+    },
+    "skill.body": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Körper"
+          }
+        }
+      }
+    },
+    "skill.counting": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zählen"
+          }
+        }
+      }
+    },
+    "skill.dictation": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diktat"
+          }
+        }
+      }
+    },
+    "skill.division": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geteilt"
+          }
+        }
+      }
+    },
+    "skill.everyday": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alltag"
+          }
+        }
+      }
+    },
+    "skill.geography": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geografie"
+          }
+        }
+      }
+    },
+    "skill.history": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschichte"
+          }
+        }
+      }
+    },
+    "skill.meaning": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedeutung"
+          }
+        }
+      }
+    },
+    "skill.missingNumber": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehlende Zahl"
+          }
+        }
+      }
+    },
+    "skill.multiplication": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mal"
+          }
+        }
+      }
+    },
+    "skill.nature": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natur"
+          }
+        }
+      }
+    },
+    "skill.numberHouse": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahlenhaus"
+          }
+        }
+      }
+    },
+    "skill.numberRecognition": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahlen erkennen"
+          }
+        }
+      }
+    },
+    "skill.opposite": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegenteil"
+          }
+        }
+      }
+    },
+    "skill.pictureToWord": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild zum Wort"
+          }
+        }
+      }
+    },
+    "skill.science": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naturwissenschaft"
+          }
+        }
+      }
+    },
+    "skill.sentence": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sätze schreiben"
+          }
+        }
+      }
+    },
+    "skill.sicherheit": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherheit"
+          }
+        }
+      }
+    },
+    "skill.space": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weltall"
+          }
+        }
+      }
+    },
+    "skill.spelling": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechtschreibung"
+          }
+        }
+      }
+    },
+    "skill.subtraction": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minus"
+          }
+        }
+      }
+    },
+    "skill.synonym": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gleiche Bedeutung"
+          }
+        }
+      }
+    },
+    "skill.wald": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilze im Wald"
+          }
+        }
+      }
+    },
+    "skill.wissen": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilzwissen"
+          }
+        }
+      }
+    },
+    "skill.wordProblem": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textaufgaben"
+          }
+        }
+      }
+    },
+    "skill.wordToPicture": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wort zum Bild"
+          }
+        }
+      }
+    },
+    "skill.writeWord": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wörter schreiben"
+          }
+        }
+      }
+    },
     "sudoku.again": {
       "comment": "UI text. (Sudoku and Zahlenhaus; web app for now.)",
       "extractionState": "manual",
@@ -4269,6 +4629,270 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschafft!"
+          }
+        }
+      }
+    },
+    "weekly.before %@": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woche davor: %@"
+          }
+        }
+      }
+    },
+    "weekly.button": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochenübersicht"
+          }
+        }
+      }
+    },
+    "weekly.correct": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "richtig"
+          }
+        }
+      }
+    },
+    "weekly.daysAria %lld": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "An %lld von 7 Tagen gelernt"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "An %lld von 7 Tagen gelernt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "weekly.daysLabel": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tage gelernt"
+          }
+        }
+      }
+    },
+    "weekly.empty": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In den letzten 7 Tagen wurde noch nicht gelernt."
+          }
+        }
+      }
+    },
+    "weekly.footer": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzten 7 Tage, heute eingeschlossen, verglichen mit den 7 Tagen davor. «Gut gelaufen» und «Zum Üben» zählen ab 4 Fragen einer Art (ab 90 % bzw. unter 75 % richtig) und erst seit diesem Update. Sudoku und die Spielecke zählen hier nicht."
+          }
+        }
+      }
+    },
+    "weekly.levelBefore %@": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorher %@"
+          }
+        }
+      }
+    },
+    "weekly.noPractice": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts Besonderes – alles läuft gut."
+          }
+        }
+      }
+    },
+    "weekly.noSkills": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch zu wenige Fragen, um das zu sagen."
+          }
+        }
+      }
+    },
+    "weekly.practice": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Üben"
+          }
+        }
+      }
+    },
+    "weekly.questionsLabel": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragen"
+          }
+        }
+      }
+    },
+    "weekly.roundsCount %lld": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runde"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runden"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "weekly.roundsLabel": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runden"
+          }
+        }
+      }
+    },
+    "weekly.rowSummary %lld": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runde in den letzten 7 Tagen"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Runden in den letzten 7 Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "weekly.starsLabel": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sterne"
+          }
+        }
+      }
+    },
+    "weekly.strong": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gut gelaufen"
+          }
+        }
+      }
+    },
+    "weekly.subjects": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fächer"
+          }
+        }
+      }
+    },
+    "weekly.title %@": {
+      "comment": "UI text. (Grown-ups: weekly overview.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Woche von %@"
           }
         }
       }

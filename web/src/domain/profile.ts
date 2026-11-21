@@ -45,6 +45,8 @@ export interface RoundRecord {
   total: number;
   starsEarned: number;
   effectiveAge: number;
+  /** How each kind of question went: { skill: [right, asked] } (rounds from 21 Nov 2026 on). */
+  skills?: Record<string, [number, number]>;
 }
 
 export interface ProfileSettings {
@@ -440,6 +442,8 @@ export interface RoundOutcome {
   /** Every question asked, so the next rounds bring new ones first. */
   askedContentIds?: string[];
   effectiveAge: number;
+  /** How each kind of question went, for the weekly overview. */
+  skills?: Record<string, [number, number]>;
 }
 
 export interface RoundSummary {
@@ -503,6 +507,7 @@ export function recordRound(p: Profile, outcome: RoundOutcome, now = new Date())
         total: outcome.total,
         starsEarned: stars,
         effectiveAge: outcome.effectiveAge,
+        ...(outcome.skills && Object.keys(outcome.skills).length ? { skills: outcome.skills } : {}),
       },
     ].slice(-ROUND_HISTORY_LIMIT),
   };

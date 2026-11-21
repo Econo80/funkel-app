@@ -48,7 +48,7 @@ export class QuestionBankProvider implements QuestionProvider {
       if (!item) break;
       remaining = remaining.filter((i) => i !== item);
       damping.set(item.category ?? "", (damping.get(item.category ?? "") ?? 1) * SAME_CATEGORY_DAMPING);
-      questions.push(this.makeQuestion(rng, item, difficulty));
+      questions.push({ ...this.makeQuestion(rng, item, difficulty), skill: item.category });
     }
     return questions;
   }

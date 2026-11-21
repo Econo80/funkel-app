@@ -174,7 +174,7 @@ export class MathsQuestionGenerator implements QuestionProvider {
         candidate = this.makeQuestion(rng, operation, difficulty);
       }
       seenKeys.add(candidate.key);
-      questions.push(candidate.question);
+      questions.push({ ...candidate.question, skill: operation });
     }
     return questions;
   }

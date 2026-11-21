@@ -33,6 +33,8 @@ import { t } from "../services/i18n";
 import { speak, speechStatus } from "../services/feedback";
 import { getMeta, setMeta } from "../services/storage";
 import { AVATAR_COLORS, BigButton, Pip, Sheet, avatarColor, subjectGlyph } from "./components";
+import { WeeklyOverview, formatLevelAge } from "./WeeklyOverview";
+import { weekSummary } from "../domain/weekly";
 
 /** Shows the maths gate first and the children once it's solved. */
 export function GrownUpGate({ children, onCancel }: { children: ComponentChildren; onCancel: () => void }) {
@@ -91,6 +93,7 @@ export function GrownUps({ library, profiles, onSave, onDelete, onRestore, onDon
   const [lastBackup, setLastBackup] = useState<string>();
   const [backupNote, setBackupNote] = useState("");
   const [restoring, setRestoring] = useState<Backup>();
+  const [overview, setOverview] = useState<Profile>();
 
   useEffect(() => { void getMeta<string>("lastBackupAt").then(setLastBackup); }, []);
 
@@ -149,6 +152,10 @@ export function GrownUps({ library, profiles, onSave, onDelete, onRestore, onDon
     );
   }
 
+  if (overview) {
+    return <WeeklyOverview profile={overview} language={library.resolvedLanguage(overview.learningLanguage)} onClose={() => setOverview(undefined)} />;
+  }
+
   if (editing) {
     return (
       <ProfileEditor
@@ -177,6 +184,21 @@ export function GrownUps({ library, profiles, onSave, onDelete, onRestore, onDon
           ))}
           <button class="list-row accent" onClick={() => setEditing("new")}>＋ {t("profiles.add")}</button>
         </div>
+
+        {profiles.length > 0 && (
+          <>
+            <h3 class="section-title">{t("weekly.button")}</h3>
+            <div class="list">
+              {profiles.map((p) => (
+                <button key={p.id} class="list-row" onClick={() => setOverview(p)} data-testid={`weekly-${p.name}`}>
+                  <span aria-hidden="true">📊</span>
+                  <span class="list-text"><strong>{p.name}</strong><span class="muted">{t("weekly.rowSummary %lld", weekSummary(p).week.rounds)}</span></span>
+                  <span aria-hidden="true" class="chevron">›</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         <h3 class="section-title">{t("backup.title")}</h3>
         <div class="list">
@@ -491,12 +513,6 @@ function download(file: File) {
 }
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString(document.documentElement.lang || undefined, { dateStyle: "medium", timeStyle: "short" });
-
-/** 8.5 → "8½", rounded to half years. */
-function formatLevelAge(age: number): string {
-  const half = Math.round(age * 2) / 2;
-  return `${Math.floor(half)}${half % 1 ? "½" : ""}`;
-}
 
 function Toggle({ checked, disabled, onChange, children }: {
   checked: boolean; disabled?: boolean; onChange: (v: boolean) => void; children: ComponentChildren;

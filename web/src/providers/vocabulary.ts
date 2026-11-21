@@ -34,7 +34,7 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
         const sentence = this.pickSentence(rng, difficulty, recentlyCorrect, used);
         if (!sentence) continue;
         used.add(sentence.text);
-        questions.push(this.sentenceQuestion(sentence, difficulty));
+        questions.push({ ...this.sentenceQuestion(sentence, difficulty), skill: "sentence" });
         continue;
       }
       let candidates = eligible.filter((w) => this.supports(w, type, difficulty) && !used.has(w.word));
@@ -45,7 +45,7 @@ export class VocabularyQuestionGenerator implements QuestionProvider {
       const question = this.makeQuestion(rng, type, word, eligible, difficulty);
       if (!question) continue;
       used.add(word.word);
-      questions.push(question);
+      questions.push({ ...question, skill: type });
     }
     return questions;
   }

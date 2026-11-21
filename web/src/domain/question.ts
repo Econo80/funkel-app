@@ -68,6 +68,8 @@ export interface Question {
   explanation?: string;
   /** What read-aloud says, e.g. "3 plus 4" instead of "3 + 4". */
   spoken?: string;
+  /** The kind of question for the weekly overview: a maths operation, a word exercise or a knowledge category. */
+  skill?: string;
 }
 
 let counter = 0;
