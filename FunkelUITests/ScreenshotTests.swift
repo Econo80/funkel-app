@@ -54,13 +54,24 @@ final class ScreenshotTests: XCTestCase {
         snap("08-knowledge-age-5", app, waitFor: app.buttons["round-close"], settle: 1.2)
         app.buttons["round-close"].tap()
 
-        // Lena (5): picture Sudoku, solved with hints
+        // Lena (5): picture Sudoku, three hints, then the rest by trying each picture
         open("sudoku", app)
         snap("30-sudoku-pictures-age-5", app, waitFor: app.buttons["sudoku-hint"], settle: 1.0)
         let sudokuAgain = app.buttons["sudoku-again"]
-        for _ in 0..<20 where !sudokuAgain.exists {
+        for _ in 0..<3 where !sudokuAgain.exists {
             app.buttons["sudoku-hint"].tap()
             pause(0.3)
+        }
+        let pictures = ["🍎", "🐟", "⭐", "🌼"]
+        for cell in 0..<16 where !sudokuAgain.exists {
+            let square = app.buttons["sudoku-cell-\(cell)"]
+            guard square.exists, !pictures.contains(square.label) else { continue }
+            square.tap()
+            // A wrong picture just wobbles; the right one fills the square.
+            for value in 1...4 where !sudokuAgain.exists && !pictures.contains(square.label) {
+                app.buttons["sudoku-key-\(value)"].tap()
+                pause(0.2)
+            }
         }
         snap("31-sudoku-solved", app, waitFor: sudokuAgain, settle: 1.5)
         app.buttons["sudoku-done"].tap()
