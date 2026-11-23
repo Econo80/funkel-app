@@ -55,14 +55,22 @@ jobs:
       - uses: actions/checkout@v5
 
       # Same Xcode as TestFlight, so CI tests what we ship (App Store Connect needs the iOS 27 SDK from April 2027).
-      - name: Select Xcode 27 or newer
+      - name: Select the newest Xcode (27 once available)
         run: |
-          ls -d /Applications/Xcode*.app
-          xc=$(ls -d /Applications/Xcode_2[7-9]*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)
-          [ -n "$xc" ] || xc=$(ls -d /Applications/Xcode_2[7-9]*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$xc" ]; then
-            echo "::error::No Xcode 27 or newer on this runner — App Store Connect would reject the build."
+          # Newest release Xcode by its real version (folder names vary; betas are skipped).
+          for app in /Applications/Xcode*.app; do
+            case "$app" in *[Bb]eta*) continue ;; esac
+            v=$(defaults read "$app/Contents/Info" CFBundleShortVersionString 2>/dev/null) || continue
+            echo "$v $app"
+          done | sort -V | tee xcodes.txt
+          read -r version xc < <(tail -n 1 xcodes.txt)
+          major=${version%%.*}
+          if [ -z "$xc" ] || [ "$major" -lt 26 ]; then
+            echo "::error::No Xcode 26 or newer on this runner — App Store Connect would reject the build."
             exit 1
+          fi
+          if [ "$major" -lt 27 ]; then
+            echo "::warning::Building with Xcode $version: Xcode 27 isn't on this runner yet. App Store Connect needs Xcode 27 from April 2027."
           fi
           sudo xcode-select -s "$xc"
           xcodebuild -version
