@@ -27,7 +27,7 @@ struct MathsQuestionGenerator: QuestionProvider {
                 attempts += 1
             }
             seenKeys.insert(candidate.key)
-            questions.append(candidate.question)
+            questions.append(candidate.question.withSkill(operation.rawValue))
         }
         return questions
     }

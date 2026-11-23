@@ -50,7 +50,7 @@ struct QuestionBankProvider: QuestionProvider {
             categoryDamping[item.category ?? "", default: 1] *= Self.sameCategoryDamping
 
             if let question = makeQuestion(item, difficulty: difficulty, using: &rng) {
-                questions.append(question)
+                questions.append(question.withSkill(item.category))
             }
         }
         return questions

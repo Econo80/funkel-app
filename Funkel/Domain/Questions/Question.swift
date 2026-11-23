@@ -16,6 +16,9 @@ struct Question: Identifiable, Equatable, Sendable {
     let explanation: String?
     /// Overrides what read-aloud says, e.g. "3 plus 4" instead of "3 + 4".
     let spoken: String?
+    /// The kind of question for the weekly overview: a maths operation, a word
+    /// exercise or a knowledge category (the web app's ids, e.g. "addition").
+    var skill: String?
 
     init(
         id: UUID = UUID(),
@@ -26,7 +29,8 @@ struct Question: Identifiable, Equatable, Sendable {
         visual: QuestionVisual? = nil,
         format: QuestionFormat,
         explanation: String? = nil,
-        spoken: String? = nil
+        spoken: String? = nil,
+        skill: String? = nil
     ) {
         self.id = id
         self.subjectID = subjectID
@@ -37,6 +41,14 @@ struct Question: Identifiable, Equatable, Sendable {
         self.format = format
         self.explanation = explanation
         self.spoken = spoken
+        self.skill = skill
+    }
+
+    /// The same question, tagged with its kind.
+    func withSkill(_ skill: String?) -> Question {
+        var copy = self
+        copy.skill = skill
+        return copy
     }
 
     /// Text handed to the speech synthesiser.

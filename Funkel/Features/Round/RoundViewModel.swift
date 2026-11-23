@@ -158,7 +158,8 @@ final class RoundViewModel {
             total: results.count,
             correctContentIDs: correctContentIDs,
             effectiveAge: difficulty.effectiveAge,
-            askedContentIDs: questions.prefix(results.count).compactMap(\.contentID)
+            askedContentIDs: questions.prefix(results.count).compactMap(\.contentID),
+            skills: WeeklySummary.skillTally(questions.map(\.skill), results)
         )
     }
 }

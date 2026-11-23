@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// The grown-up area: manage children's profiles, backups, plus the privacy statement.
+/// The grown-up area: manage children's profiles, see each child's week, backups, plus the privacy statement.
 struct GrownUpsView: View {
     @Query(sort: \ChildProfile.createdAt) private var profiles: [ChildProfile]
     @Environment(\.dismiss) private var dismiss
@@ -30,6 +30,19 @@ struct GrownUpsView: View {
                         Label("profiles.add", systemImage: "plus.circle.fill")
                     }
                     .accessibilityIdentifier("settings-add-profile")
+                }
+
+                if !profiles.isEmpty {
+                    Section("weekly.button") {
+                        ForEach(profiles) { profile in
+                            NavigationLink {
+                                WeeklyOverviewView(profile: profile)
+                            } label: {
+                                WeeklyRow(profile: profile)
+                            }
+                            .accessibilityIdentifier("weekly-\(profile.name)")
+                        }
+                    }
                 }
 
                 BackupSection(profiles: profiles, flow: backup)
@@ -69,6 +82,30 @@ private struct ProfileRow: View {
                 Text(profile.name)
                     .font(.funkelHeadline)
                 Text("profile.age \(profile.age)")
+                    .font(.funkelCaption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+/// A child in the weekly-overview list: name and rounds in the last seven days.
+private struct WeeklyRow: View {
+    let profile: ChildProfile
+
+    private var rounds: Int { WeeklySummary(profile: profile).week.rounds }
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "chart.bar.fill")
+                .font(.title2)
+                .foregroundStyle(Palette.avatarColor(profile.avatarColor))
+                .frame(width: 48)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: profile.name)
+                    .font(.funkelHeadline)
+                Text("weekly.rowSummary \(rounds)")
                     .font(.funkelCaption)
                     .foregroundStyle(.secondary)
             }

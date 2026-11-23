@@ -11,6 +11,10 @@ final class RoundRecord {
     var total: Int
     var starsEarned: Int
     var effectiveAge: Double
+    /// How each kind of question went: `["addition": [right, asked]]`, for the
+    /// weekly overview. Empty for rounds from before 21 Nov 2026. The default
+    /// keeps SwiftData's lightweight migration working for older stores.
+    var skillStats: [String: [Int]] = [:]
     var profile: ChildProfile?
 
     init(
@@ -21,6 +25,7 @@ final class RoundRecord {
         total: Int,
         starsEarned: Int,
         effectiveAge: Double,
+        skillStats: [String: [Int]] = [:],
         profile: ChildProfile? = nil
     ) {
         self.date = date
@@ -30,6 +35,7 @@ final class RoundRecord {
         self.total = total
         self.starsEarned = starsEarned
         self.effectiveAge = effectiveAge
+        self.skillStats = skillStats
         self.profile = profile
     }
 }

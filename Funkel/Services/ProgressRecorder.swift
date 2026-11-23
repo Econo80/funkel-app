@@ -11,6 +11,8 @@ struct RoundOutcome: Equatable {
     let effectiveAge: Double
     /// Every question asked, so the next rounds bring new ones first.
     var askedContentIDs: [String] = []
+    /// How each kind of question went, `[skill: [right, asked]]`, for the weekly overview.
+    var skills: [String: [Int]] = [:]
 }
 
 /// What the summary screen shows after saving.
@@ -87,7 +89,8 @@ struct ProgressRecorder {
             correct: outcome.correct,
             total: outcome.total,
             starsEarned: stars,
-            effectiveAge: outcome.effectiveAge
+            effectiveAge: outcome.effectiveAge,
+            skillStats: outcome.skills
         )
         context.insert(record)
         profile.rounds.append(record)

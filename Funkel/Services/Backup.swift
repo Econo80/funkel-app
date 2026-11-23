@@ -91,7 +91,7 @@ enum Backup {
         p["progress"] = progress
 
         p["rounds"] = profile.rounds.sorted { $0.date < $1.date }.map { round -> [String: Any] in
-            [
+            var entry: [String: Any] = [
                 "date": isoString(round.date),
                 "subjectId": round.subjectID,
                 "languageCode": round.languageCode,
@@ -100,6 +100,9 @@ enum Backup {
                 "starsEarned": round.starsEarned,
                 "effectiveAge": round.effectiveAge,
             ]
+            // { "addition": [right, asked] }, left out when empty like in the web app.
+            if !round.skillStats.isEmpty { entry["skills"] = round.skillStats }
+            return entry
         }
         return p
     }
@@ -189,7 +192,8 @@ enum Backup {
                 correct: int(entry["correct"]) ?? 0,
                 total: int(entry["total"]) ?? 0,
                 starsEarned: int(entry["starsEarned"]) ?? 0,
-                effectiveAge: double(entry["effectiveAge"]) ?? Double(profile.age)
+                effectiveAge: double(entry["effectiveAge"]) ?? Double(profile.age),
+                skillStats: skills(entry["skills"])
             )
             context.insert(round)
             profile.rounds.append(round)
@@ -198,6 +202,17 @@ enum Backup {
     }
 
     // MARK: Values
+
+    /// A round's `{ "addition": [right, asked] }`; malformed entries are skipped.
+    static func skills(_ value: Any?) -> [String: [Int]] {
+        var result: [String: [Int]] = [:]
+        for (skill, pair) in value as? [String: Any] ?? [:] {
+            guard let list = pair as? [Any], list.count == 2,
+                  let right = int(list[0]), let asked = int(list[1]) else { continue }
+            result[skill] = [right, asked]
+        }
+        return result
+    }
 
     static func int(_ value: Any?) -> Int? {
         (value as? NSNumber).map { Int(truncating: $0) }

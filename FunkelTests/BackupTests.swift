@@ -201,6 +201,46 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(problem(#"{"app": "funkel", "version": 99, "profiles": []}"#), .newerVersion)
         XCTAssertEqual(problem(#"{"app": "funkel", "version": 1, "profiles": [{"nope": true}]}"#), .noProfiles)
     }
+
+    /// How each kind of question went, for the weekly overview: `"skills": { "addition": [2, 3] }`
+    /// in a round, left out when the round has none (like the web app).
+    func testRoundSkillsRoundTripInTheWebShape() throws {
+        let web = """
+        { "app": "funkel", "version": 1, "profiles": [ { "id": "3f2b6a1c-8d4e-4f5a-9b7c-1e2d3c4b5a69", "name": "Lena", "age": 7,
+          "rounds": [
+            { "date": "2026-11-20T09:00:00.000Z", "subjectId": "maths", "languageCode": "de", "correct": 3, "total": 4,
+              "starsEarned": 3, "effectiveAge": 7, "skills": { "addition": [2, 3], "division": [1, 1] } },
+            { "date": "2026-11-21T09:00:00.000Z", "subjectId": "vocabulary", "languageCode": "de", "correct": 5, "total": 5,
+              "starsEarned": 5, "effectiveAge": 7 }
+          ] } ] }
+        """
+        let context = try makeContext()
+        let lena = try Backup.restore(try contents(web), into: context, calendar: calendar)[0]
+        let restored = lena.rounds.sorted { $0.date < $1.date }
+        XCTAssertEqual(restored.map(\.skillStats), [["addition": [2, 3], "division": [1, 1]], [:]])
+
+        ProgressRecorder(context: context).record(
+            RoundOutcome(
+                subjectID: "maths", languageCode: "de", correct: 1, total: 2, correctContentIDs: [], effectiveAge: 7,
+                skills: ["subtraction": [1, 2]]
+            ),
+            for: lena, at: Backup.date(fromISO: "2026-11-21T10:00:00.000Z")!, calendar: calendar
+        )
+
+        let data = try Backup.export([lena], calendar: calendar)
+        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let rounds = try XCTUnwrap((root["profiles"] as? [[String: Any]])?.first?["rounds"] as? [[String: Any]])
+        XCTAssertEqual(rounds.count, 3)
+        XCTAssertEqual(rounds[0]["skills"] as? [String: [Int]], ["addition": [2, 3], "division": [1, 1]])
+        XCTAssertNil(rounds[1]["skills"], "no skills, no field")
+        XCTAssertEqual(rounds[2]["skills"] as? [String: [Int]], ["subtraction": [1, 2]])
+
+        // And back in again.
+        let again = try Backup.restore(try contents(String(decoding: data, as: UTF8.self)), into: try makeContext(), calendar: calendar)[0]
+        XCTAssertEqual(again.rounds.sorted { $0.date < $1.date }.map(\.skillStats), [
+            ["addition": [2, 3], "division": [1, 1]], [:], ["subtraction": [1, 2]],
+        ])
+    }
 }
 
 /// Just enough of a garden slot to count them.

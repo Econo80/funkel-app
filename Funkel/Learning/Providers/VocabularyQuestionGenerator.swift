@@ -46,7 +46,7 @@ struct VocabularyQuestionGenerator: QuestionProvider {
             else { continue }
 
             usedWords.insert(word.word)
-            questions.append(question)
+            questions.append(question.withSkill(type.rawValue))
         }
         return questions
     }
