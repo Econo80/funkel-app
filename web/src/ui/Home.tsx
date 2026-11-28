@@ -4,7 +4,7 @@ import { displayedStreak, homeSubjects, progressKey, sudokusSolved, type Profile
 import { t } from "../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
-/** The child's home: greeting, streak and stars, one big card per subject. */
+/** The child's home: greeting, streak and stars, and a tile for each subject and game, all on one screen. */
 export function Home({ profile, language, onStart, onTest, onPlay, onSudoku, onGiftSeen, onSwitchProfile, onGrownUps }: {
   profile: Profile;
   language: ContentLanguage;
@@ -23,21 +23,24 @@ export function Home({ profile, language, onStart, onTest, onPlay, onSudoku, onG
   const testReady = canTakeTest(profile);
 
   return (
-    <main class="screen">
-      <div class="column wide">
-        <header class="home-header">
-          <Pip color={avatarColor(profile.avatarColor)} size={84} bob />
-          <div class="row gap">
+    <main class="screen home">
+      <div class="home-column">
+        {/* One compact header line, so every tile fits on the first screen. */}
+        <header class="home-top">
+          <Pip color={avatarColor(profile.avatarColor)} size={56} bob />
+          <div class="home-hello">
+            <h1>{t("home.greeting %@", profile.name)}</h1>
+            <p class="muted">{t("home.subtitle")}</p>
+          </div>
+          <div class="home-stats">
+            <StatChip icon="🔥" value={streak} label={t("home.streak %lld", streak)} />
+            <StatChip icon="⭐" value={profile.totalStars} label={t("home.stars %lld", profile.totalStars)} />
+          </div>
+          <div class="row gap home-buttons">
             <CircleButton label={t("grownups.button")} onClick={onGrownUps} testId="grown-ups">⚙️</CircleButton>
             <CircleButton label={t("home.switchProfile")} onClick={onSwitchProfile} testId="switch-profile">👥</CircleButton>
           </div>
         </header>
-        <h1>{t("home.greeting %@", profile.name)}</h1>
-        <p class="muted">{t("home.subtitle")}</p>
-        <div class="row gap wrap">
-          <StatChip icon="🔥" value={streak} label={t("home.streak %lld", streak)} />
-          <StatChip icon="⭐" value={profile.totalStars} label={t("home.stars %lld", profile.totalStars)} />
-        </div>
 
         {!!profile.giftStars && (
           <div class="card gift-card" role="status" data-testid="gift-card">
@@ -51,7 +54,7 @@ export function Home({ profile, language, onStart, onTest, onPlay, onSudoku, onG
           </div>
         )}
 
-        <div class="subject-grid">
+        <div class="home-tiles">
           {subjects.map((subject) => {
             const progress = profile.progress[progressKey(subject.languageCode, subject.id)];
             const accuracy = progress && progress.questionsAnswered > 0 ? progress.correctAnswers / progress.questionsAnswered : undefined;

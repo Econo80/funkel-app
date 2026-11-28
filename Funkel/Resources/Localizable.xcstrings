@@ -1513,6 +1513,18 @@
         }
       }
     },
+    "garden.allRewards": {
+      "comment": "UI text. (Pips Garten: farm levels.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast alles freigeschaltet. Meister-Bauer!"
+          }
+        }
+      }
+    },
     "garden.builds %lld": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -1933,6 +1945,30 @@
         }
       }
     },
+    "garden.item.bakery": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bäckerei"
+          }
+        }
+      }
+    },
+    "garden.item.balloon": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heissluftballon"
+          }
+        }
+      }
+    },
     "garden.item.barn": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -1981,6 +2017,18 @@
         }
       }
     },
+    "garden.item.castle": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schloss"
+          }
+        }
+      }
+    },
     "garden.item.cat": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -1989,6 +2037,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Katze"
+          }
+        }
+      }
+    },
+    "garden.item.cherrytree": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kirschbaum"
           }
         }
       }
@@ -2053,6 +2113,18 @@
         }
       }
     },
+    "garden.item.donkey": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esel"
+          }
+        }
+      }
+    },
     "garden.item.duck": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2077,6 +2149,18 @@
         }
       }
     },
+    "garden.item.farmshop": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hofladen"
+          }
+        }
+      }
+    },
     "garden.item.fence": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2085,6 +2169,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zaun"
+          }
+        }
+      }
+    },
+    "garden.item.ferriswheel": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riesenrad"
           }
         }
       }
@@ -2125,6 +2221,18 @@
         }
       }
     },
+    "garden.item.greenhouse": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewächshaus"
+          }
+        }
+      }
+    },
     "garden.item.horse": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2161,6 +2269,18 @@
         }
       }
     },
+    "garden.item.llama": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lama"
+          }
+        }
+      }
+    },
     "garden.item.mailbox": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2193,6 +2313,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fussweg"
+          }
+        }
+      }
+    },
+    "garden.item.peacock": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfau"
           }
         }
       }
@@ -2245,6 +2377,18 @@
         }
       }
     },
+    "garden.item.rooster": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hahn"
+          }
+        }
+      }
+    },
     "garden.item.sheep": {
       "comment": "UI text. (Pip's garden and farm; web app for now.)",
       "extractionState": "manual",
@@ -2269,6 +2413,18 @@
         }
       }
     },
+    "garden.item.stable": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grosser Stall"
+          }
+        }
+      }
+    },
     "garden.item.stone": {
       "comment": "UI text. (Play corner; web app for now.)",
       "extractionState": "manual",
@@ -2277,6 +2433,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stein"
+          }
+        }
+      }
+    },
+    "garden.item.sunflower": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonnenblumen"
+          }
+        }
+      }
+    },
+    "garden.item.swan": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwan"
           }
         }
       }
@@ -2301,6 +2481,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baum"
+          }
+        }
+      }
+    },
+    "garden.item.trophy": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meister-Pokal"
+          }
+        }
+      }
+    },
+    "garden.item.turkey": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Truthahn"
+          }
+        }
+      }
+    },
+    "garden.item.unicorn": {
+      "comment": "Name of a farm item. (Pips Garten.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einhorn"
           }
         }
       }
@@ -2401,6 +2617,30 @@
         }
       }
     },
+    "garden.milestone.bigOrders": {
+      "comment": "UI text. (Pips Garten: farm levels.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grössere Aufträge mit mehr Sternen"
+          }
+        }
+      }
+    },
+    "garden.milestone.land": {
+      "comment": "UI text. (Pips Garten: farm levels.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr Land zum Kaufen"
+          }
+        }
+      }
+    },
     "garden.moreTime": {
       "comment": "UI text. (Web app for now.)",
       "extractionState": "manual",
@@ -2493,6 +2733,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zuerst brauchst du: %@"
+          }
+        }
+      }
+    },
+    "garden.nextReward %lld %@": {
+      "comment": "UI text. (Pips Garten: farm levels.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächste Belohnung bei Level %lld: %@"
           }
         }
       }

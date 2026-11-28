@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   GARDEN_COLUMNS,
   GARDEN_ITEMS,
+  GOODS_VALUE,
   GARDEN_SIZE,
   buyLand,
   canClear,
@@ -24,6 +25,10 @@ import {
   gardenRows,
   homeSpace,
   nextLandPrice,
+  nextLandLevel,
+  levelStartXp,
+  nextReward,
+  milestonesAt,
   occupancy,
   placeInGarden,
   placementProblem,
@@ -124,8 +129,8 @@ describe("farm animals", () => {
 });
 
 describe("more land", () => {
-  it("adds four rows at a time, three times", () => {
-    let p = rich(200);
+  it("adds four rows at a time: three right away, three more at levels 15, 25 and 35", () => {
+    let p = { ...rich(1000), farmXp: levelStartXp(14) };
     expect(gardenRows(p.garden)).toBe(8);
     for (const price of [25, 40, 60]) {
       expect(nextLandPrice(p.garden)).toBe(price);
@@ -134,6 +139,15 @@ describe("more land", () => {
       expect(p.walletStars).toBe(before - price);
     }
     expect(gardenRows(p.garden)).toBe(20);
+    // The fourth piece is a level-15 reward.
+    expect(nextLandLevel(p.garden)).toBe(15);
+    expect(buyLand(p)).toBe(p);
+    p = { ...p, farmXp: levelStartXp(35) };
+    for (const price of [80, 100, 120]) {
+      expect(nextLandPrice(p.garden)).toBe(price);
+      p = buyLand(p);
+    }
+    expect(gardenRows(p.garden)).toBe(32);
     expect(nextLandPrice(p.garden)).toBeUndefined();
     expect(buyLand(p)).toBe(p);
   });
@@ -188,7 +202,13 @@ describe("farm levels", () => {
     expect(farmLevel(0)).toEqual({ level: 1, xpInLevel: 0, xpForNext: 10 });
     expect(farmLevel(35).level).toBe(3);
     expect(farmLevel(460).level).toBe(10);
-    expect(farmLevel(560).level).toBe(11);
+    // From level 10 on each level costs 40·n + 100 XP: 500, 540, 580 …
+    expect(farmLevel(949).level).toBe(10);
+    expect(farmLevel(950).level).toBe(11);
+    expect(levelStartXp(12)).toBe(1490);
+    expect(farmLevel(levelStartXp(30)).xpForNext).toBe(1300);
+    // A farm with 4300 XP (level 48 before) is level 16 now.
+    expect(farmLevel(4300).level).toBe(16);
     expect(unlockedAt(4).map((i) => i.id)).toContain("barn");
     expect(placementProblem(fresh(), 0, "barn", day(1))).toBe("level");
     expect(placementProblem(fresh(), 0, "wheat", day(1))).toBeUndefined();
@@ -426,3 +446,36 @@ describe("seasons and care", () => {
     expect(GARDEN_ITEMS.filter((i) => i.category === "animals" && i.needs).every((i) => i.care?.kind === "feed")).toBe(true);
   });
 });
+
+describe("farm level rewards", () => {
+  it("bring something new every few levels up to 60", () => {
+    const levels = [...new Set(GARDEN_ITEMS.map((i) => i.level))].sort((a, b) => a - b);
+    expect(Math.max(...levels)).toBe(60);
+    // Never more than five levels without a reward (items or milestones).
+    for (let level = 1; level < 60; level++) expect(nextReward(level)!.level - level, `after ${level}`).toBeLessThanOrEqual(5);
+    expect(nextReward(60)).toBeUndefined();
+    expect(nextReward(16)).toMatchObject({ level: 17 });
+    expect(nextReward(16)!.items.map((i) => i.id)).toEqual(["sunflower"]);
+    expect(milestonesAt(20)).toEqual(["bigOrders"]);
+    expect(nextReward(24)).toMatchObject({ level: 25, milestones: ["land"] });
+  });
+
+  it("order helpers add up: each kind brings an order or a star more", () => {
+    let p = { ...rich(2000), farmXp: levelStartXp(45) };
+    p = place(p, 0, "barn", 1);
+    p = place(p, 2, "cow", 3);
+    p = place(p, 3, "mailbox", 3);
+    p = place(p, 4, "farmshop", 3);
+    p = place(p, 5, "ferriswheel", 3);
+    p = place(p, 6, "horse", 3);
+    p = place(p, 7, "balloon", 3);
+    const orders = withTodaysOrders(p, day(4)).farmOrders!.orders;
+    expect(orders).toHaveLength(6); // 3 + mailbox + farm shop + Ferris wheel
+    // Horse and balloon, plus one for each of the big-order levels 20 and 40.
+    for (const o of orders) {
+      const value = Object.entries(o.wants).reduce((n, [k, v]) => n + v! * GOODS_VALUE[k as keyof typeof GOODS_VALUE], 0);
+      expect(o.stars).toBe(1 + Math.floor(value / 3) + 4);
+    }
+  });
+});
+

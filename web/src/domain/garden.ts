@@ -122,6 +122,24 @@ export const GARDEN_ITEMS: GardenItem[] = [
   { id: "mailbox", price: 3, level: 2, category: "decor", stages: ["📫"], days: [0], orders: "extraOrder" },
   { id: "fountain", price: 20, level: 4, category: "decor", stages: ["⛲"], days: [0], boosts: ["milk"], care: repair(3) },
   { id: "tractor", price: 30, level: 8, category: "decor", stages: ["🚜"], days: [0], boosts: ["wheat", "veg"], care: { kind: "service", every: 7, cost: 5 } },
+  // Rewards for higher farm levels: something new every two or three levels up to 60.
+  { id: "rooster", price: 12, level: 9, category: "animals", stages: ["🐓"], days: [0], needs: "chicken", boosts: ["egg"], care: feed(1) },
+  { id: "llama", price: 30, level: 11, category: "animals", stages: ["🦙"], days: [0], needs: "farm", produce: "wool", care: feed(2) },
+  { id: "farmshop", price: 60, level: 13, category: "buildings", stages: ["🏪"], days: [0], orders: "extraOrder", care: repair(4) },
+  { id: "sunflower", price: 5, level: 17, category: "plants", stages: ["🌱", "🌿", "🌻"], days: [0, 1, 2], harvest: "flowers", annual: true },
+  { id: "turkey", price: 25, level: 19, category: "animals", stages: ["🦃"], days: [0], needs: "chicken", produce: "egg", care: feed(2) },
+  { id: "peacock", price: 40, level: 22, category: "animals", stages: ["🦚"], days: [0], boosts: ["flowers"], care: feed(1) },
+  { id: "bakery", price: 80, level: 24, category: "buildings", stages: ["🥨"], days: [0], recipe: { needs: { bread: 1, honey: 1 }, makes: "pie" }, care: repair(6) },
+  { id: "greenhouse", price: 120, level: 27, category: "buildings", stages: ["🪴"], days: [0], boosts: ["wheat", "veg", "flowers"], care: repair(8) },
+  { id: "donkey", price: 35, level: 30, category: "animals", stages: ["🫏"], days: [0], needs: "farm", boosts: ["wood"], care: feed(2) },
+  { id: "stable", price: 150, level: 32, category: "buildings", stages: ["🛖"], days: [0], houses: { group: "farm", capacity: 6 }, care: repair(8) },
+  { id: "swan", price: 30, level: 36, category: "animals", stages: ["🦢"], days: [0], needs: "duck", boosts: ["fish"], care: feed(1) },
+  { id: "balloon", price: 100, level: 38, category: "decor", stages: ["🎈"], days: [0], orders: "extraStar", care: { kind: "service", every: 7, cost: 4 } },
+  { id: "ferriswheel", price: 150, level: 43, category: "decor", stages: ["🎡"], days: [0], orders: "extraOrder", care: { kind: "service", every: 7, cost: 6 } },
+  { id: "cherrytree", price: 40, level: 47, category: "plants", stages: ["🌱", "🪴", "🌸"], days: [0, 3, 6], produce: "flowers" },
+  { id: "trophy", price: 1, level: 50, category: "decor", stages: ["🏆"], days: [0] },
+  { id: "unicorn", price: 200, level: 55, category: "animals", stages: ["🦄"], days: [0], boosts: ["egg", "milk", "wheat", "veg", "apple", "honey", "wool", "bacon", "fish", "wood", "flowers", "mushroom"], care: feed(3) },
+  { id: "castle", price: 300, level: 60, category: "decor", stages: ["🏰"], days: [0] },
 ];
 
 export const gardenItem = (id: string) => GARDEN_ITEMS.find((i) => i.id === id);
@@ -131,9 +149,18 @@ export const shopPicture = (item: GardenItem) => item.variants?.[0] ?? item.stag
 
 // MARK: Farm levels
 
-/** XP needed for each level: level 2 at 10 XP, level 3 at 30, … then 100 more per level. */
+/**
+ * XP needed for each level: level 2 at 10 XP, level 3 at 30, … level 10 at 450.
+ * After that each level takes more: from level n to n+1 costs 40·n + 100 XP
+ * (500 at level 10, 900 at 20, 1300 at 30), so levels keep meaning something.
+ */
 const LEVEL_XP = [0, 10, 30, 60, 100, 150, 210, 280, 360, 450];
-export const levelStartXp = (level: number) => (level <= LEVEL_XP.length ? LEVEL_XP[level - 1] : LEVEL_XP[LEVEL_XP.length - 1] + 100 * (level - LEVEL_XP.length));
+export function levelStartXp(level: number): number {
+  if (level <= LEVEL_XP.length) return LEVEL_XP[level - 1];
+  let xp = LEVEL_XP[LEVEL_XP.length - 1];
+  for (let n = LEVEL_XP.length; n < level; n++) xp += 40 * n + 100;
+  return xp;
+}
 
 export function farmLevel(xp: number): { level: number; xpInLevel: number; xpForNext: number } {
   let level = 1;
@@ -143,6 +170,22 @@ export function farmLevel(xp: number): { level: number; xpInLevel: number; xpFor
 
 /** Items a new level unlocks (for the celebration). */
 export const unlockedAt = (level: number) => GARDEN_ITEMS.filter((i) => i.level === level);
+
+/** Rewards that aren't items: more land to buy, bigger orders. */
+export type FarmMilestone = "land" | "bigOrders";
+export const FARM_MILESTONES: readonly { level: number; milestone: FarmMilestone }[] = [
+  { level: 15, milestone: "land" }, { level: 20, milestone: "bigOrders" }, { level: 25, milestone: "land" },
+  { level: 35, milestone: "land" }, { level: 40, milestone: "bigOrders" },
+];
+export const milestonesAt = (level: number) => FARM_MILESTONES.filter((m) => m.level === level).map((m) => m.milestone);
+
+/** The next level that brings something new, and what (none after the last one). */
+export function nextReward(level: number): { level: number; items: GardenItem[]; milestones: FarmMilestone[] } | undefined {
+  const levels = [...GARDEN_ITEMS.map((i) => i.level), ...FARM_MILESTONES.map((m) => m.level)].filter((l) => l > level);
+  if (levels.length === 0) return undefined;
+  const next = Math.min(...levels);
+  return { level: next, items: unlockedAt(next), milestones: milestonesAt(next) };
+}
 
 export const XP_FOR_COLLECTING = 3;
 
@@ -163,7 +206,9 @@ export const GARDEN_START_ROWS = 8;
 export const GARDEN_SIZE = GARDEN_COLUMNS * GARDEN_START_ROWS;
 /** Each purchase adds four rows. */
 export const LAND_ROWS_PER_PURCHASE = 4;
-export const LAND_PRICES = [25, 40, 60];
+export const LAND_PRICES = [25, 40, 60, 80, 100, 120];
+/** The farm level each piece of land needs (the last three are level rewards). */
+export const LAND_LEVELS = [1, 1, 1, 15, 25, 35];
 
 /** Gardens saved before the farm was widened were 6 columns wide, 4 rows plus 2 per land purchase. */
 export const LEGACY_COLUMNS = 6;
@@ -204,9 +249,14 @@ export function nextLandPrice(garden: Garden): number | undefined {
   return LAND_PRICES[(gardenRows(garden) - GARDEN_START_ROWS) / LAND_ROWS_PER_PURCHASE];
 }
 
+/** The farm level the next piece of land needs. */
+export function nextLandLevel(garden: Garden): number | undefined {
+  return LAND_LEVELS[(gardenRows(garden) - GARDEN_START_ROWS) / LAND_ROWS_PER_PURCHASE];
+}
+
 export function buyLand(p: Profile): Profile {
   const price = nextLandPrice(p.garden);
-  if (price === undefined || p.walletStars < price) return p;
+  if (price === undefined || p.walletStars < price || farmLevel(p.farmXp).level < (nextLandLevel(p.garden) ?? 1)) return p;
   const extra: Garden = Array.from({ length: GARDEN_COLUMNS * LAND_ROWS_PER_PURCHASE }, () => null);
   return withXp({ ...p, walletStars: p.walletStars - price, garden: [...p.garden, ...extra] }, price);
 }
@@ -616,7 +666,8 @@ export function producibleGoods(garden: Garden): Produce[] {
   return PRODUCE.filter((k) => kinds.has(k));
 }
 
-const onFarm = (garden: Garden, bonus: GardenItem["orders"], now: Date) => finishedKinds(garden, now).some((item) => item.orders === bonus);
+/** How many working kinds on the farm give this order bonus. */
+const onFarm = (garden: Garden, bonus: GardenItem["orders"], now: Date) => finishedKinds(garden, now).filter((item) => item.orders === bonus).length;
 
 const hash = (s: string) => [...s].reduce((h, ch) => (Math.imul(h, 31) + ch.charCodeAt(0)) | 0, 7);
 
@@ -631,9 +682,13 @@ export function withTodaysOrders(p: Profile, now: Date): Profile {
   const current = p.farmOrders;
   if (current?.day === today && (current.orders.length > 0 || kinds.length === 0)) return p;
   const rng = seededRng(hash(`${p.id}:${today}`));
-  const big = farmLevel(p.farmXp).level >= 5 ? 1 : 0;
-  const count = onFarm(p.garden, "extraOrder", now) ? 4 : 3;
-  const extraStar = onFarm(p.garden, "extraStar", now) ? 1 : 0;
+  const level = farmLevel(p.farmXp).level;
+  // Bigger orders at levels 5, 20 and 40 (the 20 and 40 ones also pay a star more).
+  const big = [5, 20, 40].filter((l) => level >= l).length;
+  const bigStar = [20, 40].filter((l) => level >= l).length;
+  // Each kind of helper adds up: mailbox, farm shop and Ferris wheel one order each; horse and balloon a star.
+  const count = 3 + onFarm(p.garden, "extraOrder", now);
+  const extraStar = onFarm(p.garden, "extraStar", now) + bigStar;
   const orders: FarmOrder[] = kinds.length === 0 ? [] : Array.from({ length: count }, (_, i) => {
     const picked = shuffled(rng, kinds).slice(0, kinds.length > 1 && rng() < 0.5 ? 2 : 1);
     const wants: Partial<Record<Produce, number>> = {};

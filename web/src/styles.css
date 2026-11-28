@@ -663,3 +663,30 @@ label.list-row { cursor: pointer; }
 .test-points { font-size: 1.8rem; font-weight: 900; margin: 4px 0; }
 .test-level { font-size: 1.15rem; font-weight: 700; margin: 4px 0 10px; }
 .subject-card:disabled { opacity: 0.6; }
+.level-up-card .milestone { font-weight: 800; margin: 6px 0; }
+.level-up-card .small { font-size: 0.85rem; }
+.farm-level { cursor: pointer; }
+
+/* ───────────── Home: everything on one screen ───────────── */
+/* The page is exactly one screen high; the tiles share what is left below the header. */
+.screen.home { height: 100dvh; min-height: 0; display: flex; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.home-column { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 1100px; margin: 0 auto; min-height: 0; flex: 1; }
+.home-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.home-hello { flex: 1; min-width: 160px; }
+.home-hello h1 { margin: 0; font-size: clamp(1.4rem, 3.6vw, 2rem); line-height: 1.15; }
+.home-hello p { margin: 2px 0 0; font-size: 0.95rem; }
+.home-stats { display: flex; gap: 8px; }
+.home-stats .stat-chip { font-size: 1.05rem; padding: 6px 12px; }
+/* 2 columns on small phones, 3 on phones and portrait tablets, 4 on wide screens; rows share the height. */
+.home-tiles { --cols: 3; flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: minmax(96px, 1fr); gap: 12px; }
+@media (min-width: 900px) and (orientation: landscape) { .home-tiles { --cols: 4; } }
+@media (max-width: 340px) { .home-tiles { --cols: 2; } }
+.home-tiles .subject-card { position: relative; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; padding: 10px 8px; min-height: 0; border-radius: 24px; }
+.home-tiles .subject-icon { width: clamp(44px, 9vmin, 76px); height: clamp(44px, 9vmin, 76px); border-radius: 18px; font-size: clamp(1.3rem, 4.2vmin, 2rem); }
+.home-tiles .subject-text { flex: none; align-items: center; gap: 2px; }
+.home-tiles .subject-title { font-size: clamp(1rem, 2.8vmin, 1.4rem); line-height: 1.15; }
+.home-tiles .subject-sub { font-size: clamp(0.72rem, 1.9vmin, 0.95rem); opacity: 0.92; line-height: 1.2; }
+.home-tiles .ring { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; }
+/* A gift card or very large text may need more room: then the page scrolls after all. */
+.screen.home:has(.gift-card) { height: auto; min-height: 100dvh; }
+@media (max-height: 520px) { .screen.home { height: auto; min-height: 100dvh; } }

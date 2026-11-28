@@ -50,6 +50,9 @@ import {
   sellableStars,
   shopPicture,
   unlockedAt,
+  milestonesAt,
+  nextLandLevel,
+  nextReward,
   withTodaysOrders,
   type GardenCategory,
   type GardenItem,
@@ -346,6 +349,10 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
   const deliverable = orders.filter((o) => canFulfil(profile, o)).length;
   const goods = goodsCount(profile.farmGoods);
   const landPrice = nextLandPrice(garden);
+  const landLevel = nextLandLevel(garden) ?? 1;
+  const upcoming = nextReward(level.level);
+  const rewardText = (r: NonNullable<typeof upcoming>) =>
+    [...r.items.map((i) => `${shopPicture(i).startsWith("art:") ? "" : shopPicture(i) + " "}${name(i.id)}`), ...r.milestones.map((m) => t(`garden.milestone.${m}`))].join(", ");
   const toolItem = tool?.kind === "place" ? gardenItem(tool.id) : undefined;
   const banner =
     toolItem ? (toolItem.connects ? t("garden.draw") : t("garden.placeWhere %@", name(toolItem.id)))
@@ -405,7 +412,8 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
 
       <header class="farm-hud">
         <CircleButton label={t("play.back")} onClick={onBack} testId="garden-back">←</CircleButton>
-        <div class="farm-level" role="img" aria-label={t("garden.levelLabel %lld", level.level)} data-testid="farm-level">
+        <div class="farm-level" role="button" tabIndex={0} aria-label={t("garden.levelLabel %lld", level.level)} data-testid="farm-level"
+          onClick={() => setToast(upcoming ? t("garden.nextReward %lld %@", upcoming.level, rewardText(upcoming)) : t("garden.allRewards"))}>
           <span class="level-badge">{level.level}</span>
           <span class="xp-bar"><span class="xp-fill" style={{ width: `${(100 * level.xpInLevel) / level.xpForNext}%` }} /></span>
         </div>
@@ -492,11 +500,13 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
               );
             })}
             {tab === "buildings" && landPrice !== undefined && (
-              <button class="shop-card land" disabled={profile.walletStars < landPrice} data-testid="garden-land"
+              <button class={`shop-card land${level.level < landLevel ? " locked" : ""}`} disabled={profile.walletStars < landPrice || level.level < landLevel} data-testid="garden-land"
                 onClick={() => { void commit(buyLand(saved)); setSheet(undefined); setToast(t("garden.landBought")); sound("finish"); }}>
                 <span class="card-picture" aria-hidden="true">🌄</span>
                 <span class="card-name">{t("garden.landCard")}</span>
-                <span class="card-price">{landPrice} ⭐</span>
+                {level.level < landLevel
+                  ? <span class="card-lock" aria-hidden="true">🔒 {t("garden.level %lld", landLevel)}</span>
+                  : <span class="card-price">{landPrice} ⭐</span>}
               </button>
             )}
           </div>
@@ -603,6 +613,8 @@ export function Garden({ profile: saved, onSave, onBack }: { profile: Profile; o
                 </div>
               </>
             )}
+            {milestonesAt(levelUp).map((m) => <p key={m} class="milestone" data-testid="level-up-milestone">🎁 {t(`garden.milestone.${m}`)}</p>)}
+            {nextReward(levelUp) && <p class="muted small">{t("garden.nextReward %lld %@", nextReward(levelUp)!.level, rewardText(nextReward(levelUp)!))}</p>}
             <BigButton color="var(--ink)" onClick={() => setLevelUp(undefined)} testId="level-up-ok">{t("garden.great")}</BigButton>
           </div>
           <Confetti trigger={levelUp} count={60} />

@@ -18,7 +18,7 @@ import sys
 # 260-character limit in deeply nested folders.
 ROOT = pathlib.Path(os.path.relpath(pathlib.Path(__file__).absolute().parent.parent))
 CATALOG = ROOT / "Funkel/Resources/Localizable.xcstrings"
-PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden|sudoku|numberHouse|write|backup|port|weekly"
+PREFIXES = "app|content|profiles?|editor|home|round|feedback|summary|color|gate|grownups|play|game|garden|sudoku|numberHouse|write|backup|port|weekly|thinkingTest"
 LITERAL = re.compile(r'"((?:' + PREFIXES + r')\.[^"]*)"')
 INTERPOLATION = re.compile(r"\\\(([^)]*\)?)\)")
 # Interpolated values that are strings; everything else is assumed to be an Int.
@@ -44,7 +44,7 @@ def main() -> int:
             used.setdefault(key, path.relative_to(ROOT))
 
     # Keys built at runtime, e.g. LocalizedStringKey("color." + key).
-    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab.", "garden.use.", "skill.", "garden.season.", "garden.care.", "garden.cared.", "garden.careIn.", "editor.country.", "backup.problem."))}
+    dynamic = {k for k in catalog if k.startswith(("color.", "garden.item.", "editor.games.difficulty.", "game.balloons.color.", "game.balloons.name.", "garden.tab.", "garden.use.", "garden.milestone.", "skill.", "garden.season.", "garden.care.", "garden.cared.", "garden.careIn.", "editor.country.", "backup.problem."))}
 
     # Swiss spelling: no "ß" in any UI text (keys or translations).
     raw = json.loads(CATALOG.read_text(encoding="utf-8"))["strings"]
