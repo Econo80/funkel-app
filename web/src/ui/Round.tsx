@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/ho
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
 import { skillTally } from "../domain/weekly";
+import { TEST_QUESTIONS, lastThinkingTest, makeThinkingTest, recordThinkingTest, shouldStopTest, type ThinkingTestResult } from "../domain/thinkingTest";
+import { formatLevelAge } from "./WeeklyOverview";
 import { recordRound, subjectDifficulty, scoreOf, type Profile, type RoundSummary } from "../domain/profile";
 import { correctAnswerText, houseCellValue, onlyCaseDiffers, spokenText, type AnswerOption, type NumberHouse, type Question } from "../domain/question";
 import { systemRng } from "../domain/random";
@@ -14,16 +16,19 @@ import { BigButton, CircleButton, Confetti, Pip, avatarColor, fittingFontSize } 
 const PRAISE = ["feedback.correct.1", "feedback.correct.2", "feedback.correct.3", "feedback.correct.4", "feedback.correct.5"];
 
 /** Hosts a round from start to summary, including "play again". */
-export function RoundScreen({ library, subject, profile, speechLocale, onSave, onClose }: {
+export function RoundScreen({ library, subject, profile, speechLocale, test = false, onSave, onClose }: {
   library: ContentLibrary;
   subject: SubjectDescriptor;
   profile: Profile;
   speechLocale: string;
+  /** The weekly Denk-Test: puzzles from easy to hard, a score at the end, no level change. */
+  test?: boolean;
   onSave: (p: Profile) => Promise<void>;
   onClose: () => void;
 }) {
   const [state, setState] = useState<R.RoundState>();
   const [summary, setSummary] = useState<RoundSummary>();
+  const [testResult, setTestResult] = useState<{ result: ThinkingTestResult; stars: number; previous?: ThinkingTestResult }>();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   // Recomputed for "play again", so a level-up applies to the very next round.
@@ -39,7 +44,7 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
         const progress = profile.progress[`${subject.languageCode}/${subject.id}`];
         const provider = await providerFor(subject, library, { country: profile.country, seen: progress?.seenContentIds });
         const recent = new Set(progress?.recentCorrectContentIds ?? []);
-        const questions = provider.makeQuestions(profile.roundLength, difficulty, recent, systemRng);
+        const questions = test ? makeThinkingTest(provider, profile.age, systemRng) : provider.makeQuestions(profile.roundLength, difficulty, recent, systemRng);
         if (!cancelled) setState(R.startRound(questions, difficulty.maths.allowsNegativeResults));
       } catch (error) {
         console.error(error);
@@ -50,10 +55,26 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt]);
 
+  // Denk-Test: four wrong in a row ends it kindly (the rest is too hard for now).
+  useEffect(() => {
+    if (!test || !state || !shouldStopTest(state.results) || state.questions.length <= state.results.length) return;
+    setState((s) => (s ? { ...s, questions: s.questions.slice(0, s.results.length) } : s));
+  }, [state?.results.length]);
+
   // Save when finished.
   useEffect(() => {
-    if (state?.phase !== "finished" || summary || state.results.length === 0) return;
+    if (state?.phase !== "finished" || summary || testResult || state.results.length === 0) return;
     stopSpeaking();
+    if (test) {
+      const previous = lastThinkingTest(profile);
+      const { profile: updated, result, stars } = recordThinkingTest(profile, {
+        points: R.correctCount(state), total: TEST_QUESTIONS, subjectId: subject.id, languageCode: subject.languageCode,
+        skills: skillTally(state.questions.map((q) => q.skill), state.results),
+      });
+      setTestResult({ result, stars, previous });
+      void onSave(updated);
+      return;
+    }
     const { profile: updated, summary: s } = recordRound(profile, {
       subjectId: subject.id,
       languageCode: subject.languageCode,
@@ -78,6 +99,9 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
       </main>
     );
   }
+  if (testResult) {
+    return <TestSummary {...testResult} color={subject.color} profile={profile} onDone={close} />;
+  }
   if (summary) {
     return <Summary summary={summary} color={subject.color} profile={profile} onAgain={() => setAttempt((a) => a + 1)} onDone={close} />;
   }
@@ -92,7 +116,7 @@ export function RoundScreen({ library, subject, profile, speechLocale, onSave, o
       speechLocale={speechLocale}
       library={library}
       languageCode={subject.languageCode}
-      timerSeconds={profile.gentleTimerEnabled && difficulty.allowsGentleTimer ? difficulty.timerSeconds : undefined}
+      timerSeconds={!test && profile.gentleTimerEnabled && difficulty.allowsGentleTimer ? difficulty.timerSeconds : undefined}
       onClose={close}
     />
   );
@@ -220,6 +244,11 @@ function QuestionCard({ question, color, onListen }: { question: Question; color
         </button>
       )}
       {visual?.kind === "copy" && <p class="copy-text" aria-hidden={label ? "true" : undefined}>{visual.text}</p>}
+      {visual?.kind === "tiles" && (
+        <div class={`visual-tiles${visual.columns ? " grid" : ""}`} style={visual.columns ? { gridTemplateColumns: `repeat(${visual.columns}, auto)` } : undefined} aria-hidden="true" data-testid="logic-tiles">
+          {visual.items.map((item, i) => <span key={i} class={`tile${item === "❓" ? " gap" : ""}${item === "➡️" ? " arrow" : ""}`}>{item}</span>)}
+        </div>
+      )}
       {visual?.kind === "equation" && <div class="visual-equation" style={{ color }} aria-hidden={label ? "true" : undefined}>{visual.text}</div>}
       {visual?.kind === "countable" && (
         <div class="countables">
@@ -554,6 +583,36 @@ function Summary({ summary, color, profile, onAgain, onDone }: {
         <BigButton color="rgba(43,37,64,.75)" onClick={onDone} testId="summary-done">⌂ {t("summary.done")}</BigButton>
       </div>
       <Confetti trigger={celebration} count={score >= 0.8 ? 70 : 40} />
+    </main>
+  );
+}
+
+/** After the Denk-Test: points, the Denk-Niveau, and how it compares with the last test. */
+function TestSummary({ result, stars, previous, color, profile, onDone }: {
+  result: ThinkingTestResult; stars: number; previous?: ThinkingTestResult; color: string; profile: Profile; onDone: () => void;
+}) {
+  const [celebration, setCelebration] = useState(0);
+  useEffect(() => {
+    if (profile.soundEnabled) playSound("finish");
+    setCelebration(1);
+  }, []);
+  const better = previous && (result.points > previous.points || result.levelAge > previous.levelAge);
+  return (
+    <main class="screen">
+      <div class="column narrow center summary" data-testid="test-summary">
+        <Pip color={avatarColor(profile.avatarColor)} mood="cheering" size={150} hop={celebration} />
+        <h1>{t("thinkingTest.done")}</h1>
+        <div class="card summary-card">
+          <p class="test-points" data-testid="test-points">{t("thinkingTest.points %lld %lld", result.points, result.total)}</p>
+          <p class="test-level" data-testid="test-level">🧠 {t("thinkingTest.level %@", formatLevelAge(result.levelAge))}</p>
+          <p class="muted">⭐ {t("summary.stars %lld", stars)}</p>
+          {previous
+            ? <p class="muted">{t("thinkingTest.previous %lld %@", previous.points, formatLevelAge(previous.levelAge))}{better ? ` · ${t("thinkingTest.better")}` : ""}</p>
+            : <p class="muted">{t("thinkingTest.first")}</p>}
+        </div>
+        <BigButton color={color} onClick={onDone} testId="summary-done">⌂ {t("summary.done")}</BigButton>
+      </div>
+      <Confetti trigger={celebration} count={50} />
     </main>
   );
 }

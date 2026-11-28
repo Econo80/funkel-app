@@ -19,6 +19,7 @@ export function App({ library, initialProfiles, initialActiveId }: {
   const [profiles, setProfiles] = useState(initialProfiles);
   const [activeId, setActiveId] = useState(initialActiveId);
   const [subject, setSubject] = useState<SubjectDescriptor>();
+  const [testing, setTesting] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [puzzling, setPuzzling] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>();
@@ -76,13 +77,14 @@ export function App({ library, initialProfiles, initialActiveId }: {
       {active && language ? (
         subject ? (
           <RoundScreen
-            key={subject.id}
+            key={`${subject.id}${testing ? "-test" : ""}`}
             library={library}
             subject={subject}
             profile={active}
             speechLocale={language.speechLocale}
+            test={testing}
             onSave={upsert}
-            onClose={() => setSubject(undefined)}
+            onClose={() => { setSubject(undefined); setTesting(false); }}
           />
         ) : puzzling && active.sudokuEnabled ? (
           <SudokuScreen profile={active} onSave={upsert} onBack={() => setPuzzling(false)} />
@@ -92,7 +94,8 @@ export function App({ library, initialProfiles, initialActiveId }: {
           <Home
             profile={active}
             language={language}
-            onStart={setSubject}
+            onStart={(s) => { setTesting(false); setSubject(s); }}
+            onTest={(s) => { setTesting(true); setSubject(s); }}
             onPlay={() => setPlaying(true)}
             onSudoku={() => setPuzzling(true)}
             onGiftSeen={() => void upsert(giftSeen(active))}

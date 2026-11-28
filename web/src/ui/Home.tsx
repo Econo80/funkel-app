@@ -1,21 +1,26 @@
 import type { ContentLanguage, SubjectDescriptor } from "../content/types";
+import { canTakeTest, daysUntilTest } from "../domain/thinkingTest";
 import { displayedStreak, homeSubjects, progressKey, sudokusSolved, type Profile } from "../domain/profile";
 import { t } from "../services/i18n";
 import { BigButton, CircleButton, Confetti, Pip, ProgressRing, StatChip, avatarColor, subjectGlyph } from "./components";
 
 /** The child's home: greeting, streak and stars, one big card per subject. */
-export function Home({ profile, language, onStart, onPlay, onSudoku, onGiftSeen, onSwitchProfile, onGrownUps }: {
+export function Home({ profile, language, onStart, onTest, onPlay, onSudoku, onGiftSeen, onSwitchProfile, onGrownUps }: {
   profile: Profile;
   language: ContentLanguage;
   onStart: (s: SubjectDescriptor) => void;
   onPlay: () => void;
   onSudoku: () => void;
+  /** The weekly Denk-Test, with the Denken subject. */
+  onTest: (subject: SubjectDescriptor) => void;
   onGiftSeen: () => void;
   onSwitchProfile: () => void;
   onGrownUps: () => void;
 }) {
   const streak = displayedStreak(profile, new Date());
   const subjects = homeSubjects(language.subjects, profile);
+  const thinking = subjects.find((s) => s.provider === "logic");
+  const testReady = canTakeTest(profile);
 
   return (
     <main class="screen">
@@ -69,6 +74,15 @@ export function Home({ profile, language, onStart, onPlay, onSudoku, onGiftSeen,
               </button>
             );
           })}
+          {thinking && (
+            <button class="card subject-card pressable" style={{ background: "#7B61D9" }} onClick={() => onTest(thinking)} disabled={!testReady} data-testid="thinking-test">
+              <span class="subject-icon" aria-hidden="true">🧪</span>
+              <span class="subject-text">
+                <span class="subject-title">{t("thinkingTest.title")}</span>
+                <span class="subject-sub">{testReady ? t("thinkingTest.ready") : t("thinkingTest.nextIn %lld", daysUntilTest(profile))}</span>
+              </span>
+            </button>
+          )}
           {profile.sudokuEnabled && (
             <button class="card subject-card pressable" style={{ background: "#14A3A3" }} onClick={onSudoku} data-testid="sudoku">
               <span class="subject-icon" aria-hidden="true">🧩</span>

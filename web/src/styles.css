@@ -147,6 +147,13 @@ p { line-height: 1.4; }
 .question-card { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
 .visual-emoji { font-size: 5.2rem; line-height: 1; }
 .visual-equation { font-size: 3.4rem; font-weight: 900; white-space: nowrap; }
+/* Denken: picture rows and 3×3 fields; the gap is a dashed square. */
+.visual-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 100%; }
+.visual-tiles.grid { display: grid; justify-content: center; gap: 8px; }
+.visual-tiles .tile { min-width: 2.6rem; height: 2.9rem; padding: 0 4px; display: flex; align-items: center; justify-content: center; font-size: 2rem; line-height: 1; border-radius: 12px; background: rgba(122, 116, 135, 0.08); white-space: nowrap; }
+.visual-tiles.grid .tile { min-width: 4.2rem; height: 4.2rem; font-size: 2.1rem; }
+.visual-tiles .tile.gap { outline: 3px dashed #7B61D9; outline-offset: -3px; background: rgba(123, 97, 217, 0.08); }
+.visual-tiles .tile.arrow { background: none; font-size: 1.6rem; }
 .prompt { font-size: 1.8rem; font-weight: 800; line-height: 1.25; }
 .sentence { font-size: 1.4rem; font-weight: 700; margin: 0; }
 .countables { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 360px; }
@@ -653,3 +660,6 @@ label.list-row { cursor: pointer; }
 .skill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0; }
 .skill-chip { background: #e3f6ea; color: #1d6b40; border-radius: 999px; padding: 6px 12px; font-weight: 600; font-size: 0.9rem; }
 .skill-row.practice .skill-chip { background: #fdebd8; color: #9a4a12; }
+.test-points { font-size: 1.8rem; font-weight: 900; margin: 4px 0; }
+.test-level { font-size: 1.15rem; font-weight: 700; margin: 4px 0 10px; }
+.subject-card:disabled { opacity: 0.6; }

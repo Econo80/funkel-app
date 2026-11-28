@@ -8,6 +8,7 @@ import {
   type RawManifest,
   type SubjectDescriptor,
   type WordList,
+  type LogicContent,
 } from "./types";
 
 export const FALLBACK_LANGUAGE = "de";
@@ -72,6 +73,10 @@ export class ContentLibrary {
   }
 
   questionBank(subject: SubjectDescriptor): Promise<QuestionBank> {
+    return this.file(subject.languageCode, subject.file);
+  }
+
+  logicContent(subject: SubjectDescriptor): Promise<LogicContent> {
     return this.file(subject.languageCode, subject.file);
   }
 }

@@ -29,5 +29,13 @@
   "vocab.sentenceDictation": "Hör gut zu und schreib den Satz!",
   "vocab.synonym": "Welches Wort bedeutet fast das Gleiche wie „{word}“?",
   "sequence.build": "Tippe die Teile in der richtigen Reihenfolge an.",
-  "speech.answer": "Die richtige Antwort ist: {answer}."
+  "speech.answer": "Die richtige Antwort ist: {answer}.",
+  "logic.pattern": "Was kommt als Nächstes?",
+  "logic.patternGap": "Was fehlt in der Reihe?",
+  "logic.oddOneOut": "Was passt nicht dazu?",
+  "logic.oddOneOut.explain": "Die anderen sind alle {item}.",
+  "logic.numbers": "Welche Zahl kommt als Nächstes?",
+  "logic.numbersGap": "Welche Zahl fehlt?",
+  "logic.matrix": "Welches Bild fehlt im Feld?",
+  "logic.analogy": "Was passt? Mach es gleich wie im Beispiel."
 }

@@ -89,6 +89,20 @@ export function WeeklyOverview({ profile, language, onClose }: { profile: Profil
             <div class="skill-row practice">{week.practice.length ? week.practice.map(skillChip) : <span class="muted">{t("weekly.noPractice")}</span>}</div>
           </>
         )}
+        {(profile.thinkingTests ?? []).length > 0 && (
+          <>
+            <h3 class="section-title">{t("thinkingTest.history")}</h3>
+            <div class="list" data-testid="weekly-tests">
+              {[...(profile.thinkingTests ?? [])].reverse().slice(0, 6).map((test) => (
+                <div key={test.date} class="row-between list-line">
+                  <span>{new Date(test.date).toLocaleDateString(document.documentElement.lang || "de-CH", { day: "numeric", month: "short" })}</span>
+                  <span class="muted">{t("thinkingTest.row %lld %lld %@", test.points, test.total, formatLevelAge(test.levelAge))}</span>
+                </div>
+              ))}
+            </div>
+            <p class="footnote">{t("thinkingTest.footer")}</p>
+          </>
+        )}
         <p class="footnote">{t("weekly.footer")}</p>
       </div>
     </Sheet>

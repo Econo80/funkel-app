@@ -1,5 +1,6 @@
 import type { ContentLibrary } from "../content/library";
 import type { SubjectDescriptor } from "../content/types";
+import { LogicPuzzleGenerator } from "./logic";
 import { MathsQuestionGenerator } from "./maths";
 import type { QuestionProvider } from "./provider";
 import { QuestionBankProvider, type BankContext } from "./questionBank";
@@ -18,5 +19,7 @@ export async function providerFor(subject: SubjectDescriptor, library: ContentLi
     }
     case "questionBank":
       return new QuestionBankProvider(subject.id, (await library.questionBank(subject)).questions, context);
+    case "logic":
+      return new LogicPuzzleGenerator(subject.id, await library.logicContent(subject), await library.phrasing(subject.languageCode));
   }
 }

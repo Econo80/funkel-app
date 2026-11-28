@@ -5,6 +5,7 @@ import { Tuning, difficultyForAge, effectiveAge, nextAdaptivity, type Adaptivity
 import { DEFAULT_GAME_SETTINGS, gameAge, type GameDifficulty } from "./games";
 import { GARDEN_COLUMNS, GARDEN_SIZE, emptyGarden, emptyGoods, startingFarmXp, widenGarden, type FarmOrder, type Garden, type Produce } from "./garden";
 import { SUDOKU_SIZES, type SudokuSize } from "./sudoku";
+import type { ThinkingTestResult } from "./thinkingTest";
 
 export const ROUND_LENGTH_CHOICES = [5, 10, 15, 20] as const;
 export const DEFAULT_ROUND_LENGTH = 10;
@@ -107,6 +108,8 @@ export interface Profile extends ProfileSettings {
   farmOrders?: { day: string; orders: FarmOrder[] };
   /** The first day of the season whose welcome card was last shown on the farm. */
   farmSeason?: string;
+  /** Denk-Test results, oldest first. */
+  thinkingTests?: ThinkingTestResult[];
   /** Time spent in the garden on `gardenDay`, and extra minutes a grown-up gave for that day. */
   gardenDay?: string;
   gardenSeconds?: number;
@@ -556,7 +559,7 @@ export function recordSudoku(p: Profile, stars: number, now = new Date()): Profi
 export function resetProgress(p: Profile): Profile {
   return {
     ...p,
-    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: emptyGoods(), farmXp: 0, farmOrders: undefined, farmSeason: undefined,
+    totalStars: 0, walletStars: 0, gamesToday: 0, gameDay: undefined, garden: emptyGarden(), farmGoods: emptyGoods(), farmXp: 0, farmOrders: undefined, farmSeason: undefined, thinkingTests: [],
     currentStreak: 0, longestStreak: 0, lastPlayedDay: undefined, difficultyAdjustment: 0, progress: {}, rounds: [],
   };
 }

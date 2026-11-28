@@ -214,7 +214,7 @@ describe("question bank (mirrors QuestionBankTests.swift)", () => {
 describe("kinds of questions for the weekly overview", () => {
   it("tags every question with its operation, word exercise or category", async () => {
     const rng = seededRng(7);
-    for (const id of ["maths", "vocabulary", "generalKnowledge", "topic-pilze"]) {
+    for (const id of ["maths", "vocabulary", "generalKnowledge", "topic-pilze", "logic"]) {
       const provider = await germanProvider(id);
       for (const age of [6, 8, 10]) {
         const questions = provider.makeQuestions(10, difficultyForAge(age), new Set(), rng);

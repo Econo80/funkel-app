@@ -1,0 +1,486 @@
+{
+  "groups": [
+    {
+      "id": "fruit",
+      "family": "food",
+      "minAge": 4,
+      "label": "Früchte",
+      "items": [
+        "🍎",
+        "🍌",
+        "🍐",
+        "🍇",
+        "🍓",
+        "🍒",
+        "🍑",
+        "🍊",
+        "🍍",
+        "🥝"
+      ]
+    },
+    {
+      "id": "vegetables",
+      "family": "food",
+      "minAge": 6,
+      "label": "Gemüse",
+      "items": [
+        "🥕",
+        "🥦",
+        "🥒",
+        "🌽",
+        "🥔",
+        "🧅",
+        "🥬",
+        "🫑"
+      ]
+    },
+    {
+      "id": "sweets",
+      "family": "food",
+      "minAge": 5,
+      "label": "Süssigkeiten",
+      "items": [
+        "🍭",
+        "🍬",
+        "🍫",
+        "🍩",
+        "🍪",
+        "🧁",
+        "🍰"
+      ]
+    },
+    {
+      "id": "road",
+      "family": "vehicles",
+      "minAge": 4,
+      "label": "Fahrzeuge auf der Strasse",
+      "items": [
+        "🚗",
+        "🚌",
+        "🚕",
+        "🚓",
+        "🚑",
+        "🚒",
+        "🚜"
+      ]
+    },
+    {
+      "id": "air",
+      "family": "vehicles",
+      "minAge": 6,
+      "label": "Dinge, die fliegen",
+      "items": [
+        "✈️",
+        "🚁",
+        "🛩️",
+        "🪂",
+        "🚀"
+      ]
+    },
+    {
+      "id": "water",
+      "family": "vehicles",
+      "minAge": 6,
+      "label": "Schiffe und Boote",
+      "items": [
+        "⛵",
+        "🚤",
+        "🛶",
+        "🚢",
+        "⛴️"
+      ]
+    },
+    {
+      "id": "farm",
+      "family": "animals",
+      "minAge": 4,
+      "label": "Tiere vom Bauernhof",
+      "items": [
+        "🐄",
+        "🐖",
+        "🐑",
+        "🐐",
+        "🐓",
+        "🐴"
+      ]
+    },
+    {
+      "id": "wild",
+      "family": "animals",
+      "minAge": 6,
+      "label": "wilde Tiere aus Afrika",
+      "items": [
+        "🦁",
+        "🐘",
+        "🦒",
+        "🦓",
+        "🐒",
+        "🦛"
+      ]
+    },
+    {
+      "id": "sea",
+      "family": "animals",
+      "minAge": 5,
+      "label": "Tiere im Wasser",
+      "items": [
+        "🐟",
+        "🐙",
+        "🦀",
+        "🐬",
+        "🐳",
+        "🦈",
+        "🐠"
+      ]
+    },
+    {
+      "id": "birds",
+      "family": "animals",
+      "minAge": 7,
+      "label": "Vögel",
+      "items": [
+        "🦅",
+        "🦉",
+        "🐦",
+        "🦜",
+        "🦆",
+        "🐧",
+        "🦩"
+      ]
+    },
+    {
+      "id": "insects",
+      "family": "animals",
+      "minAge": 8,
+      "label": "Insekten",
+      "items": [
+        "🐝",
+        "🦋",
+        "🐞",
+        "🐜",
+        "🪲",
+        "🦗"
+      ]
+    },
+    {
+      "id": "clothes",
+      "family": "things",
+      "minAge": 4,
+      "label": "Kleider",
+      "items": [
+        "👕",
+        "👖",
+        "🧦",
+        "👗",
+        "🧢",
+        "🧤",
+        "🧣"
+      ]
+    },
+    {
+      "id": "instruments",
+      "family": "things",
+      "minAge": 6,
+      "label": "Musikinstrumente",
+      "items": [
+        "🎸",
+        "🥁",
+        "🎺",
+        "🎻",
+        "🎹",
+        "🪗"
+      ]
+    },
+    {
+      "id": "tools",
+      "family": "things",
+      "minAge": 7,
+      "label": "Werkzeuge",
+      "items": [
+        "🔨",
+        "🪛",
+        "🔧",
+        "🪚",
+        "⛏️"
+      ]
+    },
+    {
+      "id": "school",
+      "family": "things",
+      "minAge": 6,
+      "label": "Schulsachen",
+      "items": [
+        "✏️",
+        "📏",
+        "📚",
+        "🖍️",
+        "✂️",
+        "🎒"
+      ]
+    },
+    {
+      "id": "balls",
+      "family": "things",
+      "minAge": 5,
+      "label": "Bälle",
+      "items": [
+        "⚽",
+        "🏀",
+        "🏈",
+        "🎾",
+        "🏐",
+        "⚾"
+      ]
+    },
+    {
+      "id": "weather",
+      "family": "nature",
+      "minAge": 7,
+      "label": "Wetter",
+      "items": [
+        "☀️",
+        "🌧️",
+        "❄️",
+        "⛈️",
+        "🌈",
+        "🌪️"
+      ]
+    }
+  ],
+  "analogies": [
+    {
+      "minAge": 6,
+      "a": "🐄",
+      "b": "🥛",
+      "c": "🐔",
+      "answer": "🥚",
+      "wrong": [
+        "🧀",
+        "🍞",
+        "🌽"
+      ],
+      "explanation": "Die Kuh gibt Milch, das Huhn legt Eier."
+    },
+    {
+      "minAge": 6,
+      "a": "✋",
+      "b": "🧤",
+      "c": "🦶",
+      "answer": "🧦",
+      "wrong": [
+        "🧢",
+        "👖",
+        "🧣"
+      ],
+      "explanation": "Der Handschuh gehört an die Hand, die Socke an den Fuss."
+    },
+    {
+      "minAge": 6,
+      "a": "🐶",
+      "b": "🦴",
+      "c": "🐰",
+      "answer": "🥕",
+      "wrong": [
+        "🍖",
+        "🍕",
+        "🧀"
+      ],
+      "explanation": "Der Hund mag Knochen, der Hase Rüebli."
+    },
+    {
+      "minAge": 7,
+      "a": "🐟",
+      "b": "🌊",
+      "c": "🐿️",
+      "answer": "🌳",
+      "wrong": [
+        "🌊",
+        "🏠",
+        "🌵"
+      ],
+      "explanation": "Der Fisch lebt im Wasser, das Eichhörnchen im Baum."
+    },
+    {
+      "minAge": 7,
+      "a": "☀️",
+      "b": "🕶️",
+      "c": "🌧️",
+      "answer": "☂️",
+      "wrong": [
+        "🧤",
+        "🩴",
+        "🎒"
+      ],
+      "explanation": "Bei Sonne die Sonnenbrille, bei Regen den Schirm."
+    },
+    {
+      "minAge": 7,
+      "a": "🥚",
+      "b": "🐣",
+      "c": "🐛",
+      "answer": "🦋",
+      "wrong": [
+        "🐝",
+        "🐞",
+        "🕷️"
+      ],
+      "explanation": "Aus dem Ei schlüpft ein Küken, aus der Raupe wird ein Schmetterling."
+    },
+    {
+      "minAge": 7,
+      "a": "🐻",
+      "b": "🍯",
+      "c": "🐼",
+      "answer": "🎋",
+      "wrong": [
+        "🍌",
+        "🥕",
+        "🧀"
+      ],
+      "explanation": "Der Bär mag Honig, der Panda frisst Bambus."
+    },
+    {
+      "minAge": 8,
+      "a": "🧑‍🍳",
+      "b": "🍳",
+      "c": "🧑‍🚒",
+      "answer": "🚒",
+      "wrong": [
+        "🚑",
+        "🚓",
+        "🚜"
+      ],
+      "explanation": "Der Koch braucht die Pfanne, die Feuerwehrfrau das Feuerwehrauto."
+    },
+    {
+      "minAge": 8,
+      "a": "🧑‍🌾",
+      "b": "🚜",
+      "c": "🧑‍✈️",
+      "answer": "✈️",
+      "wrong": [
+        "🚒",
+        "🚑",
+        "🚂"
+      ],
+      "explanation": "Die Bäuerin fährt Traktor, der Pilot fliegt das Flugzeug."
+    },
+    {
+      "minAge": 8,
+      "a": "🕷️",
+      "b": "🕸️",
+      "c": "🐦",
+      "answer": "🪺",
+      "wrong": [
+        "🌳",
+        "🥚",
+        "🪶"
+      ],
+      "explanation": "Die Spinne baut ein Netz, der Vogel ein Nest."
+    },
+    {
+      "minAge": 8,
+      "a": "🌱",
+      "b": "🌳",
+      "c": "👶",
+      "answer": "🧑",
+      "wrong": [
+        "🍼",
+        "🧸",
+        "🐣"
+      ],
+      "explanation": "Aus dem kleinen Pflänzchen wird ein Baum, aus dem Baby ein Erwachsener."
+    },
+    {
+      "minAge": 8,
+      "a": "🔑",
+      "b": "🔒",
+      "c": "✏️",
+      "answer": "📄",
+      "wrong": [
+        "✂️",
+        "📏",
+        "🎨"
+      ],
+      "explanation": "Mit dem Schlüssel öffnet man das Schloss, mit dem Bleistift schreibt man auf Papier."
+    },
+    {
+      "minAge": 9,
+      "a": "🚗",
+      "b": "⛽",
+      "c": "📱",
+      "answer": "🔌",
+      "wrong": [
+        "💧",
+        "🍞",
+        "🧲"
+      ],
+      "explanation": "Das Auto tankt an der Tankstelle, das Handy lädt an der Steckdose."
+    },
+    {
+      "minAge": 9,
+      "a": "✂️",
+      "b": "📄",
+      "c": "🪓",
+      "answer": "🪵",
+      "wrong": [
+        "🔨",
+        "🍞",
+        "🧵"
+      ],
+      "explanation": "Die Schere schneidet Papier, die Axt hackt Holz."
+    },
+    {
+      "minAge": 9,
+      "a": "🐧",
+      "b": "🧊",
+      "c": "🐪",
+      "answer": "🏜️",
+      "wrong": [
+        "🌊",
+        "🌳",
+        "🏔️"
+      ],
+      "explanation": "Der Pinguin lebt im Eis, das Kamel in der Wüste."
+    },
+    {
+      "minAge": 10,
+      "a": "🌵",
+      "b": "🏜️",
+      "c": "🌴",
+      "answer": "🏝️",
+      "wrong": [
+        "🏔️",
+        "🏙️",
+        "🌋"
+      ],
+      "explanation": "Der Kaktus wächst in der Wüste, die Palme auf der Insel."
+    },
+    {
+      "minAge": 10,
+      "a": "👁️",
+      "b": "👓",
+      "c": "🦷",
+      "answer": "🪥",
+      "wrong": [
+        "👂",
+        "🧴",
+        "🧼"
+      ],
+      "explanation": "Die Brille hilft den Augen, die Zahnbürste pflegt die Zähne."
+    },
+    {
+      "minAge": 10,
+      "a": "🎻",
+      "b": "🎶",
+      "c": "🖌️",
+      "answer": "🖼️",
+      "wrong": [
+        "🎨",
+        "✏️",
+        "📷"
+      ],
+      "explanation": "Mit der Geige macht man Musik, mit dem Pinsel ein Bild."
+    }
+  ]
+}

@@ -3973,6 +3973,18 @@
         }
       }
     },
+    "skill.analogy": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vergleiche"
+          }
+        }
+      }
+    },
     "skill.animals": {
       "comment": "Skill name. (Weekly overview: kind of question.)",
       "extractionState": "manual",
@@ -4081,6 +4093,18 @@
         }
       }
     },
+    "skill.matrix": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder-Felder"
+          }
+        }
+      }
+    },
     "skill.meaning": {
       "comment": "Skill name. (Weekly overview: kind of question.)",
       "extractionState": "manual",
@@ -4153,6 +4177,30 @@
         }
       }
     },
+    "skill.numberSequence": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zahlenreihen"
+          }
+        }
+      }
+    },
+    "skill.oddOneOut": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was passt nicht"
+          }
+        }
+      }
+    },
     "skill.opposite": {
       "comment": "Skill name. (Weekly overview: kind of question.)",
       "extractionState": "manual",
@@ -4161,6 +4209,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gegenteil"
+          }
+        }
+      }
+    },
+    "skill.pattern": {
+      "comment": "Skill name. (Weekly overview: kind of question.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muster"
           }
         }
       }
@@ -4629,6 +4689,162 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschafft!"
+          }
+        }
+      }
+    },
+    "thinkingTest.better": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "besser als letztes Mal!"
+          }
+        }
+      }
+    },
+    "thinkingTest.done": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denk-Test geschafft!"
+          }
+        }
+      }
+    },
+    "thinkingTest.first": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein erster Denk-Test. In einer Woche kannst du ihn wieder machen."
+          }
+        }
+      }
+    },
+    "thinkingTest.footer": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Denk-Test misst keinen IQ. Er zeigt, bis zu welchem Alter die Rätsel noch gelöst werden (Denk-Niveau), im Vergleich mit den eigenen früheren Tests. 24 Rätsel, von zwei Jahren unter dem Alter an immer schwieriger; nach vier falschen Antworten in Folge ist Schluss. Einmal pro Woche."
+          }
+        }
+      }
+    },
+    "thinkingTest.history": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denk-Tests"
+          }
+        }
+      }
+    },
+    "thinkingTest.level %@": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denk-Niveau: Rätsel wie mit %@ Jahren"
+          }
+        }
+      }
+    },
+    "thinkingTest.nextIn %lld": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nächster Test in %lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Nächster Test in %lld Tagen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "thinkingTest.points %lld %lld": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von %lld Punkten"
+          }
+        }
+      }
+    },
+    "thinkingTest.previous %lld %@": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letztes Mal: %lld Punkte, Niveau %@"
+          }
+        }
+      }
+    },
+    "thinkingTest.ready": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einmal pro Woche: Wie weit kommst du?"
+          }
+        }
+      }
+    },
+    "thinkingTest.row %lld %lld %@": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von %lld Punkten · Niveau %@"
+          }
+        }
+      }
+    },
+    "thinkingTest.title": {
+      "comment": "UI text. (Denken: Denk-Test.)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denk-Test"
           }
         }
       }

@@ -7,7 +7,9 @@ export type QuestionVisual =
   /** Dictation: a big "listen" button; the text is only spoken. */
   | { kind: "listen"; text: string }
   /** Copying: the text to write out. */
-  | { kind: "copy"; text: string };
+  | { kind: "copy"; text: string }
+  /** Denken: pictures in a row, or a grid with `columns` (3×3 matrices, analogies); "❓" marks the gap. */
+  | { kind: "tiles"; items: string[]; columns?: number };
 
 export interface AnswerOption {
   id: number;

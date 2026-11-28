@@ -17,7 +17,7 @@ from pathlib import Path
 MIN_AGE, MAX_AGE = 4, 14
 # Countries a question can be limited to (the profile's "Land" setting).
 COUNTRIES = ("CH", "DE", "AT")
-PROVIDERS = {"maths", "wordList", "questionBank"}
+PROVIDERS = {"maths", "wordList", "questionBank", "logic"}
 MATHS_OPERATIONS = {"addition", "subtraction", "multiplication", "division"}
 HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
 PLACEHOLDER = re.compile(r"\{(\w+)\}")
@@ -38,6 +38,10 @@ REQUIRED_PHRASES = {
         "vocab.spelling.spoken", "vocab.opposite", "vocab.synonym",
     ],
     "questionBank": ["sequence.build"],
+    "logic": [
+        "logic.pattern", "logic.patternGap", "logic.oddOneOut", "logic.oddOneOut.explain",
+        "logic.numbers", "logic.numbersGap", "logic.matrix", "logic.analogy",
+    ],
 }
 
 
@@ -214,7 +218,41 @@ def validate_question_bank(path, data, report):
             report.error(where, f"unknown format {fmt!r} (multipleChoice | buildSequence)")
 
 
-VALIDATORS = {"maths": validate_maths, "wordList": validate_word_list, "questionBank": validate_question_bank}
+def validate_logic(path, data, report):
+    """Denken: groups for "what doesn't fit" and picture analogies; the rest is generated."""
+    groups = data.get("groups")
+    if not isinstance(groups, list) or len(groups) < 4:
+        report.error(path, "'groups' must list at least 4 groups")
+        groups = []
+    owner = {}
+    for i, g in enumerate(groups):
+        where = f"{path} groups[{i}] ({g.get('id', '?')})"
+        for key in ("id", "family", "label"):
+            if not nonempty_str(g.get(key)):
+                report.error(where, f"missing '{key}'")
+        if not isinstance(g.get("minAge"), int) or not MIN_AGE <= g["minAge"] <= MAX_AGE:
+            report.error(where, "minAge must be a whole age 4-14")
+        items = g.get("items")
+        if not isinstance(items, list) or len(items) < 4:
+            report.error(where, "needs at least 4 items")
+            continue
+        for item in items:
+            if item in owner:
+                report.error(where, f"{item} is also in group {owner[item]!r}")
+            owner[item] = g.get("id")
+    for i, a in enumerate(data.get("analogies") or []):
+        where = f"{path} analogies[{i}]"
+        for key in ("a", "b", "c", "answer", "explanation"):
+            if not nonempty_str(a.get(key)):
+                report.error(where, f"missing '{key}'")
+        wrong = a.get("wrong")
+        if not isinstance(wrong, list) or len(wrong) < 2 or a.get("answer") in (wrong or []):
+            report.error(where, "'wrong' needs 2+ options other than the answer")
+        if not isinstance(a.get("minAge"), int) or not MIN_AGE <= a["minAge"] <= MAX_AGE:
+            report.error(where, "minAge must be a whole age 4-14")
+
+
+VALIDATORS = {"maths": validate_maths, "wordList": validate_word_list, "questionBank": validate_question_bank, "logic": validate_logic}
 
 
 def validate_language(folder, report):

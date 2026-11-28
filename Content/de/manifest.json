@@ -28,6 +28,15 @@
       "color": "#23A363"
     },
     {
+      "id": "logic",
+      "provider": "logic",
+      "file": "logic.json",
+      "title": "Denken",
+      "icon": "brain.head.profile",
+      "color": "#7B61D9",
+      "emoji": "🧠"
+    },
+    {
       "id": "topic-pilze",
       "provider": "questionBank",
       "file": "topic-pilze.json",
