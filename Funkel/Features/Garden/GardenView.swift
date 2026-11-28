@@ -185,7 +185,7 @@ struct GardenView: View {
         HStack(spacing: 10) {
             CircleIconButton(systemImage: "arrow.left", label: "play.back") { dismiss() }
                 .accessibilityIdentifier("garden-back")
-            FarmLevelPill(level: shown.level)
+            FarmLevelPill(level: shown.level, onTap: showNextReward)
                 .frame(minWidth: 60, maxWidth: compact ? 150 : 230)
             seasonPill(compact: compact)
             Spacer(minLength: 0)
@@ -377,16 +377,23 @@ struct GardenView: View {
                     shopCard(item)
                 }
                 if tab == .buildings, let price = farm.nextLandPrice {
+                    let landLevel = farm.nextLandLevel ?? 1
+                    let landLocked = farm.level.level < landLevel
                     Button {
                         commit(farm.buyingLand())
                         drawer = nil
                         show(String(localized: "garden.landBought"))
                         sound(.finish)
                     } label: {
-                        ShopCardLabel(picture: { Text(verbatim: "🌄").font(.system(size: 44)) }, name: "garden.landCard", price: "\(price) ⭐")
+                        ShopCardLabel(
+                            picture: { Text(verbatim: "🌄").font(.system(size: 44)).opacity(landLocked ? 0.45 : 1) },
+                            name: "garden.landCard",
+                            price: "\(price) ⭐",
+                            lock: landLocked ? String(localized: "garden.level \(landLevel)") : nil
+                        )
                     }
-                    .buttonStyle(ShopCardStyle())
-                    .disabled(farm.walletStars < price)
+                    .buttonStyle(ShopCardStyle(locked: landLocked))
+                    .disabled(farm.walletStars < price || landLocked)
                     .accessibilityIdentifier("garden-land")
                 }
             }
@@ -663,6 +670,24 @@ struct GardenView: View {
 
     static func name(_ item: GardenItem) -> String {
         NSLocalizedString(item.nameKey, comment: "")
+    }
+
+    /// "🌻 Sonnenblume, mehr Land": each item as "emoji name", then the milestones.
+    static func rewardText(_ reward: FarmReward) -> String {
+        let items = reward.items.map { item in
+            (item.shopPicture.hasPrefix("art:") ? "" : item.shopPicture + " ") + name(item)
+        }
+        let milestones = reward.milestones.map { String(localized: String.LocalizationValue($0.textKey)) }
+        return (items + milestones).joined(separator: ", ")
+    }
+
+    /// A tap on the level: what the next level brings (or that everything is unlocked).
+    private func showNextReward() {
+        guard let next = GardenItem.nextReward(after: shown.level.level) else {
+            return show(String(localized: "garden.allRewards"))
+        }
+        let rewardText = Self.rewardText(next)
+        show(String(localized: "garden.nextReward \(next.level) \(rewardText)"))
     }
 
     // MARK: Season and care texts

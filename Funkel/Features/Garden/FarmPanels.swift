@@ -27,11 +27,19 @@ extension View {
 
 // MARK: HUD
 
-/// The farm level in a golden badge, and the XP towards the next one.
+/// The farm level in a golden badge, and the XP towards the next one. A tap says what the next level brings.
 struct FarmLevelPill: View {
     let level: FarmLevel
+    var onTap: () -> Void = {}
 
     var body: some View {
+        Button(action: onTap) { pill }
+            .buttonStyle(PressableStyle())
+            .accessibilityLabel(Text("garden.levelLabel \(level.level)"))
+            .accessibilityIdentifier("farm-level")
+    }
+
+    private var pill: some View {
         HStack(spacing: 8) {
             LevelBadge(level: level.level, size: 46)
             GeometryReader { geometry in
@@ -52,9 +60,7 @@ struct FarmLevelPill: View {
         .background {
             Capsule().fill(.white.opacity(0.94)).shadow(color: .black.opacity(0.12), radius: 6, y: 3)
         }
-        .accessibilityElement()
-        .accessibilityLabel(Text("garden.levelLabel \(level.level)"))
-        .accessibilityIdentifier("farm-level")
+        .foregroundStyle(FarmColors.ink)
     }
 }
 
@@ -484,6 +490,19 @@ struct LevelUpCard: View {
                             .accessibilityElement(children: .combine)
                         }
                     }
+                }
+                ForEach(FarmMilestone.at(level), id: \.self) { milestone in
+                    (Text(verbatim: "🎁 ") + Text(LocalizedStringKey(milestone.textKey)))
+                        .font(.system(.body, design: .rounded).weight(.heavy))
+                        .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("level-up-milestone")
+                }
+                if let next = GardenItem.nextReward(after: level) {
+                    let rewardText = GardenView.rewardText(next)
+                    Text("garden.nextReward \(next.level) \(rewardText)")
+                        .font(.system(.footnote, design: .rounded))
+                        .foregroundStyle(FarmColors.muted)
+                        .multilineTextAlignment(.center)
                 }
                 BigButton(title: "garden.great", color: FarmColors.ink, action: onDone)
                     .accessibilityIdentifier("level-up-ok")

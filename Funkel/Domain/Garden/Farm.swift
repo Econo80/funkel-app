@@ -82,7 +82,9 @@ extension Farm {
     static let startSize = columns * startRows
     /// Each purchase adds four rows.
     static let landRowsPerPurchase = 4
-    static let landPrices = [25, 40, 60]
+    static let landPrices = [25, 40, 60, 80, 100, 120]
+    /// The farm level each piece of land needs (the last three are level rewards).
+    static let landLevels = [1, 1, 1, 15, 25, 35]
 
     /// Gardens saved before the farm was widened were 6 columns wide, 4 rows plus 2 per land purchase.
     static let legacyColumns = 6
@@ -189,8 +191,16 @@ extension Farm {
 
     var nextLandPrice: Int? { Self.nextLandPrice(garden) }
 
+    /// The farm level the next piece of land needs, or nil when the garden is as big as it gets.
+    static func nextLandLevel(_ garden: [GardenPlot?]) -> Int? {
+        let bought = (rows(garden) - startRows) / landRowsPerPurchase
+        return landLevels.indices.contains(bought) ? landLevels[bought] : nil
+    }
+
+    var nextLandLevel: Int? { Self.nextLandLevel(garden) }
+
     func buyingLand() -> Farm {
-        guard let price = nextLandPrice, walletStars >= price else { return self }
+        guard let price = nextLandPrice, walletStars >= price, level.level >= (nextLandLevel ?? 1) else { return self }
         var farm = self
         farm.walletStars -= price
         farm.garden += [GardenPlot?](repeating: nil, count: Self.columns * Self.landRowsPerPurchase)
@@ -592,23 +602,27 @@ extension Farm {
         return Produce.allCases.filter(kinds.contains)
     }
 
-    /// A working mailbox or horse on the farm.
-    private static func has(_ bonus: OrderBonus, in garden: [GardenPlot?], now: Date) -> Bool {
-        finishedKinds(garden, now: now).contains { $0.orders == bonus }
+    /// How many working kinds on the farm give this order bonus.
+    private static func bonusCount(_ bonus: OrderBonus, in garden: [GardenPlot?], now: Date) -> Int {
+        finishedKinds(garden, now: now).filter { $0.orders == bonus }.count
     }
 
-    /// Three orders a day (four with a mailbox), for goods this farm can make. They
-    /// pay better than the farm shop: about 1 ⭐ for every 3 goods (bread and cheese
-    /// count 3, a pie 5), one more with a horse, plus XP. Made once per day, the
-    /// same ones the web app would make for this child.
+    /// Three orders a day, one more for each kind of helper (mailbox, farm shop,
+    /// Ferris wheel), for goods this farm can make. They pay better than the farm
+    /// shop: about 1 ⭐ for every 3 goods (bread and cheese count 3, a pie 5), one
+    /// more for each of horse and balloon and at levels 20 and 40, plus XP. Made once
+    /// per day, the same ones the web app would make for this child.
     func withTodaysOrders(now: Date) -> Farm {
         let today = FarmDay.key(now)
         let kinds = Self.producibleGoods(garden)
         if let current = orders, current.day == today, !current.orders.isEmpty || kinds.isEmpty { return self }
         var rng = Mulberry32(seed: Mulberry32.hash("\(profileID):\(today)"))
-        let big = level.level >= 5 ? 1 : 0
-        let count = Self.has(.extraOrder, in: garden, now: now) ? 4 : 3
-        let extraStar = Self.has(.extraStar, in: garden, now: now) ? 1 : 0
+        let farmLevel = level.level
+        // Bigger orders at levels 5, 20 and 40 (the 20 and 40 ones also pay a star more).
+        let big = [5, 20, 40].filter { farmLevel >= $0 }.count
+        let bigStar = [20, 40].filter { farmLevel >= $0 }.count
+        let count = 3 + Self.bonusCount(.extraOrder, in: garden, now: now)
+        let extraStar = Self.bonusCount(.extraStar, in: garden, now: now) + bigStar
         let made: [FarmOrder] = kinds.isEmpty ? [] : (0..<count).map { i in
             let shuffled = rng.shuffled(kinds)
             var picks = 1
@@ -643,7 +657,9 @@ extension Farm {
 
 // MARK: Levels
 
-/// Farm level from XP: level 2 at 10 XP, level 3 at 30, … then 100 more per level.
+/// Farm level from XP: level 2 at 10 XP, level 3 at 30, … level 10 at 450. After that
+/// each level takes more: from level n to n+1 costs 40·n + 100 XP (500 at level 10,
+/// 900 at 20, 1300 at 30), so levels keep meaning something.
 struct FarmLevel: Equatable {
     let level: Int
     let xpInLevel: Int
@@ -652,7 +668,10 @@ struct FarmLevel: Equatable {
     private static let levelXp = [0, 10, 30, 60, 100, 150, 210, 280, 360, 450]
 
     static func startXp(_ level: Int) -> Int {
-        level <= levelXp.count ? levelXp[max(0, level - 1)] : levelXp[levelXp.count - 1] + 100 * (level - levelXp.count)
+        if level <= levelXp.count { return levelXp[max(0, level - 1)] }
+        var xp = levelXp[levelXp.count - 1]
+        for n in levelXp.count..<level { xp += 40 * n + 100 }
+        return xp
     }
 
     init(level: Int, xpInLevel: Int, xpForNext: Int) {

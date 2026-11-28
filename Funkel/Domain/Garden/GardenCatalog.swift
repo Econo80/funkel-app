@@ -124,6 +124,26 @@ enum HomeGroup: String {
     }
 }
 
+/// Rewards that aren't items: more land to buy, bigger orders.
+enum FarmMilestone: String, Equatable {
+    case land, bigOrders
+
+    static let all: [(level: Int, milestone: FarmMilestone)] = [
+        (15, .land), (20, .bigOrders), (25, .land), (35, .land), (40, .bigOrders),
+    ]
+
+    static func at(_ level: Int) -> [FarmMilestone] { all.filter { $0.level == level }.map { $0.milestone } }
+
+    var textKey: String { "garden.milestone." + rawValue }
+}
+
+/// What the next level with something new brings.
+struct FarmReward: Equatable {
+    let level: Int
+    let items: [GardenItem]
+    let milestones: [FarmMilestone]
+}
+
 struct GardenItem: Identifiable, Equatable {
     struct Home: Equatable {
         let group: HomeGroup
@@ -213,6 +233,24 @@ extension GardenItem {
         GardenItem(id: "mailbox", price: 3, level: 2, category: .decor, stages: ["📫"], days: [0], orders: .extraOrder),
         GardenItem(id: "fountain", price: 20, level: 4, category: .decor, stages: ["⛲"], days: [0], boosts: [.milk], care: Care.repair(3)),
         GardenItem(id: "tractor", price: 30, level: 8, category: .decor, stages: ["🚜"], days: [0], boosts: [.wheat, .veg], care: Care(kind: .service, every: 7, cost: 5)),
+        // Rewards for higher farm levels: something new every two or three levels up to 60.
+        GardenItem(id: "rooster", price: 12, level: 9, category: .animals, stages: ["🐓"], days: [0], needs: .chicken, boosts: [.egg], care: Care.feed(1)),
+        GardenItem(id: "llama", price: 30, level: 11, category: .animals, stages: ["🦙"], days: [0], needs: .farm, produce: .wool, care: Care.feed(2)),
+        GardenItem(id: "farmshop", price: 60, level: 13, category: .buildings, stages: ["🏪"], days: [0], orders: .extraOrder, care: Care.repair(4)),
+        GardenItem(id: "sunflower", price: 5, level: 17, category: .plants, stages: ["🌱", "🌿", "🌻"], days: [0, 1, 2], harvest: .flowers, annual: true),
+        GardenItem(id: "turkey", price: 25, level: 19, category: .animals, stages: ["🦃"], days: [0], needs: .chicken, produce: .egg, care: Care.feed(2)),
+        GardenItem(id: "peacock", price: 40, level: 22, category: .animals, stages: ["🦚"], days: [0], boosts: [.flowers], care: Care.feed(1)),
+        GardenItem(id: "bakery", price: 80, level: 24, category: .buildings, stages: ["🥨"], days: [0], recipe: Recipe(needs: [.bread: 1, .honey: 1], makes: .pie), care: Care.repair(6)),
+        GardenItem(id: "greenhouse", price: 120, level: 27, category: .buildings, stages: ["🪴"], days: [0], boosts: [.wheat, .veg, .flowers], care: Care.repair(8)),
+        GardenItem(id: "donkey", price: 35, level: 30, category: .animals, stages: ["🫏"], days: [0], needs: .farm, boosts: [.wood], care: Care.feed(2)),
+        GardenItem(id: "stable", price: 150, level: 32, category: .buildings, stages: ["🛖"], days: [0], houses: Home(group: .farm, capacity: 6), care: Care.repair(8)),
+        GardenItem(id: "swan", price: 30, level: 36, category: .animals, stages: ["🦢"], days: [0], needs: .duck, boosts: [.fish], care: Care.feed(1)),
+        GardenItem(id: "balloon", price: 100, level: 38, category: .decor, stages: ["🎈"], days: [0], orders: .extraStar, care: Care(kind: .service, every: 7, cost: 4)),
+        GardenItem(id: "ferriswheel", price: 150, level: 43, category: .decor, stages: ["🎡"], days: [0], orders: .extraOrder, care: Care(kind: .service, every: 7, cost: 6)),
+        GardenItem(id: "cherrytree", price: 40, level: 47, category: .plants, stages: ["🌱", "🪴", "🌸"], days: [0, 3, 6], produce: .flowers),
+        GardenItem(id: "trophy", price: 1, level: 50, category: .decor, stages: ["🏆"], days: [0]),
+        GardenItem(id: "unicorn", price: 200, level: 55, category: .animals, stages: ["🦄"], days: [0], boosts: [.egg, .milk, .wheat, .veg, .apple, .honey, .wool, .bacon, .fish, .wood, .flowers, .mushroom], care: Care.feed(3)),
+        GardenItem(id: "castle", price: 300, level: 60, category: .decor, stages: ["🏰"], days: [0]),
     ]
 
     private static let byID = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
@@ -221,6 +259,13 @@ extension GardenItem {
 
     /// Items a new level unlocks (for the celebration).
     static func unlocked(at level: Int) -> [GardenItem] { all.filter { $0.level == level } }
+
+    /// The next level that brings something new, and what (nil after the last one).
+    static func nextReward(after level: Int) -> FarmReward? {
+        let levels = all.map(\.level) + FarmMilestone.all.map { $0.level }
+        guard let next = levels.filter({ $0 > level }).min() else { return nil }
+        return FarmReward(level: next, items: unlocked(at: next), milestones: FarmMilestone.at(next))
+    }
 
     /// What it is good for, short, for the shop card: "🥚 jeden Tag", "🥕 +1", "2🌾 → 🍞".
     var uses: [String] {

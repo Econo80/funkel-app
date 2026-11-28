@@ -126,8 +126,9 @@ final class GardenTests: XCTestCase {
 
     // MARK: Land
 
-    func testLandAddsFourRowsAtATimeThreeTimes() {
-        var p = rich(200)
+    func testLandAddsFourRowsAtATimeThreeRightAwayThreeMoreAtLevels15_25And35() {
+        var p = rich(1000)
+        p.xp = FarmLevel.startXp(14)
         XCTAssertEqual(p.rows, 8)
         for price in [25, 40, 60] {
             XCTAssertEqual(p.nextLandPrice, price)
@@ -136,6 +137,15 @@ final class GardenTests: XCTestCase {
             XCTAssertEqual(p.walletStars, before - price)
         }
         XCTAssertEqual(p.rows, 20)
+        // The fourth piece is a level-15 reward.
+        XCTAssertEqual(p.nextLandLevel, 15)
+        XCTAssertEqual(p.buyingLand(), p)
+        p.xp = FarmLevel.startXp(35)
+        for price in [80, 100, 120] {
+            XCTAssertEqual(p.nextLandPrice, price)
+            p = p.buyingLand()
+        }
+        XCTAssertEqual(p.rows, 32)
         XCTAssertNil(p.nextLandPrice)
         XCTAssertEqual(p.buyingLand(), p)
     }
@@ -200,7 +210,13 @@ final class GardenTests: XCTestCase {
         XCTAssertEqual(FarmLevel(xp: 0), FarmLevel(level: 1, xpInLevel: 0, xpForNext: 10))
         XCTAssertEqual(FarmLevel(xp: 35).level, 3)
         XCTAssertEqual(FarmLevel(xp: 460).level, 10)
-        XCTAssertEqual(FarmLevel(xp: 560).level, 11)
+        // From level 10 on each level costs 40·n + 100 XP: 500, 540, 580 …
+        XCTAssertEqual(FarmLevel(xp: 949).level, 10)
+        XCTAssertEqual(FarmLevel(xp: 950).level, 11)
+        XCTAssertEqual(FarmLevel.startXp(12), 1490)
+        XCTAssertEqual(FarmLevel(xp: FarmLevel.startXp(30)).xpForNext, 1300)
+        // A farm with 4300 XP (level 48 before) is level 16 now.
+        XCTAssertEqual(FarmLevel(xp: 4300).level, 16)
         XCTAssertTrue(GardenItem.unlocked(at: 4).map(\.id).contains("barn"))
         XCTAssertEqual(fresh().placementProblem(at: 0, itemID: "barn", now: day(1)), .level)
         XCTAssertNil(fresh().placementProblem(at: 0, itemID: "wheat", now: day(1)))
@@ -310,6 +326,45 @@ final class GardenTests: XCTestCase {
             FarmOrder(id: "2026-10-18-2", wants: ["wheat": 3], stars: 3, xp: 9),
             FarmOrder(id: "2026-10-18-3", wants: ["wheat": 4], stars: 3, xp: 12),
         ]))
+    }
+
+    // MARK: Farm level rewards
+
+    func testFarmLevelRewardsBringSomethingNewEveryFewLevelsUpTo60() {
+        XCTAssertEqual(GardenItem.all.map(\.level).max(), 60)
+        // Never more than five levels without a reward (items or milestones).
+        for level in 1..<60 {
+            let next = GardenItem.nextReward(after: level)
+            XCTAssertNotNil(next, "after \(level)")
+            XCTAssertLessThanOrEqual((next?.level ?? 999) - level, 5, "after \(level)")
+        }
+        XCTAssertNil(GardenItem.nextReward(after: 60))
+        XCTAssertEqual(GardenItem.nextReward(after: 16)?.level, 17)
+        XCTAssertEqual(GardenItem.nextReward(after: 16)?.items.map(\.id), ["sunflower"])
+        XCTAssertEqual(FarmMilestone.at(20), [.bigOrders])
+        XCTAssertEqual(GardenItem.nextReward(after: 24)?.level, 25)
+        XCTAssertEqual(GardenItem.nextReward(after: 24)?.milestones, [.land])
+        XCTAssertEqual(GardenItem.with(id: "trophy")?.price, 1)
+        XCTAssertEqual(GardenItem.home(for: .farm).id, "barn")
+    }
+
+    func testOrderHelpersAddUpEachKindBringsAnOrderOrAStarMore() {
+        var p = rich(2000)
+        p.xp = FarmLevel.startXp(45)
+        p = place(p, 0, "barn", 1)
+        p = place(p, 2, "cow", 3)
+        p = place(p, 3, "mailbox", 3)
+        p = place(p, 4, "farmshop", 3)
+        p = place(p, 5, "ferriswheel", 3)
+        p = place(p, 6, "horse", 3)
+        p = place(p, 7, "balloon", 3)
+        let orders = p.withTodaysOrders(now: day(4)).orders?.orders ?? []
+        XCTAssertEqual(orders.count, 6) // 3 + mailbox + farm shop + Ferris wheel
+        // Horse and balloon, plus one for each of the big-order levels 20 and 40.
+        for o in orders {
+            let value = o.wants.reduce(0) { $0 + (Produce(rawValue: $1.key)?.value ?? 1) * $1.value }
+            XCTAssertEqual(o.stars, 1 + value / 3 + 4)
+        }
     }
 
     // MARK: Everything does something
