@@ -260,10 +260,10 @@ enum BackupExtras {
         "longestStreak", "lastPlayedDay", "progress", "rounds",
     ]
 
-    /// Game and garden progress, cleared by "Fortschritt zurücksetzen" like in the web app.
+    /// Game, garden and Denk-Test progress, cleared by "Fortschritt zurücksetzen" like in the web app.
     static let progressFields: Set<String> = [
         "garden", "farmGoods", "farmXp", "farmOrders", "farmSeason", "gamesToday", "gameDay",
-        "bonusGames", "bonusDay", "gardenDay", "gardenSeconds", "gardenBonusMinutes",
+        "bonusGames", "bonusDay", "gardenDay", "gardenSeconds", "gardenBonusMinutes", "thinkingTests",
     ]
 
     static func unknownFields(of json: [String: Any]) -> [String: Any] {

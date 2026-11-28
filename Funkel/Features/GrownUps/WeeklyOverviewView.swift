@@ -17,6 +17,11 @@ struct WeeklyOverviewView: View {
 
     private var nameText: String { profile.name }
 
+    /// The last Denk-Tests, newest first.
+    private var recentTests: [ThinkingTest.Result] {
+        Array(profile.thinkingTests.reversed().prefix(6))
+    }
+
     var body: some View {
         content(week)
             .accessibilityIdentifier("weekly")
@@ -79,12 +84,50 @@ struct WeeklyOverviewView: View {
                 }
             }
 
+            let tests = recentTests
+            if !tests.isEmpty {
+                Section {
+                    ForEach(Array(tests.enumerated()), id: \.offset) { _, test in
+                        ThinkingTestRow(test: test)
+                    }
+                } header: {
+                    Text("thinkingTest.history")
+                } footer: {
+                    Text("thinkingTest.footer")
+                }
+            }
+
             Section {
                 EmptyView()
             } footer: {
                 Text("weekly.footer")
             }
         }
+    }
+}
+
+/// One Denk-Test: the day, points and Denk-Niveau.
+private struct ThinkingTestRow: View {
+    let test: ThinkingTest.Result
+
+    private var detailText: String {
+        let levelText = ProfileEditorView.formatLevelAge(test.levelAge)
+        return String(localized: "thinkingTest.row \(test.points) \(test.total) \(levelText)")
+    }
+
+    var body: some View {
+        HStack {
+            if let date = Backup.date(fromISO: test.date) {
+                Text(date, format: .dateTime.day().month(.abbreviated))
+            }
+            Spacer(minLength: 8)
+            Text(verbatim: detailText)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.trailing)
+        }
+        .font(.funkelBody)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("weekly-test")
     }
 }
 

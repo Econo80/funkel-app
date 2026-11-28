@@ -110,3 +110,31 @@ struct QuestionBank: Decodable, Sendable {
 
     let questions: [Item]
 }
+
+// MARK: - logic.json (provider: logic)
+
+/// Denken: groups for "what doesn't fit" and picture analogies (web: LogicContent).
+struct LogicContent: Decodable, Sendable {
+    struct Group: Decodable, Sendable, Identifiable {
+        let id: String
+        /// Groups of one family (animals, food …) are close relatives: harder to tell apart.
+        let family: String
+        let minAge: Double
+        /// For the explanation: "Die anderen sind alle {label}."
+        let label: String
+        let items: [String]
+    }
+
+    struct Analogy: Decodable, Sendable {
+        let minAge: Double
+        let a: String
+        let b: String
+        let c: String
+        let answer: String
+        let wrong: [String]
+        let explanation: String
+    }
+
+    let groups: [Group]
+    let analogies: [Analogy]
+}

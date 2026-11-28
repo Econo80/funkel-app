@@ -15,8 +15,11 @@ final class RoundViewModel {
     }
 
     let subject: SubjectDescriptor
-    let questions: [Question]
+    /// Shortened when a Denk-Test stops early.
+    private(set) var questions: [Question]
     let difficulty: Difficulty
+    /// The weekly Denk-Test: no gentle timer, and four wrong in a row end it.
+    let isTest: Bool
 
     private(set) var index = 0
     private(set) var phase: Phase = .answering
@@ -25,10 +28,11 @@ final class RoundViewModel {
     private(set) var results: [Bool] = []
     private(set) var correctContentIDs: [String] = []
 
-    init(subject: SubjectDescriptor, questions: [Question], difficulty: Difficulty) {
+    init(subject: SubjectDescriptor, questions: [Question], difficulty: Difficulty, isTest: Bool = false) {
         self.subject = subject
         self.questions = questions
         self.difficulty = difficulty
+        self.isTest = isTest
         if questions.isEmpty { phase = .finished }
     }
 
@@ -144,6 +148,10 @@ final class RoundViewModel {
         results.append(isCorrect)
         if isCorrect, let id = current?.contentID {
             correctContentIDs.append(id)
+        }
+        // Denk-Test: four wrong in a row end it kindly (the rest is too hard for now).
+        if isTest, ThinkingTest.shouldStop(results), questions.count > results.count {
+            questions = Array(questions.prefix(results.count))
         }
         phase = .feedback(isCorrect: isCorrect)
     }

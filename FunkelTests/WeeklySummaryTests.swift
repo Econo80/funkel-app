@@ -118,7 +118,7 @@ final class WeeklySummaryTests: XCTestCase {
         let library = ContentLibrary.bundled()
         let language = try XCTUnwrap(library.language(code: "de"))
         var rng = SeededGenerator(seed: 7)
-        for id in ["maths", "vocabulary", "generalKnowledge", "topic-pilze"] {
+        for id in ["maths", "vocabulary", "generalKnowledge", "topic-pilze", "logic"] {
             let subject = try XCTUnwrap(language.subject(id: id), id)
             let provider = try XCTUnwrap(try QuestionProviderFactory.provider(for: subject, content: library), id)
             for age in [6, 8, 10] {

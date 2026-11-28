@@ -66,6 +66,9 @@ enum QuestionVisual: Equatable, Sendable {
     case countable(symbol: String, count: Int)
     /// A large equation such as "7 + 5 = ?".
     case equation(String)
+    /// Denken: pictures in a row, or a grid with `columns` (3×3 fields,
+    /// analogies); "❓" marks the gap.
+    case tiles(items: [String], columns: Int?)
 }
 
 enum QuestionFormat: Equatable, Sendable {

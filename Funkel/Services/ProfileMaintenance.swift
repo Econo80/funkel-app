@@ -5,8 +5,8 @@ import SwiftData
 enum ProfileMaintenance {
 
     /// Clears stars (lifetime and to spend), streaks, per-subject progress and
-    /// levels, history, and the web app's game and garden progress kept for
-    /// backups. Name, age and settings stay.
+    /// levels, history, Denk-Tests, and the web app's game and garden progress
+    /// kept for backups. Name, age and settings stay.
     static func resetProgress(of profile: ChildProfile, in context: ModelContext) {
         let progress = profile.progress
         let rounds = profile.rounds

@@ -30,7 +30,7 @@ struct RoundView: View {
     private var color: Color { Color(hex: viewModel.subject.colorHex) }
 
     private var showsTimer: Bool {
-        profile.gentleTimerEnabled && viewModel.difficulty.allowsGentleTimer
+        !viewModel.isTest && profile.gentleTimerEnabled && viewModel.difficulty.allowsGentleTimer
     }
 
     var body: some View {

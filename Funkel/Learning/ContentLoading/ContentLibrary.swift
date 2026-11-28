@@ -68,6 +68,10 @@ final class ContentLibrary: @unchecked Sendable {
         try decode(QuestionBank.self, file: subject.file, language: subject.languageCode)
     }
 
+    func logicContent(for subject: SubjectDescriptor) throws -> LogicContent {
+        try decode(LogicContent.self, file: subject.file, language: subject.languageCode)
+    }
+
     /// Decodes `Content/<language>/<file>`, caching the result.
     func decode<T: Decodable>(_ type: T.Type, file: String, language code: String) throws -> T {
         let key = "\(code)/\(file)#\(T.self)"

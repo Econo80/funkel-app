@@ -9,6 +9,8 @@ enum ProviderKind: String, Codable, CaseIterable, Sendable {
     case wordList
     /// Authored questions in generic formats (general knowledge, grammar, …).
     case questionBank
+    /// Generated reasoning puzzles (Denken), with groups and analogies from content.
+    case logic
 }
 
 /// A subject as offered by one content language.

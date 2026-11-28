@@ -8,6 +8,8 @@ struct HomeView: View {
 
     @Environment(\.modelContext) private var modelContext
     @State private var activeSubject: SubjectDescriptor?
+    /// The Denken subject while its weekly Denk-Test runs.
+    @State private var testSubject: SubjectDescriptor?
     @State private var showsGrownUps = false
     @State private var activeExtra: HomeExtra?
 
@@ -15,6 +17,18 @@ struct HomeView: View {
 
     private var subjects: [SubjectDescriptor] {
         language.subjects.filter { $0.isTopic ? $0.id == profile.schoolTopic : profile.isSubjectEnabled($0.id) }
+    }
+
+    /// The Denken subject, when it is on the home screen: its Denk-Test card comes after the subjects.
+    private var thinkingSubject: SubjectDescriptor? {
+        subjects.first { $0.provider == .logic }
+    }
+
+    private var testSubtitle: Text {
+        let tests = profile.thinkingTests
+        if ThinkingTest.canTakeTest(tests) { return Text("thinkingTest.ready") }
+        let daysLeft = ThinkingTest.daysUntilTest(tests)
+        return Text("thinkingTest.nextIn \(daysLeft)")
     }
 
     private var sudokuSubtitle: Text {
@@ -46,6 +60,15 @@ struct HomeView: View {
                             activeSubject = subject
                         }
                     }
+                    if let thinkingSubject {
+                        let ready = ThinkingTest.canTakeTest(profile.thinkingTests)
+                        HomeExtraCard(title: "thinkingTest.title", subtitle: testSubtitle, systemImage: "flask.fill", color: Color(hex: thinkingSubject.colorHex)) {
+                            testSubject = thinkingSubject
+                        }
+                        .disabled(!ready)
+                        .opacity(ready ? 1 : 0.6)
+                        .accessibilityIdentifier("thinking-test")
+                    }
                     if profile.sudokuEnabled {
                         HomeExtraCard(title: "sudoku.title", subtitle: sudokuSubtitle, systemImage: "puzzlepiece.fill", color: SudokuView.color) {
                             activeExtra = .sudoku
@@ -68,6 +91,9 @@ struct HomeView: View {
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(item: $activeSubject) { subject in
             RoundContainerView(subject: subject, profile: profile)
+        }
+        .fullScreenCover(item: $testSubject) { subject in
+            RoundContainerView(subject: subject, profile: profile, isTest: true)
         }
         .fullScreenCover(item: $activeExtra) { extra in
             switch extra {
